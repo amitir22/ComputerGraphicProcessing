@@ -33,3 +33,4 @@
 # Visual Studio files
 *.vsidx
 *.opendb
+.vs/*
