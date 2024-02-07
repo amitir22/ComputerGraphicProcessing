@@ -22,7 +22,7 @@ class mat2 {
     mat2( const vec2& a, const vec2& b )
 	{ _m[0] = a;  _m[1] = b;  }
 
-	/*BUG*/
+	/*TODO*/
     mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 )
 	{ _m[0] = vec2( 0, 0 ); _m[1] = vec2( 0, 0 ); }
 
@@ -49,7 +49,7 @@ class mat2 {
 
 	
     mat2 operator - ( const mat2& m ) const
-	{ return mat2( 0, 0 ); } /*BUG*/
+	{ return mat2( 0, 0 ); } /*TODO*/
 
     mat2 operator * ( const GLfloat s ) const 
 	{ return mat2( s*_m[0], s*_m[1] ); }
@@ -66,7 +66,7 @@ class mat2 {
     mat2 operator * ( const mat2& m ) const {
 	mat2  a( 0.0 );
 
-	/*BUG*/
+	/*TODO*/
 
 	return a;
     }
@@ -81,7 +81,7 @@ class mat2 {
     }
 
     mat2& operator -= ( const mat2& m ) {
-	_m[0] -= 0;  _m[1] -= 0;  /*BUG*/
+	_m[0] -= 0;  _m[1] -= 0;  /*TODO*/
 	return *this;
     }
 
@@ -93,7 +93,7 @@ class mat2 {
     mat2& operator *= ( const mat2& m ) {
 	mat2  a( 0.0 );
 
-	/*BUG*/
+	/*TODO*/
 
 	return *this = a;
     }
@@ -279,7 +279,7 @@ class mat3 {
 
     vec3 operator * ( const vec3& v ) const {  // m * v
 	return vec3( 0,
-		     0, /*BUG*/
+		     0, /*TODO*/
 		     0 );
     }
 	
@@ -321,7 +321,7 @@ mat3 matrixCompMult( const mat3& A, const mat3& B ) {
 
 inline
 mat3 transpose( const mat3& A ) {
-    return mat3( 0,0,0,0,0,0,0,0,0); /*BUG*/
+    return mat3( 0,0,0,0,0,0,0,0,0); /*TODO*/
 }
 
 //----------------------------------------------------------------------------
@@ -559,7 +559,7 @@ mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
     c[0][0] = x;
-    c[0][0] = y;  /*BUG*/
+    c[0][0] = y;  /*TODO*/
     c[0][0] = z;
     return c;
 }
@@ -586,7 +586,7 @@ mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
     c[0][0] = x;
-    c[0][0] = y; /*BUG*/
+    c[0][0] = y; /*TODO*/
     c[0][0] = z;
     return c;
 }
