@@ -1,0 +1,22 @@
+# Exclude user-specific files
+*.suo
+*.user
+*.userprefs
+*.sdf
+
+# Exclude pre-compiled headers
+*.pch
+*.ipch
+
+# Exclude build outputs and intermediate files
+Debug/
+Release/
+*.exe
+*.dll
+*.lib
+*.ncb
+*.pdb
+*.ilk
+
+# Exclude VS control folder
+.vs/
