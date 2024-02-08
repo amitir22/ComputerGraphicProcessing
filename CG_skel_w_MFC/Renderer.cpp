@@ -3,6 +3,8 @@
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
+#include <algorithm> 
+#include <cmath>     
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -18,21 +20,42 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
 }
 
 void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
-	if (x0 == x1 && y0 == y1) { // The line is a single point
-		DrawPixel(x0, y0);
-		return;
+	// Make sure we draw from left to right
+	if (x0 > x1) {
+		swap(x0, x1);
+		swap(y0, y1);
 	}
+	// clamp to screen
+	if (x0 < 0) {
+		y0 += (y1 - y0) * (-x0) / (x1 - x0);
+		x0 = 0;
+	}
+	if (y0 < 0) {
+		x0 += (x1 - x0) * (-y0) / (y1 - y0);
+		y0 = 0;
+	}
+	if (y0 >= m_height) {
+		x0 += (x1 - x0) * (m_height - 1 - y0) / (y1 - y0);
+		y0 = m_height - 1;
+	}
+
+	if (x1 >= m_width) {
+		y1 += (y0 - y1) * (m_width - 1 - x1) / (x0 - x1);
+		x1 = m_width - 1;
+	}
+	if (y1 >= m_height) {
+		x1 += (x0 - x1) * (m_height - 1 - y1) / (y0 - y1);
+		y1 = m_height - 1;
+	}
+
+	
 	bool steep = abs(y1 - y0) > abs(x1 - x0);
 	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
 	if (steep) {
 		swap(x0, y0);
 		swap(x1, y1);
 	}
-	// Make sure we draw from left to right
-	if (x0 > x1) {
-		swap(x0, x1);
-		swap(y0, y1);
-	}
+	
 	// 
 	int dx = x1 - x0;
 	int dy = std::abs(y1 - y0); // Also handle negative slopes
@@ -40,7 +63,7 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	int D = 2 * dy - dx;
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
-		if (x >= m_width || y >= m_height || x < 0 || y < 0) {
+		if (x >= m_width || y >= m_height || y < 0) {
 			return;
 		}
 		if (steep) {
@@ -68,7 +91,6 @@ void Renderer::DrawPixel(int x, int y ) {
 Renderer::~Renderer(void)
 {
 }
-
 
 
 void Renderer::CreateBuffers(int width, int height)
