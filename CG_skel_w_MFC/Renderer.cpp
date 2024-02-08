@@ -17,6 +17,54 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
 	CreateBuffers(width,height);
 }
 
+void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+	if (x0 == x1 && y0 == y1) { // The line is a single point
+		DrawPixel(x0, y0);
+		return;
+	}
+	bool steep = abs(y1 - y0) > abs(x1 - x0);
+	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
+	if (steep) {
+		swap(x0, y0);
+		swap(x1, y1);
+	}
+	// Make sure we draw from left to right
+	if (x0 > x1) {
+		swap(x0, x1);
+		swap(y0, y1);
+	}
+	// 
+	int dx = x1 - x0;
+	int dy = std::abs(y1 - y0); // Also handle negative slopes
+	int ystep = (y0 < y1) ? 1 : -1;
+	int D = 2 * dy - dx;
+	int y = y0;
+	for (int x = x0; x <= x1; x++) {
+		if (x >= m_width || y >= m_height || x < 0 || y < 0) {
+			return;
+		}
+		if (steep) {
+			DrawPixel(y, x);
+		}
+		else {
+			DrawPixel(x, y);
+		}
+		if (D > 0) { // If D > 0, we should move one step in the y direction
+			y += ystep;
+			D += 2 * (dy - dx);
+		}
+		else { // Else, don't increment
+			D += 2 * dy;
+		}
+	}
+}
+
+void Renderer::DrawPixel(int x, int y ) {
+	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
+}
+
 Renderer::~Renderer(void)
 {
 }
@@ -28,7 +76,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_width=width;
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
-	m_outBuffer = new float[3*m_width*m_height];
+	m_outBuffer = std::make_unique<float[]>(3 * m_width * m_height);
 }
 
 void Renderer::SetDemoBuffer()
@@ -116,7 +164,7 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer.get());
 	glGenerateMipmap(GL_TEXTURE_2D);
 	a = glGetError();
 

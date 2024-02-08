@@ -4,11 +4,12 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
+#include <memory>
 
 using namespace std;
 class Renderer
 {
-	float *m_outBuffer; // 3*width*height
+	std::unique_ptr<float[]> m_outBuffer;
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
 
