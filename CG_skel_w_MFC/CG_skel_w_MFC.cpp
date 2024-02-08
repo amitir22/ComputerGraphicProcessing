@@ -24,9 +24,26 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define FILE_OPEN 1
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
+#define MENU_FILE_OPEN 1
+#define MENU_MAIN_DEMO 1
+#define MENU_MAIN_ABOUT 2
+#define MENU_CAMERA_DEFAULT 3
+#define MENU_OBJECTS_NONE 4
+#define MENU_FRAMES_WORLD 5
+#define MENU_TRANSFORMS_TRANSLATE 6
+#define MENU_TRANSFORMS_ROTATE 7
+#define MENU_TRANSFORMS_SCALE 8
+#define MENU_TRANSFORMS_SHEAR 9
+#define MENU_VIEW_SHOW_VERTEX_NORMALS 10
+#define MENU_VIEW_SHOW_FACE_NORMALS 11
+#define MENU_VIEW_SHOW_BOUNDING_BOX 12
+#define MENU_SHAPES_CUBE 13
+#define MENU_OPTIONS_STEP_SIZE 14
+
+
+bool isShowVertexNormals = false;
+bool isShowFaceNormals = false;
+bool isShowBoundingBox = false;
 
 Scene *scene;
 Renderer *renderer;
@@ -39,17 +56,17 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-//Call the scene and ask it to draw itself
+	scene->draw();
 }
 
 void reshape( int width, int height )
 {
-//update the renderer's buffers
+	// TODO: update the renderer's buffers
 }
 
 void keyboard( unsigned char key, int x, int y )
 {
-	switch ( key ) {
+	switch (key) {
 	case 033:
 		exit( EXIT_SUCCESS );
 		break;
@@ -62,7 +79,8 @@ void mouse(int button, int state, int x, int y)
 	//state = {GLUT_DOWN,GLUT_UP}
 	
 	//set down flags
-	switch(button) {
+	switch(button) 
+	{
 		case GLUT_LEFT_BUTTON:
 			lb_down = (state==GLUT_UP)?0:1;
 			break;
@@ -72,6 +90,8 @@ void mouse(int button, int state, int x, int y)
 		case GLUT_MIDDLE_BUTTON:
 			mb_down = (state==GLUT_UP)?0:1;	
 			break;
+		default:
+			break;
 	}
 
 	// add your code
@@ -80,18 +100,18 @@ void mouse(int button, int state, int x, int y)
 void motion(int x, int y)
 {
 	// calc difference in mouse movement
-	int dx=x-last_x;
-	int dy=y-last_y;
+	int dx = x - last_x;
+	int dy = y - last_y;
 	// update last x,y
-	last_x=x;
-	last_y=y;
+	last_x = x;
+	last_y = y;
 }
 
 void fileMenu(int id)
 {
 	switch (id)
 	{
-		case FILE_OPEN:
+		case MENU_FILE_OPEN:
 			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
 			if(dlg.DoModal()==IDOK)
 			{
@@ -99,17 +119,71 @@ void fileMenu(int id)
 				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 			}
 			break;
+			// TODO: unexpected error
 	}
+}
+
+void camerasMenu(int id)
+{
+	// TODO: change camera by the given id
+}
+
+void objectsMenu(int id)
+{
+	// TODO: change the object that is focused by the given id
+}
+
+void framesMenu(int id)
+{
+	// TODO: change the frame by the given id
+}
+
+void transformsMenu(int id)
+{
+	// TODO: change the object that is focused by the given id
+}
+
+void viewMenu(int id)
+{
+	switch (id)
+	{
+	case MENU_VIEW_SHOW_VERTEX_NORMALS:
+		isShowVertexNormals = !isShowVertexNormals;
+		// TODO: update the menu items to rename this option with a "<-" postfix
+		break;
+	case MENU_VIEW_SHOW_FACE_NORMALS:
+		isShowFaceNormals = !isShowFaceNormals;
+		// TODO: update the menu items to rename this option with a "<-" postfix
+		break;
+	case MENU_VIEW_SHOW_BOUNDING_BOX:
+		isShowBoundingBox = !isShowBoundingBox;
+		// TODO: update the menu items to rename this option with a "<-" postfix
+		break;
+	default: //TODO: error
+		break;
+	}
+
+	// TODO: re-render the scene
+}
+
+void shapesMenu(int id)
+{
+	// TODO: insert new primitive shape to the scene
+}
+
+void optionsMenu(int id)
+{
+	// TODO: change the object that is focused by the given id
 }
 
 void mainMenu(int id)
 {
 	switch (id)
 	{
-	case MAIN_DEMO:
+	case MENU_MAIN_DEMO:
 		scene->drawDemo();
 		break;
-	case MAIN_ABOUT:
+	case MENU_MAIN_ABOUT:
 		AfxMessageBox(_T("Computer Graphics"));
 		break;
 	}
@@ -117,14 +191,57 @@ void mainMenu(int id)
 
 void initMenu()
 {
+	int openFileMenu = glutCreateMenu(fileMenu);
+	glutAddMenuEntry("Open..", MENU_FILE_OPEN);
 
-	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..",FILE_OPEN);
+	int camerasSubMenu = glutCreateMenu(camerasMenu);
+	glutAddMenuEntry("default camera", MENU_CAMERA_DEFAULT);
+	// TODO: how do i add a list that i update?
+
+	int objectsSubMenu = glutCreateMenu(objectsMenu);
+	glutAddMenuEntry("None", MENU_OBJECTS_NONE);
+	// TODO: how do i add a list that i update?
+
+	int framesSubMenu = glutCreateMenu(framesMenu);
+	glutAddMenuEntry("World", MENU_FRAMES_WORLD);
+	// TODO: how do i add a list that i update?
+
+	int transformsSubMenu = glutCreateMenu(transformsMenu);
+	glutAddMenuEntry("translate", MENU_TRANSFORMS_TRANSLATE);
+	glutAddMenuEntry("rotate", MENU_TRANSFORMS_ROTATE);
+	glutAddMenuEntry("scale", MENU_TRANSFORMS_SCALE);
+	glutAddMenuEntry("shear", MENU_TRANSFORMS_SHEAR);
+
+	int viewSubMenu = glutCreateMenu(viewMenu);
+	glutAddMenuEntry("Show vertex normals", MENU_VIEW_SHOW_VERTEX_NORMALS); // TODO: how to make a checkbox?
+	glutAddMenuEntry("Show face normals", MENU_VIEW_SHOW_FACE_NORMALS); // TODO: how to make a checkbox?
+	glutAddMenuEntry("Show bounding box", MENU_VIEW_SHOW_BOUNDING_BOX); // TODO: how to make a checkbox?
+	
+	int shapesSubMenu = glutCreateMenu(shapesMenu);
+	glutAddMenuEntry("Cube", MENU_SHAPES_CUBE);
+	// TODO: how do i add a list that i update?
+
+	int optionsSubMenu = glutCreateMenu(optionsMenu);
+	glutAddMenuEntry("Set object step size when moving", MENU_OPTIONS_STEP_SIZE);
+
 	glutCreateMenu(mainMenu);
-	glutAddSubMenu("File",menuFile);
-	glutAddMenuEntry("Demo",MAIN_DEMO);
-	glutAddMenuEntry("About",MAIN_ABOUT);
+
+	glutAddSubMenu("File", openFileMenu);
+	glutAddSubMenu("Cameras", camerasSubMenu);
+	glutAddSubMenu("Objects", objectsSubMenu);
+	glutAddSubMenu("Frames", framesSubMenu);
+	glutAddSubMenu("Transforms", transformsSubMenu);
+	glutAddSubMenu("View", viewSubMenu);
+	glutAddSubMenu("Shapes", shapesSubMenu);
+	glutAddSubMenu("Options", optionsSubMenu);
+	glutAddMenuEntry("Demo", MENU_MAIN_DEMO);
+	glutAddMenuEntry("About", MENU_MAIN_ABOUT);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+void updateMenu() // TODO: update function signature as necessary
+{
+	// TODO:
 }
 //----------------------------------------------------------------------------
 
