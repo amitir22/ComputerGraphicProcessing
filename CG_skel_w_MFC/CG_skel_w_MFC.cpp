@@ -56,7 +56,7 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-	scene->draw();
+	scene->draw(); // TODO: check that initial black screen is ok
 }
 
 void reshape( int width, int height )

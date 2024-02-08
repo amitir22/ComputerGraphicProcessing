@@ -18,6 +18,34 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
 }
+Renderer::~Renderer(void)
+{
+}
+
+
+void Renderer::CreateBuffers(int width, int height)
+{
+	m_width=width;
+	m_height=height;	
+	CreateOpenGLBuffer(); //Do not remove this line.
+	m_outBuffer = std::make_unique<float[]>(3 * m_width * m_height);
+}
+
+void Renderer::SetDemoBuffer()
+{
+	//vertical line
+	for(int i=0; i<m_width; i++)
+	{
+		m_outBuffer[INDEX(m_width,256,i,0)]=1;	m_outBuffer[INDEX(m_width,256,i,1)]=0;	m_outBuffer[INDEX(m_width,256,i,2)]=0;
+
+	}
+	//horizontal line
+	for(int i=0; i<m_width; i++)
+	{
+		m_outBuffer[INDEX(m_width,i,256,0)]=1;	m_outBuffer[INDEX(m_width,i,256,1)]=0;	m_outBuffer[INDEX(m_width,i,256,2)]=1;
+
+	}
+}
 
 void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	// Make sure we draw from left to right
@@ -48,14 +76,14 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 		y1 = m_height - 1;
 	}
 
-	
+
 	bool steep = abs(y1 - y0) > abs(x1 - x0);
 	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
 	if (steep) {
 		swap(x0, y0);
 		swap(x1, y1);
 	}
-	
+
 	// 
 	int dx = x1 - x0;
 	int dy = std::abs(y1 - y0); // Also handle negative slopes
@@ -82,39 +110,10 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	}
 }
 
-void Renderer::DrawPixel(int x, int y ) {
+void Renderer::DrawPixel(int x, int y) {
 	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
 	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
 	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
-}
-
-Renderer::~Renderer(void)
-{
-}
-
-
-void Renderer::CreateBuffers(int width, int height)
-{
-	m_width=width;
-	m_height=height;	
-	CreateOpenGLBuffer(); //Do not remove this line.
-	m_outBuffer = std::make_unique<float[]>(3 * m_width * m_height);
-}
-
-void Renderer::SetDemoBuffer()
-{
-	//vertical line
-	for(int i=0; i<m_width; i++)
-	{
-		m_outBuffer[INDEX(m_width,256,i,0)]=1;	m_outBuffer[INDEX(m_width,256,i,1)]=0;	m_outBuffer[INDEX(m_width,256,i,2)]=0;
-
-	}
-	//horizontal line
-	for(int i=0; i<m_width; i++)
-	{
-		m_outBuffer[INDEX(m_width,i,256,0)]=1;	m_outBuffer[INDEX(m_width,i,256,1)]=0;	m_outBuffer[INDEX(m_width,i,256,2)]=1;
-
-	}
 }
 
 

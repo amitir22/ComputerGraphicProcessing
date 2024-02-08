@@ -12,7 +12,7 @@ protected :
 	MeshModel() {}
 	vec3 *vertex_positions;
 	//add more attributes
-	mat4 _world_transform;
+	mat4 _world_transform; // also known as model transform
 	mat3 _normal_transform;
 
 public:

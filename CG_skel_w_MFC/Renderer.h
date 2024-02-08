@@ -27,8 +27,6 @@ class Renderer
 public:
 	Renderer();
 	Renderer(int width, int height);
-	void DrawLine(int x0, int y0, int x1, int y1);
-	void DrawPixel(int x, int y);
 	~Renderer(void);
 	void Init();
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
@@ -39,4 +37,7 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+	// Our functions
+	void DrawLine(int x0, int y0, int x1, int y1);
+	void DrawPixel(int x, int y);
 };

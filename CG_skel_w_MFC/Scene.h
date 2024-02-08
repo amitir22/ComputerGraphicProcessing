@@ -18,7 +18,7 @@ class Light {
 };
 
 class Camera {
-	mat4 cTransform;
+	mat4 cTransform; // camera (view) transformation, I think
 	mat4 projection;
 
 public:
@@ -41,6 +41,7 @@ class Scene {
 	vector<Light*> lights;
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
+
 
 public:
 	Scene() {};
