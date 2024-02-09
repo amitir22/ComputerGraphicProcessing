@@ -40,4 +40,6 @@ public:
 	// Our functions
 	void DrawLine(int x0, int y0, int x1, int y1);
 	void DrawPixel(int x, int y);
+	bool LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
+	bool LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
 };

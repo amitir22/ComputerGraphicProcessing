@@ -47,47 +47,42 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+// returns true if the line is completely inside the rectangle
+bool Renderer::LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept {
+	if ( (x0 >= 0 && x1 >= 0) && (y0 >= 0 && y1 >= 0) && (x0 < m_width && x1 < m_width) && (y0 < m_height && y1 < m_height) ) {
+		return true;
+	}
+	return false;
+}
+
+bool Renderer::LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) const noexcept {
+	if ((x0 < 0 && x1 < 0) || (y0 < 0 && y1 < 0) || (x0 >= m_width && x1 >= m_width) || (y0 >= m_height && y1 >= m_height)) {
+		return true;
+	}
+	return false;
+}
+
 void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+	// Check if line is not completely inside the rectangle
+	if (!LineCompletelyInsideRectangle(x0, y0, x1, y1)) {
+		throw std::runtime_error("Line is not completely inside the rectangle.");
+	}
+	
 	// Make sure we draw from left to right
 	if (x0 > x1) {
 		swap(x0, x1);
 		swap(y0, y1);
 	}
-	// clamp to screen
-	if (x0 < 0) {
-		y0 += (y1 - y0) * (-x0) / (x1 - x0);
-		x0 = 0;
-	}
-	if (y0 < 0) {
-		x0 += (x1 - x0) * (-y0) / (y1 - y0);
-		y0 = 0;
-	}
-	if (y0 >= m_height) {
-		x0 += (x1 - x0) * (m_height - 1 - y0) / (y1 - y0);
-		y0 = m_height - 1;
-	}
 
-	if (x1 >= m_width) {
-		y1 += (y0 - y1) * (m_width - 1 - x1) / (x0 - x1);
-		x1 = m_width - 1;
-	}
-	if (y1 >= m_height) {
-		x1 += (x0 - x1) * (m_height - 1 - y1) / (y0 - y1);
-		y1 = m_height - 1;
-	}
-
-
-	bool steep = abs(y1 - y0) > abs(x1 - x0);
+	const bool steep = abs(y1 - y0) > abs(x1 - x0);
 	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
 	if (steep) {
 		swap(x0, y0);
 		swap(x1, y1);
 	}
-
-	// 
-	int dx = x1 - x0;
-	int dy = std::abs(y1 - y0); // Also handle negative slopes
-	int ystep = (y0 < y1) ? 1 : -1;
+	const int dx = x1 - x0;
+	const int dy = std::abs(y1 - y0); // Also handle negative slopes
+	const int ystep = (y0 < y1) ? 1 : -1;
 	int D = 2 * dy - dx;
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
@@ -115,9 +110,6 @@ void Renderer::DrawPixel(int x, int y) {
 	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
 	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
 }
-
-
-
 
 
 /////////////////////////////////////////////////////
