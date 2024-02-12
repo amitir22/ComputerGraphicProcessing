@@ -27,9 +27,8 @@ void Menu::buildGlutMenu()
 	string currentCameraNameWprefix = PREFIX + currentCameraName;
 	camerasSubMenuID = glutCreateMenu(handleCamerasMenu);
 	
-	if (selectedCamera == 0)
+	if (selectedCamera == 0) // special case = default
 		currentCameraNameWprefix = SELECTED_PREFIX + currentCameraName;
-	
 	glutAddMenuEntry(currentCameraNameWprefix.c_str(), menuEntryCounter++);
 	
 	for (int cameraIndex = 1; cameraIndex < cameras.size(); cameraIndex++)
@@ -49,9 +48,8 @@ void Menu::buildGlutMenu()
 	string currentObjectNameWprefix = PREFIX + currentObjectName;
 	objectsSubMenuID = glutCreateMenu(handleObjectsMenu);
 
-	if (selectedCamera == 0)
+	if (selectedCamera == 0) // special case = default
 		currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
-
 	glutAddMenuEntry(currentObjectName.c_str(), menuEntryCounter++);
 
 	for (int objectIndex = 1; objectIndex < cameras.size(); objectIndex++)

@@ -52,6 +52,9 @@ namespace Menu
 	// TODO: continue
 
 	// menu handlers
+	// 
+	// TODO: what if i turn all these functions into pointers that will 
+	// be set from the outside by assigning?
 	void handleMainMenu(int choice);
 	void handleFileMenu(int choide);
 	void handleCamerasMenu(int choice);
