@@ -24,12 +24,11 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define MENU_FILE_OPEN 1
+#define MENU_FILE_OPEN 0
 #define MENU_MAIN_DEMO 1
 #define MENU_MAIN_ABOUT 2
 #define MENU_CAMERA_DEFAULT 3
 #define MENU_OBJECTS_NONE 4
-#define MENU_FRAMES_WORLD 5
 #define MENU_TRANSFORMS_TRANSLATE 6
 #define MENU_TRANSFORMS_ROTATE 7
 #define MENU_TRANSFORMS_SCALE 8
@@ -40,10 +39,17 @@
 #define MENU_SHAPES_CUBE 13
 #define MENU_OPTIONS_STEP_SIZE 14
 
-
+// View options
 bool isShowVertexNormals = false;
 bool isShowFaceNormals = false;
 bool isShowBoundingBox = false;
+
+// Rendering variables
+Camera selectedCamera;
+// TODO: what format am i storing the frame? a simple struct of coordinates? how many? what will be most convinient?
+// (Xmin, Ymin, Zmin), (Xmax, Ymax, Zmax)? or do we want to allow a diagonal frame?
+mat4 aggregatedSelectedTransforms; // used when applying many transforms simultaneously
+
 
 Scene *scene;
 Renderer *renderer;
@@ -133,11 +139,6 @@ void objectsMenu(int id)
 	// TODO: change the object that is focused by the given id
 }
 
-void framesMenu(int id)
-{
-	// TODO: change the frame by the given id
-}
-
 void transformsMenu(int id)
 {
 	// TODO: change the object that is focused by the given id
@@ -145,17 +146,27 @@ void transformsMenu(int id)
 
 void viewMenu(int id)
 {
+	cout << id << endl;
 	switch (id)
 	{
-	case MENU_VIEW_SHOW_VERTEX_NORMALS:
+	case MENU_VIEW_SHOW_VERTEX_NORMALS: // id = 10
 		isShowVertexNormals = !isShowVertexNormals;
-		// TODO: update the menu items to rename this option with a "<-" postfix
+
+		if (isShowVertexNormals) 
+		{
+
+		}
+		else 
+		{
+
+		}
+
 		break;
-	case MENU_VIEW_SHOW_FACE_NORMALS:
+	case MENU_VIEW_SHOW_FACE_NORMALS: // id = 11
 		isShowFaceNormals = !isShowFaceNormals;
 		// TODO: update the menu items to rename this option with a "<-" postfix
 		break;
-	case MENU_VIEW_SHOW_BOUNDING_BOX:
+	case MENU_VIEW_SHOW_BOUNDING_BOX: // id = 12
 		isShowBoundingBox = !isShowBoundingBox;
 		// TODO: update the menu items to rename this option with a "<-" postfix
 		break;
@@ -174,6 +185,7 @@ void shapesMenu(int id)
 void optionsMenu(int id)
 {
 	// TODO: change the object that is focused by the given id
+	return; // TODO: what is {id}'s value?
 }
 
 void mainMenu(int id)
@@ -191,6 +203,12 @@ void mainMenu(int id)
 
 void initMenu()
 {
+	string fileOpen = "Open..";
+	string camerasDefaultCamera = "default camera";
+	string objectsNone = "None";
+	// TODO: continue here
+
+
 	int openFileMenu = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..", MENU_FILE_OPEN);
 
@@ -200,10 +218,6 @@ void initMenu()
 
 	int objectsSubMenu = glutCreateMenu(objectsMenu);
 	glutAddMenuEntry("None", MENU_OBJECTS_NONE);
-	// TODO: how do i add a list that i update?
-
-	int framesSubMenu = glutCreateMenu(framesMenu);
-	glutAddMenuEntry("World", MENU_FRAMES_WORLD);
 	// TODO: how do i add a list that i update?
 
 	int transformsSubMenu = glutCreateMenu(transformsMenu);
@@ -229,7 +243,6 @@ void initMenu()
 	glutAddSubMenu("File", openFileMenu);
 	glutAddSubMenu("Cameras", camerasSubMenu);
 	glutAddSubMenu("Objects", objectsSubMenu);
-	glutAddSubMenu("Frames", framesSubMenu);
 	glutAddSubMenu("Transforms", transformsSubMenu);
 	glutAddSubMenu("View", viewSubMenu);
 	glutAddSubMenu("Shapes", shapesSubMenu);
