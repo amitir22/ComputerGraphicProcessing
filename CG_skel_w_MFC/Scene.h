@@ -1,3 +1,4 @@
+// Scene.h
 #pragma once
 
 #include "gl/glew.h"
@@ -10,7 +11,7 @@ using namespace std;
 class Model {
 public:
 	virtual ~Model() {}
-	void virtual draw()=0;
+	void virtual draw(Renderer& renderer)=0;
 };
 
 
@@ -20,21 +21,24 @@ class Light {
 
 
 class Scene {
-
-	vector<Model*> models;
-	vector<Light*> lights;
-	vector<Camera*> cameras;
-	Renderer *m_renderer;
-
-
+	std::vector<std::unique_ptr<Model>> models;
+	std::vector<std::unique_ptr<Light>> lights;
+	std::vector<std::unique_ptr<Camera>> cameras;
+	Renderer* m_renderer;
 public:
+	// Constructors
 	Scene() {};
-	Scene(Renderer *renderer) : m_renderer(renderer) {};
+	Scene(Renderer* renderer);
+	
 	void loadOBJModel(string fileName);
 	void draw();
+	void handleWindowReshape(int width, int height);
 	void drawDemo();
+	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
+
 	
+	int activeCamera;
 	int activeModel;
 	int activeLight;
-	int activeCamera;
+	
 };
