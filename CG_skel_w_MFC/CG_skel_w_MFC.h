@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resource.h"
+#include "vec.h"
 
 void display( void );
 void reshape( int width, int height );
@@ -18,6 +19,10 @@ void handleShapesMenu(int id);
 void handleOptionsMenu(int id);
 void handleMainMenu(int id);
 void initMenu();
+
+vec3 promptScaleShell();
+vec3 promptTranslateShell();
+vec4 promptRotateShell(); // vec4 as in vec3 = axis, and vec4[3] is the angle
 
 namespace Menu
 {

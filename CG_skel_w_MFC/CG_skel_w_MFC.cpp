@@ -24,21 +24,6 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define MENU_FILE_OPEN 0
-#define MENU_MAIN_DEMO 1
-#define MENU_MAIN_ABOUT 2
-#define MENU_CAMERA_DEFAULT 3
-#define MENU_OBJECTS_NONE 4
-#define MENU_TRANSFORMS_TRANSLATE 6
-#define MENU_TRANSFORMS_ROTATE 7
-#define MENU_TRANSFORMS_SCALE 8
-#define MENU_TRANSFORMS_SHEAR 9
-#define MENU_VIEW_SHOW_VERTEX_NORMALS 10
-#define MENU_VIEW_SHOW_FACE_NORMALS 11
-#define MENU_VIEW_SHOW_BOUNDING_BOX 12
-#define MENU_SHAPES_CUBE 13
-#define MENU_OPTIONS_STEP_SIZE 14
-
 using namespace std;
 
 // Menu options
@@ -66,10 +51,10 @@ int objectsStartOffsetID;
 int viewShowVertexNormalsMenuEntryID;
 int viewShowFaceNormalsMenuEntryID;
 int viewShowBoundingBoxMenuEntryID;
-
-bool isShowVertexNormals = false;
-bool isShowFaceNormals = false;
-bool isShowBoundingBox = false;
+int transformsTranslateEntryID;
+int transformsRotateEntryID;
+int transformsScaleEntryID;
+int transformsAdvancedEntryID;
 
 
 // Rendering variables
@@ -246,7 +231,32 @@ void handleTransformsMenu(int id)
 	// TODO: delete
 	cout << "handleTransformsMenu(" << id << ")" << endl;
 
-	// TODO: transform scene->activeModel
+	if (id == transformsScaleEntryID)
+	{
+		vec3 scaleVec = promptScaleShell();
+
+		scene->models[scene->activeModel]->scale(scaleVec);
+	}
+	else if (id == transformsTranslateEntryID)
+	{
+		vec3 translateVec = promptTranslateShell();
+
+		scene->models[scene->activeModel]->translate(translateVec);
+	}
+	else if (id == transformsRotateEntryID)
+	{
+		vec4 temp = promptRotateShell();
+		vec3 axisVec = { temp[0], temp[1], temp[2] };
+		float angle = temp[3];
+
+		scene->models[scene->activeModel]->rotate(axisVec, angle);
+	}
+	//else if (id == transformsAdvancedEntryID) // unavailable for now
+	//{
+	//
+	//}
+
+	refreshGUI();
 }
 
 void handleViewMenu(int id)
@@ -254,18 +264,17 @@ void handleViewMenu(int id)
 	// TODO: delete
 	cout << "handleViewMenu(" << id << ")" << endl;
 
-	// todo: replace switch with if
 	if (viewShowVertexNormalsMenuEntryID == id)
 	{
-		isShowVertexNormals = !isShowVertexNormals;
+		scene->isShowVertexNormals = !(scene->isShowVertexNormals);
 	}
 	else if (viewShowFaceNormalsMenuEntryID == id)
 	{
-		isShowFaceNormals = !isShowFaceNormals;
+		scene->isShowFaceNormals = !(scene->isShowFaceNormals);
 	}
 	else if (viewShowBoundingBoxMenuEntryID == id)
 	{
-		isShowBoundingBox = !isShowBoundingBox;
+		scene->isShowBoundingBox = !(scene->isShowBoundingBox);
 	}
 
 	refreshGUI();
@@ -302,6 +311,69 @@ void initMenu()
 	Menu::updateGlutMenu();
 }
 
+// Shell handling:
+
+vec3 promptScaleShell()
+{
+	vec3 scale;
+
+	// TODO: delete
+	cout << "promptScaleShell()" << endl;
+
+	cout << "scale x = ";
+	cin >> scale.x;
+	cout << "scale y = ";
+	cin >> scale.y;
+	cout << "scale z = ";
+	cin >> scale.z;
+
+	// TODO: delete
+	cout << "scale = (" << scale.x << ", " << scale.y << ", " << scale.z << ")" << endl;
+
+	return scale;
+}
+vec3 promptTranslateShell()
+{
+	vec3 translate;
+
+	// TODO: delete
+	cout << "promptTranslateShell()" << endl;
+
+	cout << "translate x = ";
+	cin >> translate.x;
+	cout << "translate y = ";
+	cin >> translate.y;
+	cout << "translate z = ";
+	cin >> translate.z;
+
+	// TODO: delete
+	cout << "translate = (" << translate.x << ", " << translate.y << ", " << translate.z << ")" << endl;
+
+	return translate;
+}
+vec4 promptRotateShell()
+{
+	vec4 rotate;
+
+	// TODO: delete
+	cout << "promptRotateShell()" << endl;
+
+	cout << "axis x = ";
+	cin >> rotate.x;
+	cout << "axis y = ";
+	cin >> rotate.y;
+	cout << "axis z = ";
+	cin >> rotate.z;
+	cout << "angle = ";
+	cin >> rotate.w;
+
+	// TODO: delete
+	cout << "axis = (" << rotate.x << ", " << rotate.y << ", " << rotate.z << ")" << endl;
+	cout << "angle = " << rotate.w;
+
+	return rotate;
+}
+
 // Menu handling:
 
 void Menu::updateGlutMenu()
@@ -329,7 +401,7 @@ void Menu::buildGlutMenu()
 	string currentCameraNameWprefix = PREFIX + currentCameraName;
 	camerasSubMenuID = glutCreateMenu(handleCamerasMenu);
 
-	if (selectedCameraIndex == 0) // special case = default
+	if (scene->activeCamera == 0) // special case = default
 		currentCameraNameWprefix = SELECTED_PREFIX + currentCameraName;
 	camerasStartOffsetID = menuEntryCounter++;
 	glutAddMenuEntry(currentCameraNameWprefix.c_str(), camerasStartOffsetID);
@@ -339,7 +411,7 @@ void Menu::buildGlutMenu()
 		currentCameraName = cameraPrefix + to_string(cameraIndex);
 		currentCameraNameWprefix = PREFIX + currentCameraName;
 
-		if (selectedCameraIndex == cameraIndex)
+		if (scene->activeCamera == cameraIndex)
 			currentCameraNameWprefix = SELECTED_PREFIX + currentCameraName;
 
 		glutAddMenuEntry(currentCameraNameWprefix.c_str(), menuEntryCounter++);
@@ -351,7 +423,7 @@ void Menu::buildGlutMenu()
 	string currentObjectNameWprefix = PREFIX + currentObjectName;
 	objectsSubMenuID = glutCreateMenu(handleObjectsMenu);
 
-	if (selectedObjectIndex == 0) // special case = default
+	if (scene->activeModel == 0) // special case = default
 		currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
 	objectsStartOffsetID = menuEntryCounter++;
 	glutAddMenuEntry(currentObjectName.c_str(), objectsStartOffsetID);
@@ -361,7 +433,7 @@ void Menu::buildGlutMenu()
 		currentObjectName = objectPrefix + to_string(objectIndex);
 		currentObjectNameWprefix = PREFIX + currentObjectName;
 
-		if (selectedObjectIndex == objectIndex)
+		if (scene->activeModel == objectIndex)
 			currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
 
 		glutAddMenuEntry(currentObjectName.c_str(), menuEntryCounter++);
@@ -369,22 +441,27 @@ void Menu::buildGlutMenu()
 
 	// transforms menu
 	transformsSubMenuID = glutCreateMenu(handleTransformsMenu);
-	glutAddMenuEntry("translate", menuEntryCounter++);
-	glutAddMenuEntry("rotate", menuEntryCounter++);
-	glutAddMenuEntry("scale", menuEntryCounter++);
+	transformsTranslateEntryID = menuEntryCounter++;
+	glutAddMenuEntry("translate", transformsTranslateEntryID);
+	transformsRotateEntryID = menuEntryCounter++;
+	glutAddMenuEntry("rotate", transformsRotateEntryID);
+	transformsScaleEntryID = menuEntryCounter++;
+	glutAddMenuEntry("scale", transformsScaleEntryID);
+	//transformsAdvancedEntryID = menuEntryCounter++;
+	//glutAddMenuEntry("advanced", transformsAdvancedEntryID);
 
 	// view menu
 	string viewVertexNormalsPrefix = PREFIX;
 	string viewFaceNormalsPrefix = PREFIX;
 	string viewBoundingBoxPrefix = PREFIX;
 
-	if (isShowVertexNormals) {
+	if (scene->isShowVertexNormals) {
 		viewVertexNormalsPrefix = MARKED_PREFIX;
 	}
-	if (isShowFaceNormals) {
+	if (scene->isShowFaceNormals) {
 		viewFaceNormalsPrefix = MARKED_PREFIX;
 	}
-	if (isShowBoundingBox) {
+	if (scene->isShowBoundingBox) {
 		viewBoundingBoxPrefix = MARKED_PREFIX;
 	}
 
@@ -433,6 +510,8 @@ void Menu::bindToGlut()
 
 void Menu::removeFromGlut()
 {
+	// TODO: delete
+	cout << "removeFromGlut() | menuEntryCounter = " << menuEntryCounter << endl;
 	// free menu entries
 	// TODO: make sure this loop doesn't run out of bounds.
 	for (int i = 0; i < menuEntryCounter; ++i) {
@@ -454,7 +533,6 @@ void Menu::removeFromGlut()
 
 
 //----------------------------------------------------------------------------
-
 
 
 int my_main( int argc, char **argv )
