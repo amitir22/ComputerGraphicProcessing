@@ -21,11 +21,11 @@ class Light {
 
 
 class Scene {
+public:
 	std::vector<std::unique_ptr<Model>> models;
 	std::vector<std::unique_ptr<Light>> lights;
 	std::vector<std::unique_ptr<Camera>> cameras;
 	Renderer* m_renderer;
-public:
 	// Constructors
 	Scene() {};
 	Scene(Renderer* renderer);
@@ -40,5 +40,4 @@ public:
 	int activeCamera;
 	int activeModel;
 	int activeLight;
-	
 };
