@@ -1,8 +1,8 @@
 // MeshModel.h
 #pragma once
-#include "scene.h"
 #include "vec.h"
 #include "mat.h"
+#include "Renderer.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -48,17 +48,15 @@ struct FaceIdcs
 	}
 };
 
-
-class MeshModel : public Model
+class MeshModel
 {
-protected :
+public:
 	std::vector<vec3> vertex_positions;
 	std::vector<vec3> normal_positions;
 
 	mat4 _model_transform; // also known as model transform
 	mat3 _normal_transform;
 
-public:
 	MeshModel() noexcept;
 	explicit MeshModel(string fileName);
 	void loadFile(string fileName);
@@ -67,6 +65,4 @@ public:
 	void translate(vec3 translation);
 	void rotate(vec3 axis, float angle);
 	void scale(vec3 scale);
-
-	
 };

@@ -2,13 +2,12 @@
 //
 
 #include "stdafx.h"
-#include "CG_skel_w_MFC.h"
 #include <chrono>
+#include "CG_skel_w_MFC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
 
 // The one and only application object
 #include <string>
@@ -25,25 +24,38 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define MENU_FILE_OPEN 0
-#define MENU_MAIN_DEMO 1
-#define MENU_MAIN_ABOUT 2
-#define MENU_CAMERA_DEFAULT 3
-#define MENU_OBJECTS_NONE 4
-#define MENU_TRANSFORMS_TRANSLATE 6
-#define MENU_TRANSFORMS_ROTATE 7
-#define MENU_TRANSFORMS_SCALE 8
-#define MENU_TRANSFORMS_SHEAR 9
-#define MENU_VIEW_SHOW_VERTEX_NORMALS 10
-#define MENU_VIEW_SHOW_FACE_NORMALS 11
-#define MENU_VIEW_SHOW_BOUNDING_BOX 12
-#define MENU_SHAPES_CUBE 13
-#define MENU_OPTIONS_STEP_SIZE 14
+using namespace std;
 
-// View options
-bool isShowVertexNormals = false;
-bool isShowFaceNormals = false;
-bool isShowBoundingBox = false;
+// Menu options
+const string PREFIX = "  ";
+const string MARKED_PREFIX = "V ";
+const string SELECTED_PREFIX = "->";
+
+bool isMenuReady = false;
+int menuEntryCounter = 0;
+
+int mainMenuID;
+int fileSubMenuID;
+int fileOpenMenuEntryID;
+int camerasSubMenuID;
+int objectsSubMenuID;
+int transformsSubMenuID;
+int viewSubMenuID;
+int shapesSubMenuID;
+int optionsSubMenuID;
+int demoMenuEntryID;
+int aboutMenuEntryID;
+
+int camerasStartOffsetID;
+int objectsStartOffsetID;
+int viewShowVertexNormalsMenuEntryID;
+int viewShowFaceNormalsMenuEntryID;
+int viewShowBoundingBoxMenuEntryID;
+int transformsTranslateEntryID;
+int transformsRotateEntryID;
+int transformsScaleEntryID;
+int transformsAdvancedEntryID;
+
 
 // Rendering variables
 Camera selectedCamera;
@@ -169,152 +181,358 @@ void motion(int x, int y)
 	last_y = y;
 	activeCamera->handleMouseMovement(dx, dy);
 }
-////////////////////////////////////////////////////////////////////////////
-void fileMenu(int id)
+
+// Menu handlers
+
+void refreshGUI(bool shouldUpdateMenu/* = true */)
 {
-	switch (id)
+	// TODO: delete
+	cout << "refreshGUI(" << shouldUpdateMenu << ")" << endl;
+	if (shouldUpdateMenu)
+		Menu::updateGlutMenu();
+	scene->draw();
+}
+
+void handleFileMenu(int id)
+{
+	// TODO: delete
+	cout << "handleFileMenu(" << id << ")" << endl;
+	if (id == fileOpenMenuEntryID)
 	{
-		case MENU_FILE_OPEN:
-			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
-			if(dlg.DoModal()==IDOK)
-			{
-				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-			}
-			break;
-			// TODO: unexpected error
+		CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+		if (dlg.DoModal() == IDOK)
+		{
+			std::string s((LPCTSTR)dlg.GetPathName());
+			scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+		}
 	}
 }
 
-void camerasMenu(int id)
+void handleCamerasMenu(int id)
 {
-	// TODO: change camera by the given id
+	// TODO: delete
+	cout << "handleCamerasMenu(" << id << ")" << endl;
+	scene->activeCamera = id - camerasStartOffsetID;
+	// TODO: delete
+	cout << "activeCamera = " << scene->activeCamera << endl;
 }
 
-void objectsMenu(int id)
+void handleObjectsMenu(int id) // TODO: consider renaming all objects to models
 {
-	// TODO: change the object that is focused by the given id
+	// TODO: delete
+	cout << "handleObjectsMenu(" << id << ")" << endl;
+	scene->activeModel = id - objectsStartOffsetID;
+	// TODO: delete
+	cout << "activeModel = " << scene->activeModel << endl;
 }
 
-void transformsMenu(int id)
+void handleTransformsMenu(int id)
 {
-	// TODO: change the object that is focused by the given id
-}
+	// TODO: delete
+	cout << "handleTransformsMenu(" << id << ")" << endl;
 
-void viewMenu(int id)
-{
-	cout << id << endl;
-	switch (id)
+	if (id == transformsScaleEntryID)
 	{
-	case MENU_VIEW_SHOW_VERTEX_NORMALS: // id = 10
-		isShowVertexNormals = !isShowVertexNormals;
+		vec3 scaleVec = promptScaleShell();
 
-		if (isShowVertexNormals) 
-		{
+		scene->models[scene->activeModel]->scale(scaleVec);
+	}
+	else if (id == transformsTranslateEntryID)
+	{
+		vec3 translateVec = promptTranslateShell();
 
-		}
-		else 
-		{
+		scene->models[scene->activeModel]->translate(translateVec);
+	}
+	else if (id == transformsRotateEntryID)
+	{
+		vec4 temp = promptRotateShell();
+		vec3 axisVec = { temp[0], temp[1], temp[2] };
+		float angle = temp[3];
 
-		}
+		scene->models[scene->activeModel]->rotate(axisVec, angle);
+	}
+	//else if (id == transformsAdvancedEntryID) // unavailable for now
+	//{
+	//
+	//}
 
-		break;
-	case MENU_VIEW_SHOW_FACE_NORMALS: // id = 11
-		isShowFaceNormals = !isShowFaceNormals;
-		// TODO: update the menu items to rename this option with a "<-" postfix
-		break;
-	case MENU_VIEW_SHOW_BOUNDING_BOX: // id = 12
-		isShowBoundingBox = !isShowBoundingBox;
-		// TODO: update the menu items to rename this option with a "<-" postfix
-		break;
-	default: //TODO: error
-		break;
+	refreshGUI();
+}
+
+void handleViewMenu(int id)
+{
+	// TODO: delete
+	cout << "handleViewMenu(" << id << ")" << endl;
+
+	if (viewShowVertexNormalsMenuEntryID == id)
+	{
+		scene->isShowVertexNormals = !(scene->isShowVertexNormals);
+	}
+	else if (viewShowFaceNormalsMenuEntryID == id)
+	{
+		scene->isShowFaceNormals = !(scene->isShowFaceNormals);
+	}
+	else if (viewShowBoundingBoxMenuEntryID == id)
+	{
+		scene->isShowBoundingBox = !(scene->isShowBoundingBox);
 	}
 
-	// TODO: re-render the scene
+	refreshGUI();
 }
 
-void shapesMenu(int id)
+void handleShapesMenu(int id)
 {
+	// TODO: delete
+	cout << "handleShapesMenu(" << id << ")" << endl;
 	// TODO: insert new primitive shape to the scene
 }
 
-void optionsMenu(int id)
+void handleOptionsMenu(int id)
 {
-	// TODO: change the object that is focused by the given id
-	return; // TODO: what is {id}'s value?
+	// TODO: delete
+	cout << "handleOptionsMenu(" << id << ")" << endl;
+	// TODO: 
 }
 
-void mainMenu(int id)
+void handleMainMenu(int id)
 {
-	switch (id)
-	{
-	case MENU_MAIN_DEMO:
+	// TODO: delete
+	cout << "handleMainMenu(" << id << ")" << endl;
+	if (id == demoMenuEntryID)
 		scene->drawDemo();
-		break;
-	case MENU_MAIN_ABOUT:
+	else if (id == aboutMenuEntryID)
 		AfxMessageBox(_T("Computer Graphics"));
-		break;
-	}
 }
 
 void initMenu()
 {
-	string fileOpen = "Open..";
-	string camerasDefaultCamera = "default camera";
-	string objectsNone = "None";
-	// TODO: continue here
+	// TODO: delete
+	cout << "initMenu()" << endl;
+	Menu::updateGlutMenu();
+}
 
+// Shell handling:
 
-	int openFileMenu = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..", MENU_FILE_OPEN);
+vec3 promptScaleShell()
+{
+	vec3 scale;
 
-	int camerasSubMenu = glutCreateMenu(camerasMenu);
-	glutAddMenuEntry("default camera", MENU_CAMERA_DEFAULT);
-	// TODO: how do i add a list that i update?
+	// TODO: delete
+	cout << "promptScaleShell()" << endl;
 
-	int objectsSubMenu = glutCreateMenu(objectsMenu);
-	glutAddMenuEntry("None", MENU_OBJECTS_NONE);
-	// TODO: how do i add a list that i update?
+	cout << "scale x = ";
+	cin >> scale.x;
+	cout << "scale y = ";
+	cin >> scale.y;
+	cout << "scale z = ";
+	cin >> scale.z;
 
-	int transformsSubMenu = glutCreateMenu(transformsMenu);
-	glutAddMenuEntry("translate", MENU_TRANSFORMS_TRANSLATE);
-	glutAddMenuEntry("rotate", MENU_TRANSFORMS_ROTATE);
-	glutAddMenuEntry("scale", MENU_TRANSFORMS_SCALE);
-	glutAddMenuEntry("shear", MENU_TRANSFORMS_SHEAR);
+	// TODO: delete
+	cout << "scale = (" << scale.x << ", " << scale.y << ", " << scale.z << ")" << endl;
 
-	int viewSubMenu = glutCreateMenu(viewMenu);
-	glutAddMenuEntry("Show vertex normals", MENU_VIEW_SHOW_VERTEX_NORMALS); // TODO: how to make a checkbox?
-	glutAddMenuEntry("Show face normals", MENU_VIEW_SHOW_FACE_NORMALS); // TODO: how to make a checkbox?
-	glutAddMenuEntry("Show bounding box", MENU_VIEW_SHOW_BOUNDING_BOX); // TODO: how to make a checkbox?
-	
-	int shapesSubMenu = glutCreateMenu(shapesMenu);
-	glutAddMenuEntry("Cube", MENU_SHAPES_CUBE);
-	// TODO: how do i add a list that i update?
+	return scale;
+}
+vec3 promptTranslateShell()
+{
+	vec3 translate;
 
-	int optionsSubMenu = glutCreateMenu(optionsMenu);
-	glutAddMenuEntry("Set object step size when moving", MENU_OPTIONS_STEP_SIZE);
+	// TODO: delete
+	cout << "promptTranslateShell()" << endl;
 
-	glutCreateMenu(mainMenu);
+	cout << "translate x = ";
+	cin >> translate.x;
+	cout << "translate y = ";
+	cin >> translate.y;
+	cout << "translate z = ";
+	cin >> translate.z;
 
-	glutAddSubMenu("File", openFileMenu);
-	glutAddSubMenu("Cameras", camerasSubMenu);
-	glutAddSubMenu("Objects", objectsSubMenu);
-	glutAddSubMenu("Transforms", transformsSubMenu);
-	glutAddSubMenu("View", viewSubMenu);
-	glutAddSubMenu("Shapes", shapesSubMenu);
-	glutAddSubMenu("Options", optionsSubMenu);
-	glutAddMenuEntry("Demo", MENU_MAIN_DEMO);
-	glutAddMenuEntry("About", MENU_MAIN_ABOUT);
+	// TODO: delete
+	cout << "translate = (" << translate.x << ", " << translate.y << ", " << translate.z << ")" << endl;
+
+	return translate;
+}
+vec4 promptRotateShell()
+{
+	vec4 rotate;
+
+	// TODO: delete
+	cout << "promptRotateShell()" << endl;
+
+	cout << "axis x = ";
+	cin >> rotate.x;
+	cout << "axis y = ";
+	cin >> rotate.y;
+	cout << "axis z = ";
+	cin >> rotate.z;
+	cout << "angle = ";
+	cin >> rotate.w;
+
+	// TODO: delete
+	cout << "axis = (" << rotate.x << ", " << rotate.y << ", " << rotate.z << ")" << endl;
+	cout << "angle = " << rotate.w;
+
+	return rotate;
+}
+
+// Menu handling:
+
+void Menu::updateGlutMenu()
+{
+	if (isMenuReady)
+	{
+		removeFromGlut();
+	}
+
+	menuEntryCounter = 0;
+	buildGlutMenu();
+	bindToGlut();
+}
+
+void Menu::buildGlutMenu()
+{
+	// file menu
+	fileSubMenuID = glutCreateMenu(handleFileMenu);
+	fileOpenMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry("Open..", fileOpenMenuEntryID);
+
+	// cameras menu
+	string cameraPrefix = "camera ";
+	string currentCameraName = "default camera";
+	string currentCameraNameWprefix = PREFIX + currentCameraName;
+	camerasSubMenuID = glutCreateMenu(handleCamerasMenu);
+
+	if (scene->activeCamera == 0) // special case = default
+		currentCameraNameWprefix = SELECTED_PREFIX + currentCameraName;
+	camerasStartOffsetID = menuEntryCounter++;
+	glutAddMenuEntry(currentCameraNameWprefix.c_str(), camerasStartOffsetID);
+
+	for (int cameraIndex = 1; cameraIndex < scene->cameras.size(); cameraIndex++)
+	{
+		currentCameraName = cameraPrefix + to_string(cameraIndex);
+		currentCameraNameWprefix = PREFIX + currentCameraName;
+
+		if (scene->activeCamera == cameraIndex)
+			currentCameraNameWprefix = SELECTED_PREFIX + currentCameraName;
+
+		glutAddMenuEntry(currentCameraNameWprefix.c_str(), menuEntryCounter++);
+	}
+
+	// objects menu
+	string objectPrefix = "object ";
+	string currentObjectName = "None";
+	string currentObjectNameWprefix = PREFIX + currentObjectName;
+	objectsSubMenuID = glutCreateMenu(handleObjectsMenu);
+
+	if (scene->activeModel == 0) // special case = default
+		currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
+	objectsStartOffsetID = menuEntryCounter++;
+	glutAddMenuEntry(currentObjectName.c_str(), objectsStartOffsetID);
+
+	for (int objectIndex = 1; objectIndex < scene->models.size(); objectIndex++)
+	{
+		currentObjectName = objectPrefix + to_string(objectIndex);
+		currentObjectNameWprefix = PREFIX + currentObjectName;
+
+		if (scene->activeModel == objectIndex)
+			currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
+
+		glutAddMenuEntry(currentObjectName.c_str(), menuEntryCounter++);
+	}
+
+	// transforms menu
+	transformsSubMenuID = glutCreateMenu(handleTransformsMenu);
+	transformsTranslateEntryID = menuEntryCounter++;
+	glutAddMenuEntry("translate", transformsTranslateEntryID);
+	transformsRotateEntryID = menuEntryCounter++;
+	glutAddMenuEntry("rotate", transformsRotateEntryID);
+	transformsScaleEntryID = menuEntryCounter++;
+	glutAddMenuEntry("scale", transformsScaleEntryID);
+	//transformsAdvancedEntryID = menuEntryCounter++;
+	//glutAddMenuEntry("advanced", transformsAdvancedEntryID);
+
+	// view menu
+	string viewVertexNormalsPrefix = PREFIX;
+	string viewFaceNormalsPrefix = PREFIX;
+	string viewBoundingBoxPrefix = PREFIX;
+
+	if (scene->isShowVertexNormals) {
+		viewVertexNormalsPrefix = MARKED_PREFIX;
+	}
+	if (scene->isShowFaceNormals) {
+		viewFaceNormalsPrefix = MARKED_PREFIX;
+	}
+	if (scene->isShowBoundingBox) {
+		viewBoundingBoxPrefix = MARKED_PREFIX;
+	}
+
+	string viewVertexNormals = viewVertexNormalsPrefix + string("Show vertex normals");
+	string viewFaceNormals = viewFaceNormalsPrefix + string("Show face normals");
+	string viewBoundingBox = viewBoundingBoxPrefix + string("Show bounding box");
+
+	viewSubMenuID = glutCreateMenu(handleViewMenu);
+	viewShowVertexNormalsMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry(viewVertexNormals.c_str(), viewShowVertexNormalsMenuEntryID);
+	viewShowFaceNormalsMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry(viewFaceNormals.c_str(), viewShowFaceNormalsMenuEntryID);
+	viewShowBoundingBoxMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry(viewBoundingBox.c_str(), viewShowBoundingBoxMenuEntryID);
+
+	// shapes menu
+	shapesSubMenuID = glutCreateMenu(handleShapesMenu);
+	glutAddMenuEntry("Cube", menuEntryCounter++);
+
+	// options menu
+	optionsSubMenuID = glutCreateMenu(handleOptionsMenu);
+	glutAddMenuEntry("Set object step size when moving", menuEntryCounter++);
+
+	// main menu
+	mainMenuID = glutCreateMenu(handleMainMenu);
+
+	glutAddSubMenu("File", fileSubMenuID);
+	glutAddSubMenu("Cameras", camerasSubMenuID);
+	glutAddSubMenu("Objects", objectsSubMenuID);
+	glutAddSubMenu("Transforms", transformsSubMenuID);
+	glutAddSubMenu("View", viewSubMenuID);
+	glutAddSubMenu("Shapes", shapesSubMenuID);
+	glutAddSubMenu("Options", optionsSubMenuID);
+
+	demoMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry("Demo", demoMenuEntryID);
+
+	aboutMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry("About", aboutMenuEntryID);
+}
+
+void Menu::bindToGlut()
+{
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
-void updateMenu() // TODO: update function signature as necessary
+void Menu::removeFromGlut()
 {
-	// TODO:
-}
-//----------------------------------------------------------------------------
+	// TODO: delete
+	cout << "removeFromGlut() | menuEntryCounter = " << menuEntryCounter << endl;
+	// free menu entries
+	// TODO: make sure this loop doesn't run out of bounds.
+	for (int i = 0; i < menuEntryCounter; ++i) {
+		glutRemoveMenuItem(i); // Remove each menu item
+	}
 
+	// free submenus
+	glutDestroyMenu(fileSubMenuID);
+	glutDestroyMenu(camerasSubMenuID);
+	glutDestroyMenu(objectsSubMenuID);
+	glutDestroyMenu(transformsSubMenuID);
+	glutDestroyMenu(viewSubMenuID);
+	glutDestroyMenu(shapesSubMenuID);
+	glutDestroyMenu(optionsSubMenuID);
+
+	// free main menu
+	glutDestroyMenu(mainMenuID);
+}
+
+
+//----------------------------------------------------------------------------
 
 
 int my_main( int argc, char **argv )
@@ -361,8 +579,6 @@ int my_main( int argc, char **argv )
 }
 
 CWinApp theApp; // This is unused
-
-using namespace std;
 
 int main( int argc, char **argv )
 {
