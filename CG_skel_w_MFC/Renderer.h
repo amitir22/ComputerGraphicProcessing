@@ -1,11 +1,13 @@
 // Renderer.h
 #pragma once
 #include <vector>
+#include <memory>
 #include "CG_skel_w_MFC.h"
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
-#include <memory>
+#include "Geometry.h"
+
 
 using namespace std;
 class Renderer

@@ -7,8 +7,7 @@
 using namespace std;
 
 static const float YAW = -90.0f;
-//static const float SPEED = 2.5f;
-static const float SPEED = 1.0f;
+static const float SPEED = 2.0f;
 static const float SENSITIVITY = 0.1f;
 static const float PITCH = 0.0f;
 static const float ZOOM = 45.0f;
@@ -18,7 +17,9 @@ enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
-	RIGHT
+	RIGHT,
+	UP,
+	DOWN,
 };
 
 class Camera {

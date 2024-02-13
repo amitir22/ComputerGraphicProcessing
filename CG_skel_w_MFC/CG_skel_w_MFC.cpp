@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
-#include <chrono>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -56,8 +55,8 @@ Scene *scene;
 Renderer *renderer;
 
 // Mouse movement
-float last_x = CG::DEFAULT_WIDTH / 2;
-float last_y = CG::DEFAULT_HEIGHT / 2;
+float lastX = CG::DEFAULT_WIDTH / 2;
+float lastY = CG::DEFAULT_HEIGHT / 2;
 bool firstMouse = true;
 bool lb_down, rb_down, mb_down;
 
@@ -106,6 +105,14 @@ void keyboard( unsigned char key, int x, int y )
 		activeCamera->handleKeyboardInput(Camera_Movement::RIGHT, 0.1);
 		shouldRedraw = true;
 		break;
+	case 'q':
+		activeCamera->handleKeyboardInput(Camera_Movement::UP, 0.1);
+		shouldRedraw = true;
+		break;
+	case 'e':
+		activeCamera->handleKeyboardInput(Camera_Movement::DOWN, 0.1);
+		shouldRedraw = true;
+		break;
 	}
 	if (shouldRedraw) {
 		glutPostRedisplay();
@@ -144,16 +151,16 @@ void motion(int x, int y)
 	Camera* activeCamera = scene->getActiveCamera();
 	if (firstMouse)
 	{
-		last_x = x;
-		last_y = y;
+		lastX = x;
+		lastY = y;
 		firstMouse = false;
 	}
 	// calc difference in mouse movement
-	float dx = x - last_x;
-	float dy = last_y - y;
+	float dx = x - lastX;
+	float dy = lastY - y;
 	// update last x,y
-	last_x = x;
-	last_y = y;
+	lastX = x;
+	lastY = y;
 	activeCamera->handleMouseMovement(dx, dy);
 }
 ////////////////////////////////////////////////////////////////////////////

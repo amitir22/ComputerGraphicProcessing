@@ -8,5 +8,8 @@ namespace Geometry {
 	mat4 makeTranslationMatrix(vec3 translation);
 	mat4 getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	mat4 getPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-	
+	struct Face {
+		vec3 v[3];
+		//vec3 normal;
+	};
 }
