@@ -68,6 +68,4 @@ public:
 	void translate(vec3 translation);
 	void rotate(vec3 axis, float angle);
 	void scale(vec3 scale);
-
-	
 };
