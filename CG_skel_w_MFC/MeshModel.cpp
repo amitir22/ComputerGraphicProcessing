@@ -1,8 +1,6 @@
 // MeshModel.cpp
 #include "StdAfx.h"
 #include "MeshModel.h"
-#include "vec.h"
-#include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>

@@ -10,7 +10,7 @@ using namespace std;
 // Constructors
 Scene::Scene(Renderer* renderer) : m_renderer(renderer) {
 	// create a default camera
-	cameras.push_back(std::make_unique<Camera>());
+	cameras.push_back(std::make_shared<Camera>());
 	activeCamera = 0;
 	activeModel = 0;
 	activeLight = 0;
@@ -19,7 +19,7 @@ Scene::Scene(Renderer* renderer) : m_renderer(renderer) {
 
 void Scene::loadOBJModel(string fileName)
 {
-	models.push_back(std::make_unique<MeshModel>(fileName));
+	models.push_back(std::make_shared<MeshModel>(fileName));
 	activeModel = models.size() - 1;
 }
 
