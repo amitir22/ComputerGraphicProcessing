@@ -8,6 +8,7 @@
 #include "GL\freeglut.h"
 #include "constants.h"
 
+
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
 Renderer::Renderer() :m_width(CG::DEFAULT_WIDTH), m_height(CG::DEFAULT_HEIGHT)
@@ -74,27 +75,53 @@ void Renderer::handleWindowReshape(int newWidth, int newHeight) {
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals) {
+	updateMVP();
 	if (vertices == nullptr || vertices->size() % 3 != 0) {
 		throw std::runtime_error("Invalid vertices input.");
 	}
 	// Transform vertices from world space to screen space, save them in a new vector
 	// create a vector of screen vertices initialized to zero of size vertices->size()
-	vector<vec4> screenVertices(vertices->size(), vec3(0, 0, 0));
+	vector<vec4> ndcVertices(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
 		vec4 vertex = vec4((*vertices)[i].x, (*vertices)[i].y, (*vertices)[i].z, 1);
-		vec4 clip_vertex = m_mvp * vertex; // aka normalized device coordinates
+		vec4 clipVertex = m_mvp * vertex; // aka normalized device coordinates
 		if (m_isPerspective)
-			clip_vertex = vec4(clip_vertex.x / clip_vertex.w, clip_vertex.y / clip_vertex.w, clip_vertex.z / clip_vertex.w, 1);
-		screenVertices[i] = m_viewPortTransform * clip_vertex; // aka pixel coordinates
-		// TODO : Viewport, half-pixel, Shirley convention
+			ndcVertices[i] = vec4(clipVertex.x / clipVertex.w, clipVertex.y / clipVertex.w, clipVertex.z / clipVertex.w, 1);
 	}
+	// Create vector of faces
+	vector<Geometry::Face> faces;
+	for (int i = 0; i < ndcVertices.size(); i += 3) {
+		// Check all three vertices are inside normalized viewing volume [-1,1]^3
+		if (ndcVertices[i].x < -1 || ndcVertices[i].x > 1 || ndcVertices[i].y < -1 || ndcVertices[i].y > 1 || ndcVertices[i].z < -1 || ndcVertices[i].z > 1) {
+			continue;
+		}
+		Geometry::Face face;
+		face.v[0] = ndcVertices[i];
+		face.v[1] = ndcVertices[i + 1];
+		face.v[2] = ndcVertices[i + 2];
+		faces.push_back(face);
+	}
+
+		
+		//screenVertices[i] = m_viewPortTransform * clipVertex; // aka pixel coordinates
+		// TODO : Viewport, half-pixel, Shirley convention
+
 	
 	// Draw each triangle
-	for (int i = 0; i < screenVertices.size(); i += 3) {
+	for (int i = 0; i < faces.size(); i++) {
+		vec3 v1 = vec3(faces[i].v[0].x, faces[i].v[0].y, faces[i].v[0].z);
+		vec3 v2 = vec3(faces[i].v[1].x, faces[i].v[1].y, faces[i].v[1].z);
+		vec3 v3 = vec3(faces[i].v[2].x, faces[i].v[2].y, faces[i].v[2].z);
+		v1 = m_viewPortTransform * v1;
+		v2 = m_viewPortTransform * v2;
+		v3 = m_viewPortTransform * v3;
+
 		// call drawLine and cast the vertices to int
-		DrawLine((int)screenVertices[i].x, (int)screenVertices[i].y,  (int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y);
-		DrawLine((int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y, (int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y);
-		DrawLine((int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y, (int)screenVertices[i].x, (int)screenVertices[i].y);
+		DrawLine((int)v1.x, (int)v1.y,  (int)v2.x, (int)v2.y);
+		DrawLine((int)v2.x, (int)v2.y,  (int)v3.x, (int)v3.y);
+		DrawLine((int)v3.x, (int)v3.y,  (int)v1.x, (int)v1.y);
+		/*DrawLine((int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y, (int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y);
+		DrawLine((int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y, (int)screenVertices[i].x, (int)screenVertices[i].y);*/
 	}
 }
 
@@ -174,6 +201,18 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 			D += 2 * dy;
 		}
 	}
+}
+
+
+
+void Renderer::DrawPixel(int x, int y, int z) {
+	if (x < 0 || x >= m_width || y < 0 || y >= m_height || z < -1 || z > 1 ) {
+		return;
+	}
+	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
+
 }
 
 void Renderer::DrawPixel(int x, int y) {

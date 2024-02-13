@@ -85,6 +85,11 @@ void Camera::handleKeyboardInput(int key, float deltaTime)
 		Translate(velocity * (-right));
 	if (key == RIGHT)
 		Translate(velocity * right);
+	if (key == UP)
+		Translate(velocity * up);
+	if (key == DOWN)
+		Translate(velocity * (-up));
+
 }
 
 void Camera::updateVectors() {

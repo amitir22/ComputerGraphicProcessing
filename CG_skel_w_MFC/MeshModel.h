@@ -1,11 +1,12 @@
 // MeshModel.h
 #pragma once
-#include "vec.h"
-#include "mat.h"
-#include "Renderer.h"
 #include <vector>
 #include <string>
 #include <memory>
+#include "vec.h"
+#include "mat.h"
+#include "Renderer.h"
+#include "Geometry.h"
 
 using namespace std;
 
@@ -61,6 +62,7 @@ public:
 	explicit MeshModel(string fileName);
 	void loadFile(string fileName);
 	void draw(Renderer& renderer);
+	void applyTransformation(mat4 transformation);
 	// User Transformation
 	void translate(vec3 translation);
 	void rotate(vec3 axis, float angle);

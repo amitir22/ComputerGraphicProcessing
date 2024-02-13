@@ -21,7 +21,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "constants.h"
-
+#include "Geometry.h"
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 using namespace std;
@@ -68,30 +68,16 @@ Scene *scene;
 Renderer *renderer;
 
 // Mouse movement
-float last_x = CG::DEFAULT_WIDTH / 2;
-float last_y = CG::DEFAULT_HEIGHT / 2;
+float lastX = CG::DEFAULT_WIDTH / 2;
+float lastY = CG::DEFAULT_HEIGHT / 2;
 bool firstMouse = true;
 bool lb_down, rb_down, mb_down;
-
-// Time values for movement
-double deltaTime = 0.0f;	// Time between current frame and last frame
-auto lastFrameTime = std::chrono::high_resolution_clock::now(); // Time of last frame
 
 //----------------------------------------------------------------------------
 // Callbacks
 
-void idle() {
-	auto currentFrameTime = std::chrono::high_resolution_clock::now();
-	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
-	lastFrameTime = currentFrameTime;
-}
-
 void display( void )
 {
-	// TODO problem it doesn't call redraw every loop, so deltaTime might be wrong
-	auto currentFrameTime = std::chrono::high_resolution_clock::now();
-	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
-	lastFrameTime = currentFrameTime;
 	scene->draw(); // TODO: check that initial black screen is ok
 }
 
@@ -131,10 +117,33 @@ void keyboard( unsigned char key, int x, int y )
 		activeCamera->handleKeyboardInput(Camera_Movement::RIGHT, 0.1);
 		shouldRedraw = true;
 		break;
+	case 'q':
+		activeCamera->handleKeyboardInput(Camera_Movement::UP, 0.1);
+		shouldRedraw = true;
+		break;
+	case 'e':
+		activeCamera->handleKeyboardInput(Camera_Movement::DOWN, 0.1);
+		shouldRedraw = true;
+		break;
 	}
 	if (shouldRedraw) {
 		glutPostRedisplay();
 	}
+}
+
+void mouseWheel(int button, int dir, int x, int y) {
+	if (dir > 0) {
+		cout << "scroll up" << endl;
+		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(1.1, 1.1, 1.1));
+		scene->applyTransformation(scaleMatrix);
+	}
+	else {
+		cout << "scroll down" << endl;
+		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(0.9, 0.9, 0.9));
+		scene->applyTransformation(scaleMatrix);
+	}
+
+	return;
 }
 
 // Handle mouse press and release events
@@ -169,16 +178,16 @@ void motion(int x, int y)
 	Camera* activeCamera = scene->getActiveCamera();
 	if (firstMouse)
 	{
-		last_x = x;
-		last_y = y;
+		lastX = x;
+		lastY = y;
 		firstMouse = false;
 	}
 	// calc difference in mouse movement
-	float dx = x - last_x;
-	float dy = last_y - y;
+	float dx = x - lastX;
+	float dy = lastY - y;
 	// update last x,y
-	last_x = x;
-	last_y = y;
+	lastX = x;
+	lastY = y;
 	activeCamera->handleMouseMovement(dx, dy);
 }
 
@@ -566,9 +575,9 @@ int my_main( int argc, char **argv )
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
 	//glutMouseFunc( mouse );
+	glutMouseWheelFunc(mouseWheel);
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
-	glutIdleFunc(idle); 
 	initMenu();
 	
 
