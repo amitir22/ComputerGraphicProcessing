@@ -126,7 +126,22 @@ void Menu::bindToGlut()
 
 void Menu::removeFromGlut()
 {
-	// TODO: delete each menu item
+	// free menu entries
+	// TODO: make sure this loop doesn't run out of bounds.
+	for (int i = 0; i < menuEntryCounter; ++i) { 
+		glutRemoveMenuItem(i); // Remove each menu item
+	}
+
+	// free submenus
+	glutDestroyMenu(fileSubMenuID);
+	glutDestroyMenu(camerasSubMenuID);
+	glutDestroyMenu(objectsSubMenuID);
+	glutDestroyMenu(transformsSubMenuID);
+	glutDestroyMenu(viewSubMenuID);
+	glutDestroyMenu(shapesSubMenuID);
+	glutDestroyMenu(optionsSubMenuID);
+
+	// free main menu
 	glutDestroyMenu(mainMenuID);
 }
 
