@@ -1,25 +1,41 @@
+// Renderer.cpp
 #include "StdAfx.h"
+#include <algorithm> 
+#include <cmath>   
 #include "Renderer.h"
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
-#include <algorithm> 
-#include <cmath>     
+#include "constants.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
-Renderer::Renderer() :m_width(512), m_height(512)
+Renderer::Renderer() :m_width(CG::DEFAULT_WIDTH), m_height(CG::DEFAULT_HEIGHT)
 {
 	InitOpenGLRendering();
-	CreateBuffers(512,512);
+	CreateBuffers(m_width, m_height);
+	Init();
 }
 Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
+	Init();
 }
 Renderer::~Renderer(void)
 {
+	glDeleteTextures(1, &gScreenTex);
+	glDeleteVertexArrays(1, &gScreenVtc);
+}
+
+void Renderer::Init()
+{ // Init transformation matrices to default values
+	m_modelTransform = mat4(1.0);
+	m_viewTransform = mat4(1.0);
+	m_projectionTransform = mat4(1.0);
+	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+	computeViewPortMatrix();
+	m_normalTransform = mat3(1.0);
 }
 
 
@@ -29,6 +45,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = std::make_unique<float[]>(3 * m_width * m_height);
+	std::fill(m_outBuffer.get(), m_outBuffer.get() + 3 * m_width * m_height, 0);
 }
 
 void Renderer::SetDemoBuffer()
@@ -47,7 +64,53 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-// returns true if the line is completely inside the rectangle
+void Renderer::handleWindowReshape(int newWidth, int newHeight) {
+	m_width = newWidth;
+	m_height = newHeight;
+	computeViewPortMatrix(); // Recalculate viewport transformation matrix
+	CreateBuffers(m_width, m_height); // Recreate buffers with new size
+}
+/////////////////////////////////////////////////////
+//				DRAW FUNCTIONS
+///////////////////////////////////////////////////
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals) {
+	if (vertices == nullptr || vertices->size() % 3 != 0) {
+		throw std::runtime_error("Invalid vertices input.");
+	}
+	// Transform vertices from world space to screen space, save them in a new vector
+	// create a vector of screen vertices initialized to zero of size vertices->size()
+	vector<vec4> screenVertices(vertices->size(), vec3(0, 0, 0));
+	for (int i = 0; i < vertices->size(); i++) {
+		vec4 vertex = vec4((*vertices)[i].x, (*vertices)[i].y, (*vertices)[i].z, 1);
+		vec4 clip_vertex = m_mvp * vertex; // aka normalized device coordinates
+		if (m_isPerspective)
+			clip_vertex = vec4(clip_vertex.x / clip_vertex.w, clip_vertex.y / clip_vertex.w, clip_vertex.z / clip_vertex.w, 1);
+		screenVertices[i] = m_viewPortTransform * clip_vertex; // aka pixel coordinates
+		// TODO : Viewport, half-pixel, Shirley convention
+	}
+	
+	// Draw each triangle
+	for (int i = 0; i < screenVertices.size(); i += 3) {
+		// call drawLine and cast the vertices to int
+		DrawLine((int)screenVertices[i].x, (int)screenVertices[i].y,  (int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y);
+		DrawLine((int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y, (int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y);
+		DrawLine((int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y, (int)screenVertices[i].x, (int)screenVertices[i].y);
+	}
+}
+
+void Renderer::SetViewTransform(const mat4& viewTransform)
+{
+	m_viewTransform = viewTransform;
+	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+}
+
+void Renderer::SetProjection(const mat4& projection, bool isPerspective)
+{
+	m_projectionTransform = projection;
+	m_isPerspective = isPerspective;
+	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+}
+
 bool Renderer::LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept {
 	if ( (x0 >= 0 && x1 >= 0) && (y0 >= 0 && y1 >= 0) && (x0 < m_width && x1 < m_width) && (y0 < m_height && y1 < m_height) ) {
 		return true;
@@ -62,11 +125,22 @@ bool Renderer::LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) con
 	return false;
 }
 
+// We want to map the normalized device coordinates to the screen coordinates
+void Renderer::computeViewPortMatrix()
+{
+	m_viewPortTransform = mat4(1.0);
+	m_viewPortTransform[0][0] = m_width / 2.0;
+	m_viewPortTransform[1][1] = m_height / 2.0;
+
+	// TODO Shirley convention: m_viewPortTransform[0][3] = (m_width-1)/ 2.0; m_viewPortTransform[2][3] = (m_height-1) / 2.0;
+	m_viewPortTransform[0][3] = (m_width) / 2.0; 
+	m_viewPortTransform[1][3] = (m_height) / 2.0;
+	// Keeping z values between [-1,1]
+	m_viewPortTransform[2][2] = 1;
+}
+
 void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	// Check if line is not completely inside the rectangle
-	if (!LineCompletelyInsideRectangle(x0, y0, x1, y1)) {
-		throw std::runtime_error("Line is not completely inside the rectangle.");
-	}
 	
 	// Make sure we draw from left to right
 	if (x0 > x1) {
@@ -86,9 +160,6 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	int D = 2 * dy - dx;
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
-		if (x >= m_width || y >= m_height || y < 0) {
-			return;
-		}
 		if (steep) {
 			DrawPixel(y, x);
 		}
@@ -106,21 +177,21 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 }
 
 void Renderer::DrawPixel(int x, int y) {
+	if (x < 0 || x >= m_width || y < 0 || y >= m_height) {
+		return;
+	}
 	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
 	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
 	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
 }
 
-
 /////////////////////////////////////////////////////
-//OpenGL stuff. Don't touch.
+//			OpenGL stuff. Don't touch.
+/////////////////////////////////////////////////////
 
 void Renderer::InitOpenGLRendering()
 {
-	int a = glGetError();
-	a = glGetError();
 	glGenTextures(1, &gScreenTex);
-	a = glGetError();
 	glGenVertexArrays(1, &gScreenVtc);
 	GLuint buffer;
 	glBindVertexArray(gScreenVtc);
@@ -158,7 +229,6 @@ void Renderer::InitOpenGLRendering()
 	glVertexAttribPointer( vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
 		(GLvoid *) sizeof(vtc) );
 	glProgramUniform1i( program, glGetUniformLocation(program, "texture"), 0 );
-	a = glGetError();
 }
 
 void Renderer::CreateOpenGLBuffer()
@@ -169,22 +239,26 @@ void Renderer::CreateOpenGLBuffer()
 	glViewport(0, 0, m_width, m_height);
 }
 
+void Renderer::SetModelMatrices(const mat4& modelTransform, const mat3& nTransform)
+{
+	m_modelTransform = modelTransform;
+	m_normalTransform = nTransform;
+	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+}
+
 void Renderer::SwapBuffers()
 {
 
-	int a = glGetError();
 	glActiveTexture(GL_TEXTURE0);
-	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
-	a = glGetError();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer.get());
 	glGenerateMipmap(GL_TEXTURE_2D);
-	a = glGetError();
-
 	glBindVertexArray(gScreenVtc);
-	a = glGetError();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	a = glGetError();
 	glutSwapBuffers();
-	a = glGetError();
+}
+
+void Renderer::ClearColorBuffer()
+{
+	std::fill(m_outBuffer.get(), m_outBuffer.get() + 3 * m_width * m_height, 0);
 }

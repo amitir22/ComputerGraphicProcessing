@@ -10,9 +10,14 @@
 //
 #pragma once
 #include <iostream>
+#include <istream>
 #include <cmath>
 #include "GL/glew.h"
 #define M_PI 3.14159265358979323846264338327
+struct vec2; // Forward declaration of vec2
+struct vec3; // Forward declaration of vec3
+struct vec4; // Forward declaration of vec4
+
 struct vec2 {
 
     GLfloat  x;
@@ -46,7 +51,7 @@ struct vec2 {
 	{ return vec2( -x, -y ); }
 
     vec2 operator + ( const vec2& v ) const
-	{ return vec2( 0, 0 ); } /*TODO*/
+	{ return vec2( x+v.x, y+v.y ); }
 
     vec2 operator - ( const vec2& v ) const
 	{ return vec2( x - v.x, y - v.y ); }
@@ -72,7 +77,7 @@ struct vec2 {
     //
 
     vec2& operator += ( const vec2& v )
-	{ x += 0;  y += 0;   return *this; } /*TODO*/
+	{ x += v.x;  y += v.y;   return *this; }
 
     vec2& operator -= ( const vec2& v )
 	{ x -= v.x;  y -= v.y;  return *this; }
@@ -120,17 +125,17 @@ struct vec2 {
 
 inline
 GLfloat dot( const vec2& u, const vec2& v ) {
-    return 0; /*TODO*/
+    return u.x * v.x + u.y * v.y;
 }
 
 inline
 GLfloat length( const vec2& v ) {
-    return std::sqrt( 0.0 ); /*TODO*/
+    return std::sqrt(dot(v,v));
 }
 
 inline
 vec2 normalize( const vec2& v ) {
-    return v / 1; /*TODO*/
+    return v / length(v);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -148,7 +153,7 @@ struct vec3 {
     //
     //  --- Constructors and Destructors ---
     //
-
+    
     vec3( GLfloat s = GLfloat(0.0) ) :
 	x(s), y(s), z(s) {}
 
@@ -156,6 +161,8 @@ struct vec3 {
 	x(x), y(y), z(z) {}
 
     vec3( const vec3& v ) { x = v.x;  y = v.y;  z = v.z; }
+
+    vec3(const vec4& v);
 
     vec3( const vec2& v, const float f ) { x = v.x;  y = v.y;  z = f; }
 
@@ -206,7 +213,7 @@ struct vec3 {
 	{ x -= v.x;  y -= v.y;  z -= v.z;  return *this; }
 
     vec3& operator *= ( const GLfloat s )
-	{ x *= 0;  y *= 0;  z *= 0;  return *this; } /*TODO*/
+	{ x *= s;  y *= s;  z *= s;  return *this; }
 
     vec3& operator *= ( const vec3& v )
 	{ x *= v.x;  y *= v.y;  z *= v.z;  return *this; }
@@ -265,9 +272,9 @@ vec3 normalize( const vec3& v ) {
 inline
 vec3 cross(const vec3& a, const vec3& b )
 {
-    return vec3( 0,
-		 0,  /*TODO*/
-		 0 );
+    return vec3( a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x ); 
 }
 
 
@@ -393,6 +400,8 @@ inline
 GLfloat dot( const vec4& u, const vec4& v ) {
     return u.x*v.x + u.y*v.y + u.z*v.z + u.w*v.w;
 }
+
+inline vec3::vec3(const vec4& v) { x = v.x;  y = v.y;  z = v.z; }
 
 inline
 GLfloat length( const vec4& v ) {
