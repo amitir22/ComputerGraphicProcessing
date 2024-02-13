@@ -9,3 +9,5 @@ void mouse(int button, int state, int x, int y);
 void fileMenu(int id);
 void mainMenu(int id);
 void initMenu();
+
+// TODO: insert Menu namespace here
