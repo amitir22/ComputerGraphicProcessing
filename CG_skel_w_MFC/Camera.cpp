@@ -12,8 +12,8 @@ zoom(ZOOM), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), worldUp(0,1,0) 
 	gaze = normalize(at - eye); // points to negative z
 	right = cross(up, -gaze);  // points to positive x
 	LookAt(eye, at, up);
-	setOrtho(-1, 1, -1, 1, 0.1, 10);
-	//setPerspective(-1, 1, -1, 1, 0.1, 10);
+	//setOrtho(-1, 1, -1, 1, 0.1, 10);
+	setPerspective(-1, 1, -1, 1, 0.1, 10);
 	updateVectors();
 }
 
@@ -105,6 +105,9 @@ void Camera::handleWindowReshape(int width, int height)
 	// Set the viewport to cover the new window
 	if (!m_isPerspective) {
 		setOrtho(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, 0.1, 10);
+	}
+	else {
+		setPerspective(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, 0.1, 10);
 	}
 	
 }
