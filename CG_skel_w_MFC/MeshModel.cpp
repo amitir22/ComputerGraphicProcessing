@@ -1,82 +1,50 @@
+// MeshModel.cpp
 #include "StdAfx.h"
-#include "MeshModel.h"
-#include "vec.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "vec.h"
+#include "MeshModel.h"
+
 
 using namespace std;
-
-struct FaceIdcs
-{
-	int v[4];
-	int vn[4];
-	int vt[4];
-
-	FaceIdcs()
-	{
-		for (int i=0; i<4; i++)
-			v[i] = vn[i] = vt[i] = 0;
-	}
-
-	FaceIdcs(std::istream & aStream)
-	{
-		for (int i=0; i<4; i++)
-			v[i] = vn[i] = vt[i] = 0;
-
-		char c;
-		for(int i = 0; i < 3; i++)
-		{
-			aStream >> std::ws >> v[i] >> std::ws;
-			if (aStream.peek() != '/')
-				continue;
-			aStream >> c >> std::ws;
-			if (aStream.peek() == '/')
-			{
-				aStream >> c >> std::ws >> vn[i];
-				continue;
-			}
-			else
-				aStream >> vt[i];
-			if (aStream.peek() != '/')
-				continue;
-			aStream >> c >> vn[i];
-		}
-	}
-};
-
-vec3 vec3fFromStream(std::istream & aStream)
+vec3 vec3fFromStream(std::istream& aStream)
 {
 	float x, y, z;
 	aStream >> x >> std::ws >> y >> std::ws >> z;
 	return vec3(x, y, z);
 }
 
-vec2 vec2fFromStream(std::istream & aStream)
+vec2 vec2fFromStream(std::istream& aStream)
 {
 	float x, y;
 	aStream >> x >> std::ws >> y;
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(string fileName)
+
+MeshModel::MeshModel() noexcept
 {
+	_model_transform = mat4(1.0f);
+	_normal_transform = mat3(1.0f);
+}
+
+
+MeshModel::MeshModel(string fileName) : MeshModel()
+{	
 	loadFile(fileName);
 }
 
-MeshModel::~MeshModel(void)
-{
-}
-
+// Read OBJ file and create a mesh model
 void MeshModel::loadFile(string fileName)
 {
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
+	vector<vec3> normals;
 	// while not end of file
-	while (!ifile.eof())
-	{
+	while (!ifile.eof()) {
 		// get line
 		string curLine;
 		getline(ifile, curLine);
@@ -87,42 +55,71 @@ void MeshModel::loadFile(string fileName)
 
 		issLine >> std::ws >> lineType;
 
-		// based on the type parse data
-		if (lineType == "?") /*BUG*/
+		if (lineType == "v")
 			vertices.push_back(vec3fFromStream(issLine));
-		else if (lineType == "?") /*BUG*/
-			faces.push_back(issLine);
-		else if (lineType == "#" || lineType == "")
-		{
-			// comment / empty line
+		else if (lineType == "vn")
+			normals.push_back(vec3fFromStream(issLine));
+		else if (lineType == "f")
+			faces.push_back(FaceIdcs(issLine));
+		else if (lineType == "#" || lineType == "") { 
+			// do nothing if the line is a comment or empty
 		}
-		else
-		{
+		else {
 			cout<< "Found unknown line Type \"" << lineType << "\"";
 		}
-	}
-	//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
-	//If the face part of the obj is
-	//f 1 2 3
-	//f 1 3 4
-	//Then vertex_positions should contain:
-	//vertex_positions={v1,v2,v3,v1,v3,v4}
-
-	vertex_positions = new vec3[7]; /*BUG*/
-	// iterate through all stored faces and create triangles
-	int k=0;
-	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
-	{
-		for (int i = 0; i < 3; i++)
+		//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
+		//If the face part of the obj is
+		//f 1 2 3
+		//f 1 3 4
+		//Then vertex_positions should contain:
+		//vertex_positions={v1,v2,v3,v1,v3,v4}
+		vertex_positions.resize(faces.size() * 3);
+		normal_positions.resize(faces.size() * 3);
+		for (int i = 0; i < faces.size(); i++)
 		{
-			vertex_positions[k++] = vec3(); /*BUG*/
+			for (int j = 0; j < 3; j++)
+			{
+				vertex_positions[i * 3 + j] = vertices[faces[i].v[j] - 1];
+				normal_positions[i * 3 + j] = normals[faces[i].vn[j] - 1];
+			}
 		}
 	}
 }
 
 
 
-void MeshModel::draw()
+void MeshModel::draw(Renderer& renderer)
 {
+	renderer.SetModelMatrices(_model_transform, _normal_transform);
+	renderer.updateMVP();
+	renderer.DrawTriangles(&vertex_positions, &normal_positions);
+}
+
+void MeshModel::applyTransformation(mat4 transformation)
+{
+	_model_transform = transformation * _model_transform;
+	cout << _model_transform << endl;
+	//_normal_transform = transformation * _normal_transform;
+}
+
+////////////////////////////////////////
+// 		Transformation functions	  //
+////////////////////////////////////////
+void MeshModel::translate(vec3 translation)
+{ 
+	_model_transform = Geometry::makeTranslationMatrix(translation) * _model_transform;
+	//_normal_transform = Geometry::makeTranslationMatrix(translation) * _normal_transform;
+}
+
+void MeshModel::rotate(vec3 axis, float angle)
+{ 
+	_model_transform = Geometry::makeRotationMatrix(axis, angle) * _model_transform;
+	//_normal_transform = Geometry::makeRotationMatrix(axis, angle) * _normal_transform;
 	
+}
+
+void MeshModel::scale(vec3 scale)
+{ 
+	_model_transform = Geometry::makeScaleMatrix(scale) * _model_transform;
+	//_normal_transform = Geometry::makeScaleMatrix(scale) * _normal_transform; TODO
 }

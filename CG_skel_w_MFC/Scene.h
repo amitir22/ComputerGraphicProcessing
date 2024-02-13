@@ -1,55 +1,47 @@
+// Scene.h
 #pragma once
 
 #include "gl/glew.h"
 #include <vector>
 #include <string>
+#include "MeshModel.h"
 #include "Renderer.h"
+#include "Camera.h"
+#include "mat.h"
 using namespace std;
-
-class Model {
-protected:
-	virtual ~Model() {}
-	void virtual draw()=0;
-};
 
 
 class Light {
 
 };
 
-class Camera {
-	mat4 cTransform;
-	mat4 projection;
-
-public:
-	void setTransformation(const mat4& transform);
-	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
-	void Ortho( const float left, const float right,
-		const float bottom, const float top,
-		const float zNear, const float zFar );
-	void Frustum( const float left, const float right,
-		const float bottom, const float top,
-		const float zNear, const float zFar );
-	mat4 Perspective( const float fovy, const float aspect,
-		const float zNear, const float zFar);
-
-};
 
 class Scene {
-
-	vector<Model*> models;
-	vector<Light*> lights;
-	vector<Camera*> cameras;
-	Renderer *m_renderer;
-
 public:
+	std::vector<std::shared_ptr<MeshModel>> models;
+	std::vector<std::shared_ptr<Light>> lights;
+	std::vector<std::shared_ptr<Camera>> cameras;
+	Renderer* m_renderer;
+	// Constructors
 	Scene() {};
-	Scene(Renderer *renderer) : m_renderer(renderer) {};
+	Scene(Renderer* renderer);
+	
 	void loadOBJModel(string fileName);
 	void draw();
+	void handleWindowReshape(int width, int height);
 	void drawDemo();
+	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
+	MeshModel* getActiveModel() { return models[activeModel].get(); }
+	void applyTransformation(mat4 transformation) { models[activeModel]->applyTransformation(transformation);}
+
 	
+	int activeCamera;
 	int activeModel;
 	int activeLight;
-	int activeCamera;
+
+	// View options
+	bool isShowVertexNormals = false;
+	bool isShowFaceNormals = false;
+	bool isShowBoundingBox = false;
+
 };
