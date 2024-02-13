@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
-
+#include <chrono>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -11,7 +11,7 @@
 
 
 // The one and only application object
-
+#include <string>
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 #include "GL/freeglut_ext.h"
@@ -20,7 +20,8 @@
 #include "InitShader.h"
 #include "Scene.h"
 #include "Renderer.h"
-#include <string>
+#include "Camera.h"
+#include "constants.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -54,33 +55,80 @@ mat4 aggregatedSelectedTransforms; // used when applying many transforms simulta
 Scene *scene;
 Renderer *renderer;
 
-int last_x,last_y;
-bool lb_down,rb_down,mb_down;
+// Mouse movement
+float last_x = CG::DEFAULT_WIDTH / 2;
+float last_y = CG::DEFAULT_HEIGHT / 2;
+bool firstMouse = true;
+bool lb_down, rb_down, mb_down;
+
+// Time values for movement
+double deltaTime = 0.0f;	// Time between current frame and last frame
+auto lastFrameTime = std::chrono::high_resolution_clock::now(); // Time of last frame
 
 //----------------------------------------------------------------------------
 // Callbacks
 
+void idle() {
+	auto currentFrameTime = std::chrono::high_resolution_clock::now();
+	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
+	lastFrameTime = currentFrameTime;
+}
+
 void display( void )
 {
+	// TODO problem it doesn't call redraw every loop, so deltaTime might be wrong
+	auto currentFrameTime = std::chrono::high_resolution_clock::now();
+	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
+	lastFrameTime = currentFrameTime;
 	scene->draw(); // TODO: check that initial black screen is ok
 }
 
 void reshape( int width, int height )
 {
-	// TODO: update the renderer's buffers
+	// Set the viewport to cover the whole window
+	glViewport(0, 0, width, height);
+	if (height == 0) height = 1;
+
+	// Tell your Renderer to handle window reshape
+	renderer->handleWindowReshape(width, height);
+	scene->handleWindowReshape(width, height);
 }
 
 void keyboard( unsigned char key, int x, int y )
 {
+	Camera* activeCamera = scene->getActiveCamera();
+	bool shouldRedraw = false;
 	switch (key) {
-	case 033:
+	case 033: // Esc Key
 		exit( EXIT_SUCCESS );
 		break;
+	// if someone pressed WASD, send it to camera to HandlekeyboardInput()
+	case 'w':
+		activeCamera->handleKeyboardInput(Camera_Movement::FORWARD, 0.1);
+		shouldRedraw = true;
+		break;
+	case 's':
+		activeCamera->handleKeyboardInput(Camera_Movement::BACKWARD, 0.1);
+		shouldRedraw = true;
+		break;
+	case 'a':
+		activeCamera->handleKeyboardInput(Camera_Movement::LEFT, 0.1);
+		shouldRedraw = true;
+		break;
+	case 'd':
+		activeCamera->handleKeyboardInput(Camera_Movement::RIGHT, 0.1);
+		shouldRedraw = true;
+		break;
+	}
+	if (shouldRedraw) {
+		glutPostRedisplay();
 	}
 }
 
+// Handle mouse press and release events
 void mouse(int button, int state, int x, int y)
 {
+	// Nice drag idea https://stackoverflow.com/a/12984457/4399305
 	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
 	//state = {GLUT_DOWN,GLUT_UP}
 	
@@ -103,16 +151,25 @@ void mouse(int button, int state, int x, int y)
 	// add your code
 }
 
+// Handle mouse movements
 void motion(int x, int y)
 {
+	Camera* activeCamera = scene->getActiveCamera();
+	if (firstMouse)
+	{
+		last_x = x;
+		last_y = y;
+		firstMouse = false;
+	}
 	// calc difference in mouse movement
-	int dx = x - last_x;
-	int dy = y - last_y;
+	float dx = x - last_x;
+	float dy = last_y - y;
 	// update last x,y
 	last_x = x;
 	last_y = y;
+	activeCamera->handleMouseMovement(dx, dy);
 }
-
+////////////////////////////////////////////////////////////////////////////
 void fileMenu(int id)
 {
 	switch (id)
@@ -266,12 +323,12 @@ int my_main( int argc, char **argv )
 	// Initialize window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_RGBA| GLUT_DOUBLE);
-	glutInitWindowSize( 512, 512 );
+	glutInitWindowSize( CG::DEFAULT_WIDTH, CG::DEFAULT_HEIGHT);
 	glutInitContextVersion( 3, 2 );
 	glutInitContextProfile( GLUT_CORE_PROFILE );
+	int glutGetWindow(void);
 	glutCreateWindow( "CG" );
 	glewExperimental = GL_TRUE;
-	glewInit();
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -281,18 +338,19 @@ int my_main( int argc, char **argv )
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
+
 	
-	
-	renderer = new Renderer(512,512);
+	renderer = new Renderer(CG::DEFAULT_WIDTH,CG::DEFAULT_HEIGHT);
 	scene = new Scene(renderer);
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
-	glutMouseFunc( mouse );
+	//glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
+	glutIdleFunc(idle); 
 	initMenu();
 	
 
@@ -302,7 +360,7 @@ int my_main( int argc, char **argv )
 	return 0;
 }
 
-CWinApp theApp;
+CWinApp theApp; // This is unused
 
 using namespace std;
 

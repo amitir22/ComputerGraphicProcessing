@@ -22,9 +22,9 @@ class mat2 {
     mat2( const vec2& a, const vec2& b )
 	{ _m[0] = a;  _m[1] = b;  }
 
-	/*TODO*/
-    mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 )
-	{ _m[0] = vec2( 0, 0 ); _m[1] = vec2( 0, 0 ); }
+    mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 ){
+        _m[0] = vec2(m00, m01 ); _m[1] = vec2( m10, m11 ); 
+    }
 
     mat2( const mat2& m ) {
 	if ( *this != m ) {
@@ -49,7 +49,7 @@ class mat2 {
 
 	
     mat2 operator - ( const mat2& m ) const
-	{ return mat2( 0, 0 ); } /*TODO*/
+	{ return mat2( _m[0]-m[0], _m[1]-m[1]); }
 
     mat2 operator * ( const GLfloat s ) const 
 	{ return mat2( s*_m[0], s*_m[1] ); }
@@ -63,12 +63,9 @@ class mat2 {
     friend mat2 operator * ( const GLfloat s, const mat2& m )
 	{ return m * s; }
 	
-    mat2 operator * ( const mat2& m ) const {
-	mat2  a( 0.0 );
-
-	/*TODO*/
-
-	return a;
+    mat2 operator * (const mat2& m) const {
+        return mat2( _m[0][0]*m[0][0], _m[0][1]*m[0][1],
+					 _m[1][0]*m[1][0], _m[1][1]*m[1][1] );
     }
 
     //
@@ -79,9 +76,8 @@ class mat2 {
 	_m[0] += m[0];  _m[1] += m[1];  
 	return *this;
     }
-
     mat2& operator -= ( const mat2& m ) {
-	_m[0] -= 0;  _m[1] -= 0;  /*TODO*/
+    _m[0] -= m[0];  _m[1] -= m[1];
 	return *this;
     }
 
@@ -90,17 +86,15 @@ class mat2 {
 	return *this;
     }
 
+    // component-wise multiplication
     mat2& operator *= ( const mat2& m ) {
-	mat2  a( 0.0 );
+    _m[0][0] *= m[0][0]; _m[0][1] *= m[0][1];
+    _m[1][0] *= m[1][0]; _m[1][1] *= m[1][1];
+    return *this;
 
-	/*TODO*/
-
-	return *this = a;
     }
     
     mat2& operator /= ( const GLfloat s ) {
-
-
 	GLfloat r = GLfloat(1.0) / s;
 	return *this *= r;
     }
@@ -277,10 +271,12 @@ class mat3 {
     //  --- Matrix / Vector operators ---
     //
 
+    // Matrix vector multiplication
     vec3 operator * ( const vec3& v ) const {  // m * v
-	return vec3( 0,
-		     0, /*TODO*/
-		     0 );
+        return vec3( _m[0][0]*v.x + _m[0][1]*v.y + _m[0][2]*v.z,
+		     _m[1][0]*v.x + _m[1][1]*v.y + _m[1][2]*v.z,
+		     _m[2][0]*v.x + _m[2][1]*v.y + _m[2][2]*v.z
+	    );
     }
 	
     //
@@ -319,9 +315,12 @@ mat3 matrixCompMult( const mat3& A, const mat3& B ) {
 		 A[2][0]*B[2][0], A[2][1]*B[2][1], A[2][2]*B[2][2] );
 }
 
+// transpote matrix
 inline
 mat3 transpose( const mat3& A ) {
-    return mat3( 0,0,0,0,0,0,0,0,0); /*TODO*/
+    return mat3( A[0][0], A[1][0], A[2][0],
+A[0][1], A[1][1], A[2][1],
+A[0][2], A[1][2], A[2][2] );
 }
 
 //----------------------------------------------------------------------------
@@ -557,11 +556,11 @@ mat4 RotateX( const GLfloat theta )
 inline
 mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
-    mat4 c;
-    c[0][0] = x;
-    c[0][0] = y;  /*TODO*/
-    c[0][0] = z;
-    return c;
+mat4 c;
+	c[0][3] = x;
+	c[1][3] = y;
+	c[2][3] = z;
+	return c;
 }
 
 inline
@@ -586,8 +585,8 @@ mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
     c[0][0] = x;
-    c[0][0] = y; /*TODO*/
-    c[0][0] = z;
+    c[1][1] = y;
+    c[2][2] = z;
     return c;
 }
 
