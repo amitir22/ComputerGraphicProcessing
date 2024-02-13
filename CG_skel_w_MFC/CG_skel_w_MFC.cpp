@@ -61,25 +61,12 @@ float last_y = CG::DEFAULT_HEIGHT / 2;
 bool firstMouse = true;
 bool lb_down, rb_down, mb_down;
 
-// Time values for movement
-double deltaTime = 0.0f;	// Time between current frame and last frame
-auto lastFrameTime = std::chrono::high_resolution_clock::now(); // Time of last frame
-
 //----------------------------------------------------------------------------
 // Callbacks
-
-void idle() {
-	auto currentFrameTime = std::chrono::high_resolution_clock::now();
-	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
-	lastFrameTime = currentFrameTime;
-}
 
 void display( void )
 {
 	// TODO problem it doesn't call redraw every loop, so deltaTime might be wrong
-	auto currentFrameTime = std::chrono::high_resolution_clock::now();
-	deltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(currentFrameTime - lastFrameTime).count();
-	lastFrameTime = currentFrameTime;
 	scene->draw(); // TODO: check that initial black screen is ok
 }
 
@@ -350,7 +337,6 @@ int my_main( int argc, char **argv )
 	//glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
-	glutIdleFunc(idle); 
 	initMenu();
 	
 

@@ -88,10 +88,12 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		screenVertices[i] = m_viewPortTransform * clip_vertex; // aka pixel coordinates
 		// TODO : Viewport, half-pixel, Shirley convention
 	}
+
 	
 	// Draw each triangle
 	for (int i = 0; i < screenVertices.size(); i += 3) {
 		// call drawLine and cast the vertices to int
+		cout << "called draw triangles " << i <<  endl;
 		DrawLine((int)screenVertices[i].x, (int)screenVertices[i].y,  (int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y);
 		DrawLine((int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y, (int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y);
 		DrawLine((int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y, (int)screenVertices[i].x, (int)screenVertices[i].y);
@@ -174,6 +176,18 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 			D += 2 * dy;
 		}
 	}
+}
+
+
+
+void Renderer::DrawPixel(int x, int y, int z) {
+	if (x < 0 || x >= m_width || y < 0 || y >= m_height || z < -1 || z > 1 ) {
+		return;
+	}
+	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
+
 }
 
 void Renderer::DrawPixel(int x, int y) {

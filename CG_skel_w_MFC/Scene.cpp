@@ -14,7 +14,7 @@ Scene::Scene(Renderer* renderer) : m_renderer(renderer) {
 	activeCamera = 0;
 	activeModel = 0;
 	activeLight = 0;
-	loadOBJModel("C:\\Users\\ehud.gordon\\Documents\\technion\\ComputerGraphicProcessing\\obj_examples\\triangle.obj");
+	loadOBJModel("..\\obj_examples\\trigPyramid.obj");
 }
 
 void Scene::loadOBJModel(string fileName)

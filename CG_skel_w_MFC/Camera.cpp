@@ -12,8 +12,8 @@ zoom(ZOOM), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), worldUp(0,1,0) 
 	gaze = normalize(at - eye); // points to negative z
 	right = cross(up, -gaze);  // points to positive x
 	LookAt(eye, at, up);
-	//setOrtho(-1, 1, -1, 1, 0.1, 10);
-	setPerspective(-1, 1, -1, 1, 0.1, 10);
+	setOrtho(-5, 5, -5, 5, 0.1, 10);
+	//setPerspective(-5, 5, -5, 5, 0.1, 10);
 	updateVectors();
 }
 

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 
+
 using namespace std;
 vec3 vec3fFromStream(std::istream& aStream)
 {
@@ -97,13 +98,20 @@ void MeshModel::draw(Renderer& renderer)
 // 		Transformation functions	  //
 ////////////////////////////////////////
 void MeshModel::translate(vec3 translation)
-{ // TODO
+{ 
+	_model_transform = Geometry::makeTranslationMatrix(translation) * _model_transform;
+	//_normal_transform = Geometry::makeTranslationMatrix(translation) * _normal_transform;
 }
 
 void MeshModel::rotate(vec3 axis, float angle)
-{ // TODO
+{ 
+	_model_transform = Geometry::makeRotationMatrix(axis, angle) * _model_transform;
+	//_normal_transform = Geometry::makeRotationMatrix(axis, angle) * _normal_transform;
+	
 }
 
 void MeshModel::scale(vec3 scale)
-{ // TODO
+{ 
+	_model_transform = Geometry::makeScaleMatrix(scale) * _model_transform;
+	//_normal_transform = Geometry::makeScaleMatrix(scale) * _normal_transform; TODO
 }
