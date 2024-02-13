@@ -1,11 +1,11 @@
 // MeshModel.cpp
 #include "StdAfx.h"
-#include "MeshModel.h"
-#include "vec.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "vec.h"
+#include "MeshModel.h"
 
 
 using namespace std;
@@ -91,7 +91,15 @@ void MeshModel::loadFile(string fileName)
 void MeshModel::draw(Renderer& renderer)
 {
 	renderer.SetModelMatrices(_model_transform, _normal_transform);
+	renderer.updateMVP();
 	renderer.DrawTriangles(&vertex_positions, &normal_positions);
+}
+
+void MeshModel::applyTransformation(mat4 transformation)
+{
+	_model_transform = transformation * _model_transform;
+	cout << _model_transform << endl;
+	//_normal_transform = transformation * _normal_transform;
 }
 
 ////////////////////////////////////////

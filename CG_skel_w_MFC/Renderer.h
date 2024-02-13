@@ -59,5 +59,6 @@ public:
 	bool LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
 	bool LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
 	void computeViewPortMatrix();
+	void updateMVP() { m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform; }
 private:
 };

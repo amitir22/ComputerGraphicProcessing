@@ -75,6 +75,7 @@ void Renderer::handleWindowReshape(int newWidth, int newHeight) {
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals) {
+	updateMVP();
 	if (vertices == nullptr || vertices->size() % 3 != 0) {
 		throw std::runtime_error("Invalid vertices input.");
 	}

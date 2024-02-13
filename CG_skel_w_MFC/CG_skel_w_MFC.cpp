@@ -21,7 +21,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "constants.h"
-
+#include "Geometry.h"
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 #define MENU_FILE_OPEN 0
@@ -65,7 +65,6 @@ bool lb_down, rb_down, mb_down;
 
 void display( void )
 {
-	// TODO problem it doesn't call redraw every loop, so deltaTime might be wrong
 	scene->draw(); // TODO: check that initial black screen is ok
 }
 
@@ -117,6 +116,21 @@ void keyboard( unsigned char key, int x, int y )
 	if (shouldRedraw) {
 		glutPostRedisplay();
 	}
+}
+
+void mouseWheel(int button, int dir, int x, int y) {
+	if (dir > 0) {
+		cout << "scroll up" << endl;
+		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(1.1, 1.1, 1.1));
+		scene->applyTransformation(scaleMatrix);
+	}
+	else {
+		cout << "scroll down" << endl;
+		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(0.9, 0.9, 0.9));
+		scene->applyTransformation(scaleMatrix);
+	}
+
+	return;
 }
 
 // Handle mouse press and release events
@@ -342,6 +356,7 @@ int my_main( int argc, char **argv )
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
 	//glutMouseFunc( mouse );
+	glutMouseWheelFunc(mouseWheel);
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
 	initMenu();

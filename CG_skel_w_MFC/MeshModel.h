@@ -52,18 +52,18 @@ struct FaceIdcs
 
 class MeshModel : public Model
 {
-protected :
+public:
 	std::vector<vec3> vertex_positions;
 	std::vector<vec3> normal_positions;
 
 	mat4 _model_transform; // also known as model transform
 	mat3 _normal_transform;
 
-public:
 	MeshModel() noexcept;
 	explicit MeshModel(string fileName);
 	void loadFile(string fileName);
 	void draw(Renderer& renderer);
+	void applyTransformation(mat4 transformation);
 	// User Transformation
 	void translate(vec3 translation);
 	void rotate(vec3 axis, float angle);

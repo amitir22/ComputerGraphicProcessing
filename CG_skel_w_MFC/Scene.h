@@ -6,6 +6,7 @@
 #include <string>
 #include "Renderer.h"
 #include "Camera.h"
+#include "mat.h"
 using namespace std;
 
 class Model {
@@ -21,7 +22,7 @@ class Light {
 
 
 class Scene {
-	std::vector<std::unique_ptr<Model>> models;
+	std::vector<std::unique_ptr<MeshModel>> models;
 	std::vector<std::unique_ptr<Light>> lights;
 	std::vector<std::unique_ptr<Camera>> cameras;
 	Renderer* m_renderer;
@@ -35,6 +36,8 @@ public:
 	void handleWindowReshape(int width, int height);
 	void drawDemo();
 	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
+	MeshModel* getActiveModel() { return models[activeModel].get(); }
+	void applyTransformation(mat4 transformation) { models[activeModel]->applyTransformation(transformation);}
 
 	
 	int activeCamera;
