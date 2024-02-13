@@ -41,9 +41,6 @@
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>  
-    <ClCompile Include="Menu.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -84,9 +81,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

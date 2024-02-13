@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "scene.h"
 #include "vec.h"
 #include "mat.h"
+#include "Renderer.h"
 #include "Geometry.h"
 
 using namespace std;
@@ -49,8 +49,7 @@ struct FaceIdcs
 	}
 };
 
-
-class MeshModel : public Model
+class MeshModel
 {
 public:
 	std::vector<vec3> vertex_positions;

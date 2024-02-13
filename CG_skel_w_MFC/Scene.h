@@ -4,16 +4,11 @@
 #include "gl/glew.h"
 #include <vector>
 #include <string>
+#include "MeshModel.h"
 #include "Renderer.h"
 #include "Camera.h"
 #include "mat.h"
 using namespace std;
-
-class Model {
-public:
-	virtual ~Model() {}
-	void virtual draw(Renderer& renderer)=0;
-};
 
 
 class Light {
@@ -22,11 +17,11 @@ class Light {
 
 
 class Scene {
-	std::vector<std::unique_ptr<MeshModel>> models;
-	std::vector<std::unique_ptr<Light>> lights;
-	std::vector<std::unique_ptr<Camera>> cameras;
-	Renderer* m_renderer;
 public:
+	std::vector<std::shared_ptr<MeshModel>> models;
+	std::vector<std::shared_ptr<Light>> lights;
+	std::vector<std::shared_ptr<Camera>> cameras;
+	Renderer* m_renderer;
 	// Constructors
 	Scene() {};
 	Scene(Renderer* renderer);
@@ -43,5 +38,10 @@ public:
 	int activeCamera;
 	int activeModel;
 	int activeLight;
-	
+
+	// View options
+	bool isShowVertexNormals = false;
+	bool isShowFaceNormals = false;
+	bool isShowBoundingBox = false;
+
 };
