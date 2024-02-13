@@ -2,6 +2,11 @@
 
 #include "Menu.h"
 
+using std::cout;
+using std::endl;
+using std::move;
+using std::to_string;
+
 void Menu::rebuildGlutMenu()
 {
 	if (isMenuReady)

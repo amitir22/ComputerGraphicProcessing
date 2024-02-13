@@ -6,11 +6,6 @@
 #include "Camera.h"
 #include "MeshModel.h"
 
-using std::cout;
-using std::endl;
-using std::move;
-using std::to_string;
-
 const string PREFIX = "  ";
 const string MARKED_PREFIX = "V ";
 const string SELECTED_PREFIX = "->";

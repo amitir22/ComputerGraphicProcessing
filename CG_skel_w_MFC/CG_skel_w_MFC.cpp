@@ -40,6 +40,8 @@
 #define MENU_SHAPES_CUBE 13
 #define MENU_OPTIONS_STEP_SIZE 14
 
+using namespace std;
+
 // View options
 bool isShowVertexNormals = false;
 bool isShowFaceNormals = false;
@@ -361,8 +363,6 @@ int my_main( int argc, char **argv )
 }
 
 CWinApp theApp; // This is unused
-
-using namespace std;
 
 int main( int argc, char **argv )
 {
