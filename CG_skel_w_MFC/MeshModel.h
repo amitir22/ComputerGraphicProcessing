@@ -8,6 +8,8 @@
 #include "Renderer.h"
 #include "Geometry.h"
 
+typedef Geometry::Face face;
+
 #define CUBE_DEFAULT_SIZE 20
 #define CUBE_MESH_DEFAULT_MIN (vec3(0, 0, 0))
 #define CUBE_MESH_DEFAULT_MAX (vec3(CUBE_DEFAULT_SIZE, CUBE_DEFAULT_SIZE, CUBE_DEFAULT_SIZE))
@@ -74,14 +76,19 @@ public:
 	void drawBoundingBox(Renderer& renderer);
 	void drawVertexNormals(Renderer& renderer);
 	void drawFaceNormals(Renderer& renderer);
+
+	static vec3 getNormalOfFace(face f);
 };
 
-class CubeMeshModel : public MeshModel
+// TODO: doesn't work, maybe we'll just create a Cube.obj file and load it hardcoded?
+class CubeMeshModel : public MeshModel 
 {
 public:
 	CubeMeshModel() noexcept;
 };
 
+// TODO: if we decide to turn the CubeMeshModel into an obj file, 
+// then maybe we should load up the Cube and scale it to vec3Min and vec3Max?
 class BoxMeshModel : public MeshModel
 {
 public:

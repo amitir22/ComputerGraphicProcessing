@@ -101,7 +101,6 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CG_skel_w_MFC.cpp" />
-    <ClCompile Include="CubeMeshModel.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="MeshModel.cpp" />
@@ -116,7 +115,6 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
     <ClInclude Include="constants.h" />
-    <ClInclude Include="CubeMeshModel.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="mat.h" />

@@ -7,8 +7,6 @@
 #include "vec.h"
 #include "MeshModel.h"
 
-typedef Geometry::Face face;
-
 static inline face* makeTriangleFacesForBox(vec3 min, vec3 max);
 
 using namespace std;
@@ -130,7 +128,13 @@ void MeshModel::scale(vec3 scale)
 
 void MeshModel::drawBoundingBox(Renderer& renderer)
 {
-	// TODO:
+	vec3 min;
+	vec3 max;
+
+	// Finding min and max
+
+	BoxMeshModel boundingBox = BoxMeshModel::makeBoundingBox(0.3, 0.6, 0.9, min, max); // random RGB values for now
+	renderer.DrawTriangles(&boundingBox.vertex_positions, &boundingBox.normal_positions);
 }
 
 void MeshModel::drawVertexNormals(Renderer& renderer)
@@ -141,6 +145,27 @@ void MeshModel::drawVertexNormals(Renderer& renderer)
 void MeshModel::drawFaceNormals(Renderer& renderer)
 {
 	// TODO:
+}
+
+vec3 MeshModel::getNormalOfFace(face f)
+{
+	vec3 v1, v2;
+
+	v1.x = f.v[1].x - f.v[0].x;
+	v1.y = f.v[1].y - f.v[0].y;
+	v1.z = f.v[1].z - f.v[0].z;
+
+	v2.x = f.v[2].x - f.v[0].x;
+	v2.y = f.v[2].y - f.v[0].y;
+	v2.z = f.v[2].z - f.v[0].z;
+
+	vec3 normal;
+
+	normal.x = v1.y * v2.z - v2.y * v1.z;
+	normal.y = v1.z * v2.x - v2.z * v1.x;
+	normal.z = v1.x * v2.y - v2.x * v1.y;
+
+	return normal;
 }
 
 CubeMeshModel::CubeMeshModel() noexcept : MeshModel()
