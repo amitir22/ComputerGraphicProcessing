@@ -15,7 +15,7 @@ Scene::Scene(Renderer* renderer) : m_renderer(renderer) {
 	activeModel = 0;
 	activeLight = 0;
 	//loadOBJModel("..\\obj_examples\\trigPyramid.obj");
-	//loadOBJModel("..\\obj_examples\\triangle.obj");
+	loadOBJModel("..\\obj_examples\\Bunny.obj");
 }
 
 void Scene::loadOBJModel(string fileName)

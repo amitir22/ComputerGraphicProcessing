@@ -55,10 +55,7 @@ public:
 	mat4 getCameraTransformMatrix();
 	// Projections
 	void setOrtho(float left, float right, float bottom, float top, float zNear, float zFar);
-	void setPerspective(float left, float right, float bottom, float top, float zNear, float zFar);
 	void setPerspective(float fovy, float aspect, float zNear, float zFar);
-	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
-	//mat4 Perspective(float fovy, float aspect, float zNear, float zFar);
 	void handleWindowReshape(int width, int height);
 	// Functions
 	void translate(const vec3& translation);

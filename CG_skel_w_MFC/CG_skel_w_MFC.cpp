@@ -84,7 +84,6 @@ void reshape( int width, int height ) {
 
 void keyboard( unsigned char key, int x, int y ) {
 	Camera* activeCamera = scene->getActiveCamera();
-	bool shouldRedraw = false;
 	switch (key) {
 	case 033: // Esc Key
 		exit( EXIT_SUCCESS );
@@ -92,32 +91,24 @@ void keyboard( unsigned char key, int x, int y ) {
 	// if someone pressed WASD, send it to camera to HandlekeyboardInput()
 	case 'w':
 		activeCamera->handleKeyboardInput(Camera_Movement::FORWARD, 0.1);
-		shouldRedraw = true;
 		break;
 	case 's':
 		activeCamera->handleKeyboardInput(Camera_Movement::BACKWARD, 0.1);
-		shouldRedraw = true;
 		break;
 	case 'a':
 		activeCamera->handleKeyboardInput(Camera_Movement::LEFT, 0.1);
-		shouldRedraw = true;
 		break;
 	case 'd':
 		activeCamera->handleKeyboardInput(Camera_Movement::RIGHT, 0.1);
-		shouldRedraw = true;
 		break;
 	case 'q':
 		activeCamera->handleKeyboardInput(Camera_Movement::UP, 0.1);
-		shouldRedraw = true;
 		break;
 	case 'e':
 		activeCamera->handleKeyboardInput(Camera_Movement::DOWN, 0.1);
-		shouldRedraw = true;
 		break;
 	}
-	if (shouldRedraw) {
-		glutPostRedisplay();
-	}
+	glutPostRedisplay();
 }
 
 void mouseWheel(int button, int dir, int x, int y) {
@@ -180,6 +171,7 @@ void motion(int x, int y)
 	lastY = y;
 	cout << "motion(): " <<  "dx = " << dx << " dy = " << dy << endl;
 	activeCamera->handleMouseMovement(dx, dy);
+	glutPostRedisplay();
 }
 
 // Menu handlers

@@ -12,8 +12,9 @@ fov(FOV), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), worldUp(0,1,0) {
 	aspect = float(CG::DEFAULT_WIDTH) / float(CG::DEFAULT_HEIGHT);
 	//setOrtho(-1, 1, -1, 1, Z_NEAR, Z_FAR);
 	//setPerspective(-1, 1, -1, 1, Z_NEAR, Z_FAR);
-	setPerspective(fov, aspect, Z_NEAR,Z_FAR);
+	//setPerspective(fov, aspect, Z_NEAR,Z_FAR);
 	updateVectors();
+	handleMouseScroll(-1);
 }
 
 Camera::Camera(const Camera& other) {
@@ -61,11 +62,6 @@ void Camera::setOrtho(float left, float right, float bottom, float top, float zN
 	projection = Geometry::getOrthoProjection(left, right, bottom, top, zNear, zFar);
 }
 
-void Camera::setPerspective(float left, float right, float bottom, float top, float zNear, float zFar) {
-	m_isPerspective = true;
-	projection = Geometry::getPerspectiveProjection(left, right, bottom, top, zNear, zFar);	
-}
-
 void Camera::setPerspective(float fovy, float aspect, float zNear, float zFar) {
 	m_isPerspective = true;
 	projection = Geometry::getPerspectiveProjection(fovy, aspect, zNear, zFar);
@@ -93,8 +89,8 @@ void Camera::handleMouseScroll(float yoffset) {
 	fov -= (float)yoffset;
 	if (fov < 1.0f)
 		fov = 1.0f;
-	if (fov > FOV)
-		fov = FOV;
+	if (fov > 70)
+		fov = 70;
 	cout << "fov " << fov << endl;
 	setPerspective(fov, aspect, Z_NEAR, Z_FAR);
 }
@@ -114,7 +110,6 @@ void Camera::handleKeyboardInput(int key, float deltaTime)
 		translate(velocity * up);
 	if (key == DOWN)
 		translate(velocity * (-up));
-
 }
 
 void Camera::updateVectors() {
@@ -138,7 +133,8 @@ void Camera::handleWindowReshape(int width, int height)
 		setOrtho(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, Z_NEAR, Z_FAR);
 	}
 	else {
-		setPerspective(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, Z_NEAR, Z_FAR);
+		setPerspective(fov, aspect, Z_NEAR, Z_FAR);
+		//setPerspective(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, Z_NEAR, Z_FAR);
 	}
 }
 
