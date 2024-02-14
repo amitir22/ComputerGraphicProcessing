@@ -75,7 +75,7 @@ void Renderer::handleWindowReshape(int newWidth, int newHeight) {
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
-void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals, bool isDrawNormals) {
+void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals, bool isDrawNormals, vec3 color) {
 	updateMatrices();
 	if (worldVertices == nullptr || worldVertices->size() % 3 != 0) {
 		throw std::runtime_error("Invalid vertices input.");
@@ -133,9 +133,9 @@ void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec
 		v3 = m_viewPortTransform * v3;
 
 		// call drawLine and cast the vertices to int
-		DrawLine((int)v1.x, (int)v1.y,  (int)v2.x, (int)v2.y);
-		DrawLine((int)v2.x, (int)v2.y,  (int)v3.x, (int)v3.y);
-		DrawLine((int)v3.x, (int)v3.y,  (int)v1.x, (int)v1.y);
+		DrawLine((int)v1.x, (int)v1.y,  (int)v2.x, (int)v2.y, color);
+		DrawLine((int)v2.x, (int)v2.y,  (int)v3.x, (int)v3.y, color);
+		DrawLine((int)v3.x, (int)v3.y,  (int)v1.x, (int)v1.y, color);
 		
 		// Do this only if user wishes to draw normals
 		if (isDrawNormals) {
@@ -147,9 +147,9 @@ void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec
 			v3NormalEnd = m_viewPortTransform * v3NormalEnd;
 
 			// Draw Normals
-			DrawLine((int)v1.x, (int)v1.y, (int)v1NormalEnd.x, (int)v1NormalEnd.y);
-			DrawLine((int)v2.x, (int)v2.y, (int)v2NormalEnd.x, (int)v2NormalEnd.y);
-			DrawLine((int)v3.x, (int)v3.y, (int)v3NormalEnd.x, (int)v3NormalEnd.y);
+			DrawLine((int)v1.x, (int)v1.y, (int)v1NormalEnd.x, (int)v1NormalEnd.y, color);
+			DrawLine((int)v2.x, (int)v2.y, (int)v2NormalEnd.x, (int)v2NormalEnd.y, color);
+			DrawLine((int)v3.x, (int)v3.y, (int)v3NormalEnd.x, (int)v3NormalEnd.y, color);
 		}
 	}
 }
@@ -187,7 +187,7 @@ void Renderer::updateMatrices() {
 
 }
 
-void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+void Renderer::DrawLine(int x0, int y0, int x1, int y1, vec3 color) {
 	// Check if line is not completely inside the rectangle
 
 	const bool steep = abs(y1 - y0) > abs(x1 - x0);
@@ -209,10 +209,10 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
 		if (steep) {
-			DrawPixel(y, x);
+			DrawPixel(y, x, color);
 		}
 		else {
-			DrawPixel(x, y);
+			DrawPixel(x, y, color);
 		}
 		if (D > 0) { // If D > 0, we should move one step in the y direction
 			y += ystep;
@@ -224,13 +224,14 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	}
 }
 
-void Renderer::DrawPixel(int x, int y) {
+void Renderer::DrawPixel(int x, int y, vec3 color) {
+
 	if (x < 0 || x >= m_width || y < 0 || y >= m_height) {
 		return;
 	}
-	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
-	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
-	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
+	m_outBuffer[INDEX(m_width, x, y, 0)] = color.x;
+	m_outBuffer[INDEX(m_width, x, y, 1)] = color.y;
+	m_outBuffer[INDEX(m_width, x, y, 2)] = color.z;
 }
 
 /////////////////////////////////////////////////////
