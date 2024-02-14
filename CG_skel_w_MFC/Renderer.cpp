@@ -120,8 +120,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		DrawLine((int)v1.x, (int)v1.y,  (int)v2.x, (int)v2.y);
 		DrawLine((int)v2.x, (int)v2.y,  (int)v3.x, (int)v3.y);
 		DrawLine((int)v3.x, (int)v3.y,  (int)v1.x, (int)v1.y);
-		/*DrawLine((int)screenVertices[i + 1].x, (int)screenVertices[i + 1].y, (int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y);
-		DrawLine((int)screenVertices[i + 2].x, (int)screenVertices[i + 2].y, (int)screenVertices[i].x, (int)screenVertices[i].y);*/
 	}
 }
 
@@ -152,7 +150,7 @@ bool Renderer::LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) con
 	return false;
 }
 
-// We want to map the normalized device coordinates to the screen coordinates
+ // We want to map the normalized device coordinates to the screen coordinates
 void Renderer::computeViewPortMatrix()
 {
 	m_viewPortTransform = mat4(1.0);
@@ -165,77 +163,116 @@ void Renderer::computeViewPortMatrix()
 	// Keeping z values between [-1,1]
 	m_viewPortTransform[2][2] = 1;
 }
+//
+//void Renderer::DrawLine(int xa, int ya, int xb, int yb) {
+//	int dx = abs(xb - xa);
+//	int dy = abs(yb - ya);
+//	int x, y;
+//	if (dx >= dy){
+//		int d = 2 * dy - dx;
+//		int ds = 2 * dy;
+//		int dt = 2 * (dy - dx);
+//		if (xa < xb)
+//		{
+//			x = xa;
+//			y = ya;
+//		}
+//		else
+//		{
+//			x = xb;
+//			y = yb;
+//			xb = xa;
+//			yb = ya;
+//		}
+//		DrawPixel(x, y);
+//		while (x < xb)
+//		{
+//			if (d < 0)
+//				d += ds;
+//			else {
+//				if (y < yb) {
+//					y++;
+//					d += dt;
+//				}
+//				else {
+//					y--;
+//					d += dt;
+//				}
+//			}
+//			x++;
+//			DrawPixel(x, y);
+//		}
+//	}
+//	else {
+//		int d = 2 * dx - dy;
+//		int ds = 2 * dx;
+//		int dt = 2 * (dx - dy);
+//		if (ya < yb) {
+//			x = xa;
+//			y = ya;
+//		}
+//		else {
+//			x = xb;
+//			y = yb;
+//			yb = ya;
+//			xb = xa;
+//		}
+//		DrawPixel(x, y);
+//		while (y < yb)
+//		{
+//			if (d < 0)
+//				d += ds;
+//			else {
+//				if (x > xb) {
+//					x--;
+//					d += dt;
+//				}
+//				else {
+//					x++;
+//					d += dt;
+//				}
+//			}
+//			y++;
+//			DrawPixel(x, y);
+//		}
+//	}
+//}
 
-void Renderer::DrawLine(int xa, int ya, int xb, int yb) {
-	int dx = abs(xb - xa);
-	int dy = abs(yb - ya);
-	int x, y;
-	if (dx >= dy){
-		int d = 2 * dy - dx;
-		int ds = 2 * dy;
-		int dt = 2 * (dy - dx);
-		if (xa < xb)
-		{
-			x = xa;
-			y = ya;
-		}
-		else
-		{
-			x = xb;
-			y = yb;
-			xb = xa;
-			yb = ya;
-		}
-		DrawPixel(x, y);
-		while (x < xb)
-		{
-			if (d < 0)
-				d += ds;
-			else {
-				if (y < yb) {
-					y++;
-					d += dt;
-				}
-				else {
-					y--;
-					d += dt;
-				}
-			}
-			x++;
-			DrawPixel(x, y);
-		}
+void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+	// Check if line is not completely inside the rectangle
+
+	const bool steep = abs(y1 - y0) > abs(x1 - x0);
+	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
+	if (steep) {
+		swap(x0, y0);
+		swap(x1, y1);
 	}
-	else {
-		int d = 2 * dx - dy;
-		int ds = 2 * dx;
-		int dt = 2 * (dx - dy);
-		if (ya < yb) {
-			x = xa;
-			y = ya;
+	
+	// Make sure we draw from left to right
+	if (x0 > x1) {
+		swap(x0, x1);
+		swap(y0, y1);
+	}
+
+
+	const int dx = x1 - x0;
+	const int dy = std::abs(y1 - y0); // Also handle negative slopes
+	const int ystep = (y0 < y1) ? 1 : -1;
+	int D = 2 * dy - dx;
+	int y = y0;
+	for (int x = x0; x <= x1; x++) {
+		if (steep) {
+			DrawPixel(y, x);
 		}
 		else {
-			x = xb;
-			y = yb;
-			yb = ya;
-			xb = xa;
-		}
-		DrawPixel(x, y);
-		while (y < yb)
-		{
-			if (d < 0)
-				d += ds;
-			else {
-				if (x > xb) {
-					x--;
-					d += dt;
-				}
-				else {
-					x++;
-					d += dt;
-				}
-			}
-			y++;
 			DrawPixel(x, y);
+		}
+		if (D > 0) { // If D > 0, we should move one step in the y direction
+			y += ystep;
+			D += 2 * (dy - dx);
+		}
+		else { // Else, don't increment
+			D += 2 * dy;
 		}
 	}
 }
