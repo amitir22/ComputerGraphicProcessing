@@ -36,7 +36,7 @@ void Scene::draw()
 	// 2. Tell all models to draw themselves
 	for (auto& model : models)
 	{
-		model->draw(*m_renderer, isShowVertexNormals);
+		model->draw(*m_renderer, isShowVertexNormals, isShowFaceNormals);
 
 		if (this->isShowBoundingBox)
 		{

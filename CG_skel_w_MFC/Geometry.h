@@ -13,7 +13,8 @@ namespace Geometry {
 	
 	struct Face {
 		vec3 v[3];
-		vec3 vn[3]; // END POINTS OF NORMALs
-		vec3 normal;
+		vec3 vn[3]; // END POINTS OF NORMALS (in ndc)
+		vec3 midPoint; // in ndc
+		vec3 faceNormalEndPoint; // in ndc
 	};
 }

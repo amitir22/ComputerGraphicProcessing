@@ -72,7 +72,7 @@ public:
 	MeshModel() noexcept;
 	explicit MeshModel(string fileName);
 	void loadFile(string fileName);
-	void draw(Renderer& renderer, bool isDrawNormals = false);
+	void draw(Renderer& renderer, bool isDrawNormals = false, bool isDrawFacesNormals=false);
 	void applyTransformation(mat4 transformation);
 	// User Transformation
 	void translate(vec3 translation);

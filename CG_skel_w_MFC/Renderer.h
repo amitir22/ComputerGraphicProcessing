@@ -43,7 +43,7 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL, bool isDrawNormals=false, vec3 color = vec3(1, 1, 1));
+	void DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals=NULL, bool isDrawNormals=false, bool isDrawFacesNormals =false, vec3 color = vec3(1, 1, 1));
 	void SetViewTransform(const mat4& viewTransform);
 	void SetProjection(const mat4& projection, bool isPerspective);
 	void SetModelMatrices(const mat4& modelTransform, const mat3& nTransform);

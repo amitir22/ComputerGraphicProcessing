@@ -75,12 +75,26 @@ void Renderer::handleWindowReshape(int newWidth, int newHeight) {
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
-void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals, bool isDrawNormals, vec3 color) {
+void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals, bool isDrawNormals, bool isDrawFacesNormals, vec3 color) {
 	updateMatrices();
 	if (worldVertices == nullptr || worldVertices->size() % 3 != 0) {
 		throw std::runtime_error("Invalid vertices input.");
 	}
+	vector<vec3> facesMidPoints;
+	vector<vec3> facesNormals; 
+	vector<vec4> facesNormalEndsVertices;
+	// compute faces midpoints and normals
+	for (int i = 0; i < worldVertices->size(); i += 3) {
+		vec3 v1 = (*worldVertices)[i];
+		vec3 v2 = (*worldVertices)[i + 1];
+		vec3 v3 = (*worldVertices)[i + 2];
+		vec3 faceMidPoint = (v1 + v2 + v3) / 3.0f;
+		facesMidPoints.push_back(faceMidPoint);
+		vec3 faceNormal = cross(v2 - v1, v3 - v1);
+		facesNormals.push_back(faceNormal);
+	}
 
+	
 	vector<vec4> ndcVertices(worldVertices->size());
 	vector<vec4> ndcNormalEndVertices(normals->size());
 	for (int i = 0; i < worldVertices->size(); i++) {
@@ -118,7 +132,25 @@ void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec
 		face.vn[1] = ndcNormalEndVertices[i + 1];
 		face.vn[2] = ndcNormalEndVertices[i + 2];
 		// Calculate normal vector for the face
-		face.normal = cross(vec3(face.v[1].x - face.v[0].x, face.v[1].y - face.v[0].y, face.v[1].z - face.v[0].z), vec3(face.v[2].x - face.v[0].x, face.v[2].y - face.v[0].y, face.v[2].z - face.v[0].z));
+		// transform faceMidPoint to eye space
+		vec4 faceMidPointEye = m_viewTransform * m_modelTransform * vec4(facesMidPoints[i / 3].x, facesMidPoints[i / 3].y, facesMidPoints[i / 3].z, 1);
+		// transform faceNormal to  eyespace using m_normalTransform
+		vec3 transformedFaceNormal = m_normalTransform * facesNormals[i / 3];
+		// compute end point of the normal
+		vec4 faceNormalEndEye = faceMidPointEye + vec4(transformedFaceNormal.x, transformedFaceNormal.y, transformedFaceNormal.z, 0);
+		// project faceMidPointEye to clip space
+		vec4 faceMidPointClip = m_projectionTransform * faceMidPointEye;
+		// project faceNormalEndEye to clip space
+		vec4 faceNormalEndClip = m_projectionTransform * faceNormalEndEye;
+		// do perspective division if needed
+		if (m_isPerspective) { // now in ndc
+			faceMidPointClip = vec4(faceMidPointClip.x / faceMidPointClip.w, faceMidPointClip.y / faceMidPointClip.w, faceMidPointClip.z / faceMidPointClip.w, 1);
+			faceNormalEndClip = vec4(faceNormalEndClip.x / faceNormalEndClip.w, faceNormalEndClip.y / faceNormalEndClip.w, faceNormalEndClip.z / faceNormalEndClip.w, 1);
+		}
+		//store face normal endpoints
+		face.midPoint = faceMidPointClip;
+		face.faceNormalEndPoint = faceNormalEndClip;
+
 		faces.push_back(face);
 	}
 
@@ -150,6 +182,13 @@ void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec
 			DrawLine((int)v1.x, (int)v1.y, (int)v1NormalEnd.x, (int)v1NormalEnd.y, color);
 			DrawLine((int)v2.x, (int)v2.y, (int)v2NormalEnd.x, (int)v2NormalEnd.y, color);
 			DrawLine((int)v3.x, (int)v3.y, (int)v3NormalEnd.x, (int)v3NormalEnd.y, color);
+		}
+		if (isDrawFacesNormals) {
+			vec3 faceMidPoint = vec3(faces[i].midPoint.x, faces[i].midPoint.y, faces[i].midPoint.z);
+			vec3 faceNormalEnd = vec3(faces[i].faceNormalEndPoint.x, faces[i].faceNormalEndPoint.y, faces[i].faceNormalEndPoint.z);
+			faceMidPoint = m_viewPortTransform * faceMidPoint;
+			faceNormalEnd = m_viewPortTransform * faceNormalEnd;
+			DrawLine((int)faceMidPoint.x, (int)faceMidPoint.y, (int)faceNormalEnd.x, (int)faceNormalEnd.y, color);
 		}
 	}
 }

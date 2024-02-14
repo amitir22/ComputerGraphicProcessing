@@ -284,7 +284,7 @@ void handleViewMenu(int id)
 	}
 	else if (viewDispOrthographicMenuEntryID == id)
 	{
-		scene->isOrthographic = !(scene->isOrthographic);
+		renderer->m_isPerspective = !(renderer->m_isPerspective);
 	}
 
 	refreshGUI();
@@ -490,7 +490,7 @@ void Menu::buildGlutMenu()
 	if (scene->isShowBoundingBox) {
 		viewBoundingBoxPrefix = MARKED_PREFIX;
 	}
-	if (scene->isOrthographic) {
+	if (!renderer->m_isPerspective) {
 		viewOrthographicPrefix = MARKED_PREFIX;
 	}
 

@@ -108,11 +108,11 @@ void MeshModel::loadFile(string fileName)
 
 
 
-void MeshModel::draw(Renderer& renderer, bool isDrawNormals)
+void MeshModel::draw(Renderer& renderer, bool isDrawNormals, bool isDrawFacesNormals)
 {
 	renderer.SetModelMatrices(_model_transform, _normal_transform);
 	renderer.updateMatrices();
-	renderer.DrawTriangles(&vertex_positions, &normal_positions, isDrawNormals);
+	renderer.DrawTriangles(&vertex_positions, &normal_positions, isDrawNormals, isDrawFacesNormals);
 }
 
 void MeshModel::applyTransformation(mat4 transformation)
