@@ -224,6 +224,31 @@ BoxMeshModel BoxMeshModel::makeBoundingBox(float red, float green, float blue,
 	return boundingBox;
 }
 
+LineModel::LineModel() noexcept
+{
+	this->startPoint = vec3(-1, -1, -1);
+	this->endPoint = vec3(-1, -1, -1);
+	this->color = vec3(0, 0, 0); // black
+}
+
+LineModel::LineModel(vec3 startPoint, vec3 endPoint, vec3 color)
+	: startPoint(startPoint), endPoint(endPoint), color(color) { }
+
+void LineModel::draw(Renderer& renderer)
+{
+	// TODO
+}
+
+ArrowModel::ArrowModel(vec3 startPoint, vec3 endPoint, vec3 color)
+	: line(LineModel(startPoint, endPoint, color)), color(color) { }
+
+void ArrowModel::draw(Renderer& renderer)
+{
+	// TODO
+}
+
+// Local inline functions
+
 static inline face* makeTriangleFacesForBox(vec3 min, vec3 max)
 {
 	face f[12];

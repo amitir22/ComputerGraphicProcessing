@@ -97,3 +97,25 @@ public:
 	static BoxMeshModel makeBoundingBox(float red, float green, float blue,
 		vec3 min, vec3 max);
 };
+
+class LineModel
+{
+public:
+	vec3 startPoint;
+	vec3 endPoint;
+	vec3 color;
+
+	LineModel() noexcept;
+	LineModel(vec3 startPoint, vec3 endPoint, vec3 color);
+	void draw(Renderer& renderer);
+};
+
+class ArrowModel
+{
+public:
+	LineModel line;
+	vec3 color;
+
+	ArrowModel(vec3 startPoint, vec3 endPoint, vec3 color);
+	void draw(Renderer& renderer);
+};
