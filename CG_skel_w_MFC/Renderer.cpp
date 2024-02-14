@@ -34,9 +34,10 @@ void Renderer::Init()
 	m_modelTransform = mat4(1.0);
 	m_viewTransform = mat4(1.0);
 	m_projectionTransform = mat4(1.0);
-	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+	mat4 modelView = m_viewTransform * m_modelTransform;
+	m_mvp = m_projectionTransform * modelView;
+	m_normalTransform = myNormalMatrix(modelView);
 	computeViewPortMatrix();
-	m_normalTransform = mat3(1.0);
 }
 
 
@@ -74,19 +75,31 @@ void Renderer::handleWindowReshape(int newWidth, int newHeight) {
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals) {
-	updateMVP();
-	if (vertices == nullptr || vertices->size() % 3 != 0) {
+void Renderer::DrawTriangles(const vector<vec3>* worldVertices, const vector<vec3>* normals, bool isDrawNormals) {
+	updateMatrices();
+	if (worldVertices == nullptr || worldVertices->size() % 3 != 0) {
 		throw std::runtime_error("Invalid vertices input.");
 	}
-	// Transform vertices from world space to screen space, save them in a new vector
-	// create a vector of screen vertices initialized to zero of size vertices->size()
-	vector<vec4> ndcVertices(vertices->size());
-	for (int i = 0; i < vertices->size(); i++) {
-		vec4 vertex = vec4((*vertices)[i].x, (*vertices)[i].y, (*vertices)[i].z, 1);
-		vec4 clipVertex = m_mvp * vertex; // aka normalized device coordinates
-		if (m_isPerspective)
+
+	vector<vec4> ndcVertices(worldVertices->size());
+	vector<vec4> ndcNormalEndVertices(normals->size());
+	for (int i = 0; i < worldVertices->size(); i++) {
+		vec4 worldVertex = vec4((*worldVertices)[i].x, (*worldVertices)[i].y, (*worldVertices)[i].z, 1);
+		vec4 eyeVertex = m_viewTransform * m_modelTransform * worldVertex;
+		vec3 trasformedNormal = m_normalTransform * (*normals)[i]; trasformedNormal = normalize(trasformedNormal);
+		vec4 transformedNormal4 = vec4(trasformedNormal.x, trasformedNormal.y, trasformedNormal.z, 0);
+		vec4 endNormalVertex = eyeVertex + transformedNormal4; // in eye space
+		vec4 clipVertex = m_projectionTransform * eyeVertex;
+		vec4 clipEndNormalVertex =  m_projectionTransform * endNormalVertex;
+
+		//vec4 clipVertex = m_mvp * worldVertex; // aka normalized device coordinates
+		if (m_isPerspective) {
 			ndcVertices[i] = vec4(clipVertex.x / clipVertex.w, clipVertex.y / clipVertex.w, clipVertex.z / clipVertex.w, 1);
+			ndcNormalEndVertices[i] = vec4(clipEndNormalVertex.x / clipEndNormalVertex.w, clipEndNormalVertex.y / clipEndNormalVertex.w, clipEndNormalVertex.z / clipEndNormalVertex.w, 1);
+		}  else {
+			ndcVertices[i] = clipVertex;
+			ndcNormalEndVertices[i] = clipEndNormalVertex;
+		}
 	}
 	// Create vector of faces
 	vector<Geometry::Face> faces;
@@ -99,11 +112,18 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		face.v[0] = ndcVertices[i];
 		face.v[1] = ndcVertices[i + 1];
 		face.v[2] = ndcVertices[i + 2];
+		
+		// store vertex normal endpoints
+		face.vn[0] = ndcNormalEndVertices[i];
+		face.vn[1] = ndcNormalEndVertices[i + 1];
+		face.vn[2] = ndcNormalEndVertices[i + 2];
+		// Calculate normal vector for the face
+		face.normal = cross(vec3(face.v[1].x - face.v[0].x, face.v[1].y - face.v[0].y, face.v[1].z - face.v[0].z), vec3(face.v[2].x - face.v[0].x, face.v[2].y - face.v[0].y, face.v[2].z - face.v[0].z));
 		faces.push_back(face);
 	}
 
 	
-	// Draw each triangle
+	// Draw each face
 	for (int i = 0; i < faces.size(); i++) {
 		vec3 v1 = vec3(faces[i].v[0].x, faces[i].v[0].y, faces[i].v[0].z);
 		vec3 v2 = vec3(faces[i].v[1].x, faces[i].v[1].y, faces[i].v[1].z);
@@ -116,13 +136,28 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		DrawLine((int)v1.x, (int)v1.y,  (int)v2.x, (int)v2.y);
 		DrawLine((int)v2.x, (int)v2.y,  (int)v3.x, (int)v3.y);
 		DrawLine((int)v3.x, (int)v3.y,  (int)v1.x, (int)v1.y);
+		
+		// Do this only if user wishes to draw normals
+		if (isDrawNormals) {
+			vec3 v1NormalEnd = vec3(faces[i].vn[0].x, faces[i].vn[0].y, faces[i].vn[0].z);
+			vec3 v2NormalEnd = vec3(faces[i].vn[1].x, faces[i].vn[1].y, faces[i].vn[1].z);
+			vec3 v3NormalEnd = vec3(faces[i].vn[2].x, faces[i].vn[2].y, faces[i].vn[2].z);
+			v1NormalEnd = m_viewPortTransform * v1NormalEnd;
+			v2NormalEnd = m_viewPortTransform * v2NormalEnd;
+			v3NormalEnd = m_viewPortTransform * v3NormalEnd;
+
+			// Draw Normals
+			DrawLine((int)v1.x, (int)v1.y, (int)v1NormalEnd.x, (int)v1NormalEnd.y);
+			DrawLine((int)v2.x, (int)v2.y, (int)v2NormalEnd.x, (int)v2NormalEnd.y);
+			DrawLine((int)v3.x, (int)v3.y, (int)v3NormalEnd.x, (int)v3NormalEnd.y);
+		}
 	}
 }
 
 void Renderer::SetViewTransform(const mat4& viewTransform)
 {
 	m_viewTransform = viewTransform;
-	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
+	updateMatrices();
 }
 
 void Renderer::SetProjection(const mat4& projection, bool isPerspective)
@@ -132,19 +167,6 @@ void Renderer::SetProjection(const mat4& projection, bool isPerspective)
 	m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform;
 }
 
-bool Renderer::LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept {
-	if ( (x0 >= 0 && x1 >= 0) && (y0 >= 0 && y1 >= 0) && (x0 < m_width && x1 < m_width) && (y0 < m_height && y1 < m_height) ) {
-		return true;
-	}
-	return false;
-}
-
-bool Renderer::LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) const noexcept {
-	if ((x0 < 0 && x1 < 0) || (y0 < 0 && y1 < 0) || (x0 >= m_width && x1 >= m_width) || (y0 >= m_height && y1 >= m_height)) {
-		return true;
-	}
-	return false;
-}
 
  // We want to map the normalized device coordinates to the screen coordinates
 void Renderer::computeViewPortMatrix()
@@ -156,6 +178,13 @@ void Renderer::computeViewPortMatrix()
 	m_viewPortTransform[1][3] = (m_height) / 2.0;
 	// Keeping z values between [-1,1]
 	m_viewPortTransform[2][2] = 1;
+}
+
+void Renderer::updateMatrices() {
+	mat4 modelView = m_viewTransform * m_modelTransform;
+	m_mvp = m_projectionTransform * modelView;
+	m_normalTransform = myNormalMatrix(modelView);
+
 }
 
 void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
@@ -193,16 +222,6 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 			D += 2 * dy;
 		}
 	}
-}
-
-void Renderer::DrawPixel(int x, int y, int z) {
-	if (x < 0 || x >= m_width || y < 0 || y >= m_height || z < -1 || z > 1 ) {
-		return;
-	}
-	m_outBuffer[INDEX(m_width, x, y, 0)] = 1;
-	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;
-	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
-
 }
 
 void Renderer::DrawPixel(int x, int y) {

@@ -84,11 +84,11 @@ void MeshModel::loadFile(string fileName)
 
 
 
-void MeshModel::draw(Renderer& renderer)
+void MeshModel::draw(Renderer& renderer, bool isDrawNormals)
 {
 	renderer.SetModelMatrices(_model_transform, _normal_transform);
-	renderer.updateMVP();
-	renderer.DrawTriangles(&vertex_positions, &normal_positions);
+	renderer.updateMatrices();
+	renderer.DrawTriangles(&vertex_positions, &normal_positions, isDrawNormals);
 }
 
 void MeshModel::applyTransformation(mat4 transformation)
@@ -104,20 +104,17 @@ void MeshModel::applyTransformation(mat4 transformation)
 void MeshModel::translate(vec3 translation)
 { 
 	_model_transform = Geometry::makeTranslationMatrix(translation) * _model_transform;
-	//_normal_transform = Geometry::makeTranslationMatrix(translation) * _normal_transform;
 }
 
 void MeshModel::rotate(vec3 axis, float angle)
 { 
 	_model_transform = Geometry::makeRotationMatrix(axis, angle) * _model_transform;
-	//_normal_transform = Geometry::makeRotationMatrix(axis, angle) * _normal_transform;
 	
 }
 
 void MeshModel::scale(vec3 scale)
 { 
 	_model_transform = Geometry::makeScaleMatrix(scale) * _model_transform;
-	//_normal_transform = Geometry::makeScaleMatrix(scale) * _normal_transform; TODO
 }
 
 void MeshModel::drawBoundingBox(Renderer& renderer)

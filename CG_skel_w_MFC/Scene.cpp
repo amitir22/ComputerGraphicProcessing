@@ -15,7 +15,7 @@ Scene::Scene(Renderer* renderer) : m_renderer(renderer) {
 	activeModel = 0;
 	activeLight = 0;
 	//loadOBJModel("..\\obj_examples\\trigPyramid.obj");
-	loadOBJModel("..\\obj_examples\\Bunny.obj");
+	//loadOBJModel("..\\obj_examples\\Bunny.obj");
 }
 
 void Scene::loadOBJModel(string fileName)
@@ -36,7 +36,7 @@ void Scene::draw()
 	// 2. Tell all models to draw themselves
 	for (auto& model : models)
 	{
-		model->draw(*m_renderer);
+		model->draw(*m_renderer, isShowVertexNormals);
 
 		if (this->isShowBoundingBox)
 		{

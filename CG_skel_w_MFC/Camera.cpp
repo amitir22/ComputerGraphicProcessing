@@ -10,11 +10,9 @@ fov(FOV), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), worldUp(0,1,0) {
 	right = cross(up, -gaze);  // points to positive x
 	LookAt(eye, at, up);
 	aspect = float(CG::DEFAULT_WIDTH) / float(CG::DEFAULT_HEIGHT);
-	//setOrtho(-1, 1, -1, 1, Z_NEAR, Z_FAR);
-	//setPerspective(-1, 1, -1, 1, Z_NEAR, Z_FAR);
-	//setPerspective(fov, aspect, Z_NEAR,Z_FAR);
+	setPerspective(fov, aspect, Z_NEAR,Z_FAR);
 	updateVectors();
-	handleMouseScroll(-1);
+	m_isPerspective = true;
 }
 
 Camera::Camera(const Camera& other) {
@@ -31,6 +29,7 @@ Camera::Camera(const Camera& other) {
 	this->movementSpeed = other.movementSpeed;
 	this->mouseSensitivity = other.mouseSensitivity;
 	this->aspect = other.aspect;
+	this->m_isPerspective = other.m_isPerspective;
 }
 
 // compute change-of-basis from world pose to camera pose, keeping in mind that the camera looks towards -z 
@@ -90,7 +89,6 @@ void Camera::handleMouseScroll(float yoffset) {
 		fov = 1.0f;
 	if (fov > 70)
 		fov = 70;
-	cout << "fov " << fov << endl;
 	setPerspective(fov, aspect, Z_NEAR, Z_FAR);
 }
 
@@ -133,7 +131,6 @@ void Camera::handleWindowReshape(int width, int height)
 	}
 	else {
 		setPerspective(fov, aspect, Z_NEAR, Z_FAR);
-		//setPerspective(-worldWidth / 2, worldWidth / 2, -worldHeight / 2, worldHeight / 2, Z_NEAR, Z_FAR);
 	}
 }
 

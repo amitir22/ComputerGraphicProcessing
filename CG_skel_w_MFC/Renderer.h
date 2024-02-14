@@ -38,27 +38,23 @@ public:
 	mat4 m_viewPortTransform;
 	mat3 m_normalTransform;
 
+
 	Renderer();
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
+	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL, bool isDrawNormals=false);
 	void SetViewTransform(const mat4& viewTransform);
 	void SetProjection(const mat4& projection, bool isPerspective);
 	void SetModelMatrices(const mat4& modelTransform, const mat3& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
-	void ClearDepthBuffer();
 	void SetDemoBuffer();
 	void handleWindowReshape(int newWidth, int newHeight);
 	// Our functions
 	void DrawLine(int x0, int y0, int x1, int y1);
-	void DrawLine3D(float x0, float y0, float z0, float x1, float y1, float z1);
-	void DrawPixel(int x, int y, int z);
 	void DrawPixel(int x, int y);
-	bool LineCompletelyInsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
-	bool LineCompletlyOutsideRectangle(int x0, int y0, int x1, int y1) const noexcept;
 	void computeViewPortMatrix();
-	void updateMVP() { m_mvp = m_projectionTransform * m_viewTransform * m_modelTransform; }
+	void updateMatrices();
 private:
 };
