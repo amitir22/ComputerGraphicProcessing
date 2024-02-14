@@ -70,7 +70,6 @@ void Camera::setPerspective(float fovy, float aspect, float zNear, float zFar) {
 void Camera::handleMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
 	xoffset *= mouseSensitivity;
 	yoffset *= mouseSensitivity;
-	cout << "handleMouseMovement: " << "xoffset " << xoffset << " yoffset " << yoffset << endl;
 
 	yaw += xoffset;
 	pitch += yoffset;
