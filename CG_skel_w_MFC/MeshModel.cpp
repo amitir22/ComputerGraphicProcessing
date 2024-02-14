@@ -30,6 +30,30 @@ MeshModel::MeshModel() noexcept
 MeshModel::MeshModel(string fileName) : MeshModel()
 {	
 	loadFile(fileName);
+
+	// init
+	vec3 sum;
+	int counter = 0;
+	vMin = vertex_positions[0];
+	vMax = vertex_positions[0];
+	vMiddle = vertex_positions[0];
+
+	for (auto& vertex : vertex_positions)
+	{
+		vMin.x = (vMin.x > vertex.x) ? vertex.x : vMin.x;
+		vMin.y = (vMin.y > vertex.y) ? vertex.y : vMin.y;
+		vMin.z = (vMin.z > vertex.z) ? vertex.z : vMin.z;
+		vMax.x = (vMax.x < vertex.x) ? vertex.x : vMax.x;
+		vMax.y = (vMax.y < vertex.y) ? vertex.y : vMax.y;
+		vMax.z = (vMax.z < vertex.z) ? vertex.z : vMax.z;
+
+		sum += vertex;
+		counter++;
+	}
+
+	vMiddle.x = sum.x / counter;
+	vMiddle.y = sum.y / counter;
+	vMiddle.z = sum.z / counter;
 }
 
 // Read OBJ file and create a mesh model
@@ -122,13 +146,10 @@ void MeshModel::scale(vec3 scale)
 
 void MeshModel::drawBoundingBox(Renderer& renderer)
 {
-	vec3 min;
-	vec3 max;
+	BoxMeshModel boundingBox = BoxMeshModel::makeBoundingBox(0.3, 0.6, 0.9, vMin, vMax);
+	boundingBox._model_transform = _model_transform;
+	boundingBox._normal_transform = _normal_transform;
 
-	// calc min and max
-	// TODO: amit
-
-	BoxMeshModel boundingBox = BoxMeshModel::makeBoundingBox(0.3, 0.6, 0.9, min, max);
 	boundingBox.draw(renderer);
 }
 

@@ -60,9 +60,9 @@ struct FaceIdcs
 class MeshModel
 {
 public:
-	vec3 min;
-	vec3 max;
-	vec3 middle;
+	vec3 vMin;
+	vec3 vMax;
+	vec3 vMiddle;
 	std::vector<vec3> vertex_positions;
 	std::vector<vec3> normal_positions;
 
@@ -86,15 +86,12 @@ public:
 	static vec3 getNormalOfFace(face f);
 };
 
-// TODO: doesn't work, maybe we'll just create a Cube.obj file and load it hardcoded?
 class CubeMeshModel : public MeshModel 
 {
 public:
 	CubeMeshModel() noexcept;
 };
 
-// TODO: if we decide to turn the CubeMeshModel into an obj file, 
-// then maybe we should load up the Cube and scale it to vec3Min and vec3Max?
 class BoxMeshModel : public MeshModel
 {
 public:
