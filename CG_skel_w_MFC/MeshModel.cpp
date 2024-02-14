@@ -239,13 +239,6 @@ void LineModel::draw(Renderer& renderer)
 	// TODO
 }
 
-ArrowModel::ArrowModel(vec3 startPoint, vec3 endPoint, vec3 color)
-	: line(LineModel(startPoint, endPoint, color)), color(color) { }
-
-void ArrowModel::draw(Renderer& renderer)
-{
-	// TODO
-}
 
 // Local inline functions
 

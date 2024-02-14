@@ -109,13 +109,3 @@ public:
 	LineModel(vec3 startPoint, vec3 endPoint, vec3 color);
 	void draw(Renderer& renderer);
 };
-
-class ArrowModel
-{
-public:
-	LineModel line;
-	vec3 color;
-
-	ArrowModel(vec3 startPoint, vec3 endPoint, vec3 color);
-	void draw(Renderer& renderer);
-};
