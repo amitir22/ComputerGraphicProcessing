@@ -284,7 +284,18 @@ void handleViewMenu(int id)
 	}
 	else if (viewDispOrthographicMenuEntryID == id)
 	{
-		scene->isOrthographic = !(scene->isOrthographic);
+		// TODO: (ORTHOGRAPHIC) handle the change with setters and getters
+		if (renderer->m_isPerspective)
+		{
+			scene->getActiveCamera()->setOrtho(-1, 1, -1, 1, 0.1, 100);
+		}
+		else
+		{
+			scene->getActiveCamera()->setPerspective(45, CG::DEFAULT_WIDTH / CG::DEFAULT_HEIGHT, 0.1, 100);
+		}
+		// TODO: still not working, needs debugging
+
+		renderer->m_isPerspective = !(renderer->m_isPerspective);
 	}
 
 	refreshGUI();
@@ -490,7 +501,7 @@ void Menu::buildGlutMenu()
 	if (scene->isShowBoundingBox) {
 		viewBoundingBoxPrefix = MARKED_PREFIX;
 	}
-	if (scene->isOrthographic) {
+	if (!renderer->m_isPerspective) {
 		viewOrthographicPrefix = MARKED_PREFIX;
 	}
 

@@ -43,6 +43,7 @@ public:
 	float fov;
 	float movementSpeed;
 	float mouseSensitivity;
+	// TODO: (ORTHOGRAPHIC) add datamembers for viewing volume
 	
 
 	// Functions

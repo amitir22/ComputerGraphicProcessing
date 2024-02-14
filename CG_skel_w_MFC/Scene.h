@@ -33,7 +33,6 @@ public:
 	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
 	MeshModel* getActiveModel() { return models[activeModel].get(); }
 	void applyTransformation(mat4 transformation) { models[activeModel]->applyTransformation(transformation);}
-
 	
 	int activeCamera;
 	int activeModel;
@@ -43,5 +42,4 @@ public:
 	bool isShowVertexNormals = false;
 	bool isShowFaceNormals = false;
 	bool isShowBoundingBox = false;
-	bool isOrthographic = false;
 };
