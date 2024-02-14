@@ -46,7 +46,8 @@ int optionsSubMenuID;
 int demoMenuEntryID;
 int aboutMenuEntryID;
 
-int camerasStartOffsetID;
+int camerasStartOffsetID; 
+int camerasAddCameraEntryID;
 int objectsStartOffsetID;
 int viewShowVertexNormalsMenuEntryID;
 int viewShowFaceNormalsMenuEntryID;
@@ -425,6 +426,9 @@ void Menu::buildGlutMenu()
 
 		glutAddMenuEntry(currentCameraNameWprefix.c_str(), menuEntryCounter++);
 	}
+
+	camerasAddCameraEntryID = menuEntryCounter++;
+	glutAddMenuEntry("+ make dup", camerasAddCameraEntryID);
 
 	// objects menu
 	string objectPrefix = "object ";
