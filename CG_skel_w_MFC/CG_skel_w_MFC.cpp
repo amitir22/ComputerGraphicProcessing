@@ -157,19 +157,14 @@ void mouse(int button, int state, int x, int y)
 void motion(int x, int y)
 {
 	Camera* activeCamera = scene->getActiveCamera();
-	if (firstMouse)
-	{
-		lastX = x;
-		lastY = y;
-		firstMouse = false;
-	}
+
 	// calc difference in mouse movement
 	float dx = x - lastX;
 	float dy = lastY - y;
 	// update last x,y
 	lastX = x;
 	lastY = y;
-	cout << "motion(): " <<  "dx = " << dx << " dy = " << dy << endl;
+	cout << "motion(" << x << ", " << y << "): " <<  "dx = " << dx << " dy = " << dy << endl;
 	activeCamera->handleMouseMovement(dx, dy);
 	glutPostRedisplay();
 }

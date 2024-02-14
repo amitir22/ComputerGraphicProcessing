@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "vec.h"
 #include "mat.h"
 #include "Renderer.h"
@@ -10,9 +13,9 @@
 
 typedef Geometry::Face face;
 
-#define CUBE_DEFAULT_SIZE 20
-#define CUBE_MESH_DEFAULT_MIN (vec3(0, 0, 0))
-#define CUBE_MESH_DEFAULT_MAX (vec3(CUBE_DEFAULT_SIZE, CUBE_DEFAULT_SIZE, CUBE_DEFAULT_SIZE))
+#define CUBE_DEFAULT_SIZE 2
+#define CUBE_MESH_DEFAULT_MIN (vec3(-0.5 * CUBE_DEFAULT_SIZE, -0.5 * CUBE_DEFAULT_SIZE, -0.5 * CUBE_DEFAULT_SIZE))
+#define CUBE_MESH_DEFAULT_MAX (vec3(0.5 * CUBE_DEFAULT_SIZE, 0.5 * CUBE_DEFAULT_SIZE, 0.5 * CUBE_DEFAULT_SIZE))
 
 using namespace std;
 
@@ -57,6 +60,9 @@ struct FaceIdcs
 class MeshModel
 {
 public:
+	vec3 min;
+	vec3 max;
+	vec3 middle;
 	std::vector<vec3> vertex_positions;
 	std::vector<vec3> normal_positions;
 

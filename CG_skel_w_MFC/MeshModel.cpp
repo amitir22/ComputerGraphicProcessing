@@ -1,10 +1,5 @@
 // MeshModel.cpp
 #include "StdAfx.h"
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include "vec.h"
 #include "MeshModel.h"
 
 static inline face* makeTriangleFacesForBox(vec3 min, vec3 max);
@@ -130,39 +125,31 @@ void MeshModel::drawBoundingBox(Renderer& renderer)
 	vec3 min;
 	vec3 max;
 
-	// Finding min and max
+	// calc min and max
+	// TODO: amit
 
-	BoxMeshModel boundingBox = BoxMeshModel::makeBoundingBox(0.3, 0.6, 0.9, min, max); // random RGB values for now
-	renderer.DrawTriangles(&boundingBox.vertex_positions, &boundingBox.normal_positions);
+	BoxMeshModel boundingBox = BoxMeshModel::makeBoundingBox(0.3, 0.6, 0.9, min, max);
+	boundingBox.draw(renderer);
 }
 
 void MeshModel::drawVertexNormals(Renderer& renderer)
 {
-	// TODO:
+	// TODO: ehud
 }
 
 void MeshModel::drawFaceNormals(Renderer& renderer)
 {
-	// TODO:
+	// TODO: ehud
 }
 
 vec3 MeshModel::getNormalOfFace(face f)
 {
 	vec3 v1, v2;
 
-	v1.x = f.v[1].x - f.v[0].x;
-	v1.y = f.v[1].y - f.v[0].y;
-	v1.z = f.v[1].z - f.v[0].z;
+	v1 = f.v[1] - f.v[0];
+	v2 = f.v[2] - f.v[0];
 
-	v2.x = f.v[2].x - f.v[0].x;
-	v2.y = f.v[2].y - f.v[0].y;
-	v2.z = f.v[2].z - f.v[0].z;
-
-	vec3 normal;
-
-	normal.x = v1.y * v2.z - v2.y * v1.z;
-	normal.y = v1.z * v2.x - v2.z * v1.x;
-	normal.z = v1.x * v2.y - v2.x * v1.y;
+	vec3 normal = cross(v1, v2);
 
 	return normal;
 }

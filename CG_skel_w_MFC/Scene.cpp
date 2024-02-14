@@ -37,6 +37,19 @@ void Scene::draw()
 	for (auto& model : models)
 	{
 		model->draw(*m_renderer);
+
+		if (this->isShowBoundingBox)
+		{
+			model->drawBoundingBox(*m_renderer);
+		}
+		if (this->isShowFaceNormals)
+		{
+			model->drawFaceNormals(*m_renderer);
+		}
+		if (this->isShowVertexNormals)
+		{
+			model->drawVertexNormals(*m_renderer);
+		}
 	}
 
 	m_renderer->SwapBuffers();
