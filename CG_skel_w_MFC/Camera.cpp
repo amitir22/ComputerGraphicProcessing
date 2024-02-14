@@ -17,6 +17,22 @@ zoom(ZOOM), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), worldUp(0,1,0) 
 	updateVectors();
 }
 
+Camera::Camera(const Camera& other)
+{
+	this->viewTransform = other.viewTransform;
+	this->projection = other.projection;
+	this->eye = other.eye;
+	this->gaze = other.gaze;
+	this->up = other.up;
+	this->worldUp = other.worldUp;
+	this->right = other.right;
+	this->yaw = other.yaw;
+	this->pitch = other.pitch;
+	this->zoom = other.zoom;
+	this->movementSpeed = other.movementSpeed;
+	this->mouseSensitivity = other.mouseSensitivity;
+}
+
 // compute change-of-basis from world pose to camera pose, keeping in mind that the camera looks towards -z 
 // We've used https://www.songho.ca/opengl/gl_camera.html#lookat as a reference
 mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)

@@ -34,6 +34,7 @@ const string SELECTED_PREFIX = "->";
 bool isMenuReady = false;
 int menuEntryCounter = 0;
 
+// important menu entry IDs
 int mainMenuID;
 int fileSubMenuID;
 int fileOpenMenuEntryID;
@@ -45,8 +46,8 @@ int shapesSubMenuID;
 int optionsSubMenuID;
 int demoMenuEntryID;
 int aboutMenuEntryID;
-
-int camerasStartOffsetID;
+int camerasStartOffsetID; 
+int camerasAddCameraEntryID;
 int objectsStartOffsetID;
 int viewShowVertexNormalsMenuEntryID;
 int viewShowFaceNormalsMenuEntryID;
@@ -56,14 +57,7 @@ int transformsRotateEntryID;
 int transformsScaleEntryID;
 int transformsAdvancedEntryID;
 
-
-// Rendering variables
-Camera selectedCamera;
-// TODO: what format am i storing the frame? a simple struct of coordinates? how many? what will be most convinient?
-// (Xmin, Ymin, Zmin), (Xmax, Ymax, Zmax)? or do we want to allow a diagonal frame?
-mat4 aggregatedSelectedTransforms; // used when applying many transforms simultaneously
-
-
+// Heavy logic variables
 Scene *scene;
 Renderer *renderer;
 
@@ -215,15 +209,31 @@ void handleFileMenu(int id)
 			scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 		}
 	}
+
+	refreshGUI();
 }
 
 void handleCamerasMenu(int id)
 {
 	// TODO: delete
 	cout << "handleCamerasMenu(" << id << ")" << endl;
-	scene->activeCamera = id - camerasStartOffsetID;
+
+	if (id == camerasAddCameraEntryID) {
+		Camera currentActiveCamera = *(scene->getActiveCamera());
+		shared_ptr<Camera> duplicateCam = make_shared<Camera>(currentActiveCamera);
+
+		scene->cameras.push_back(duplicateCam);
+		scene->activeCamera = scene->cameras.size() - 1; // index of last camera
+	}
+	else
+	{
+		scene->activeCamera = id - camerasStartOffsetID;
+	}
+
 	// TODO: delete
 	cout << "activeCamera = " << scene->activeCamera << endl;
+
+	refreshGUI();
 }
 
 void handleObjectsMenu(int id) // TODO: consider renaming all objects to models
@@ -233,6 +243,8 @@ void handleObjectsMenu(int id) // TODO: consider renaming all objects to models
 	scene->activeModel = id - objectsStartOffsetID;
 	// TODO: delete
 	cout << "activeModel = " << scene->activeModel << endl;
+
+	refreshGUI();
 }
 
 void handleTransformsMenu(int id)
@@ -293,7 +305,12 @@ void handleShapesMenu(int id)
 {
 	// TODO: delete
 	cout << "handleShapesMenu(" << id << ")" << endl;
-	// TODO: insert new primitive shape to the scene
+
+	shared_ptr<CubeMeshModel> cube = make_shared<CubeMeshModel>(CubeMeshModel());
+
+	scene->models.push_back(cube);
+
+	refreshGUI();
 }
 
 void handleOptionsMenu(int id)
@@ -301,16 +318,23 @@ void handleOptionsMenu(int id)
 	// TODO: delete
 	cout << "handleOptionsMenu(" << id << ")" << endl;
 	// TODO: 
+
+	refreshGUI();
 }
 
 void handleMainMenu(int id)
 {
 	// TODO: delete
 	cout << "handleMainMenu(" << id << ")" << endl;
+	// TODO: delete
+	cout << "demoMenuEntryID = " << demoMenuEntryID << endl;
+
 	if (id == demoMenuEntryID)
-		scene->drawDemo();
+		scene->drawDemo(); // TODO: check why doesn't work
 	else if (id == aboutMenuEntryID)
 		AfxMessageBox(_T("Computer Graphics"));
+
+	refreshGUI();
 }
 
 void initMenu()
@@ -329,11 +353,11 @@ vec3 promptScaleShell()
 	// TODO: delete
 	cout << "promptScaleShell()" << endl;
 
-	cout << "scale x = ";
+	cout << "scale x = " << flush;
 	cin >> scale.x;
-	cout << "scale y = ";
+	cout << "scale y = " << flush;
 	cin >> scale.y;
-	cout << "scale z = ";
+	cout << "scale z = " << flush;
 	cin >> scale.z;
 
 	// TODO: delete
@@ -348,11 +372,11 @@ vec3 promptTranslateShell()
 	// TODO: delete
 	cout << "promptTranslateShell()" << endl;
 
-	cout << "translate x = ";
+	cout << "translate x = " << flush;
 	cin >> translate.x;
-	cout << "translate y = ";
+	cout << "translate y = " << flush;
 	cin >> translate.y;
-	cout << "translate z = ";
+	cout << "translate z = " << flush;
 	cin >> translate.z;
 
 	// TODO: delete
@@ -367,13 +391,13 @@ vec4 promptRotateShell()
 	// TODO: delete
 	cout << "promptRotateShell()" << endl;
 
-	cout << "axis x = ";
+	cout << "axis x = " << flush;
 	cin >> rotate.x;
-	cout << "axis y = ";
+	cout << "axis y = " << flush;
 	cin >> rotate.y;
-	cout << "axis z = ";
+	cout << "axis z = " << flush;
 	cin >> rotate.z;
-	cout << "angle = ";
+	cout << "angle = " << flush;
 	cin >> rotate.w;
 
 	// TODO: delete
@@ -425,6 +449,9 @@ void Menu::buildGlutMenu()
 
 		glutAddMenuEntry(currentCameraNameWprefix.c_str(), menuEntryCounter++);
 	}
+
+	camerasAddCameraEntryID = menuEntryCounter++;
+	glutAddMenuEntry("+ (make dup and swap focus)", camerasAddCameraEntryID);
 
 	// objects menu
 	string objectPrefix = "object ";
