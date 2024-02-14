@@ -99,8 +99,7 @@ void MeshModel::draw(Renderer& renderer)
 void MeshModel::applyTransformation(mat4 transformation)
 {
 	_model_transform = transformation * _model_transform;
-	cout << _model_transform << endl;
-	//_normal_transform = transformation * _normal_transform;
+	//_normal_transform = transformation * _normal_transform; // TODO apply
 }
 
 ////////////////////////////////////////

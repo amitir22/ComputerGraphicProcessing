@@ -7,10 +7,12 @@
 using namespace std;
 
 static const float YAW = -90.0f;
-static const float SPEED = 2.0f;
+static const float SPEED = 1.5f;
 static const float SENSITIVITY = 0.1f;
 static const float PITCH = 0.0f;
-static const float ZOOM = 45.0f;
+static const float FOV = 45.0f;
+static const float Z_NEAR = 0.1f;
+static const float Z_FAR = 100.0f;
 
 
 enum Camera_Movement {
@@ -36,14 +38,15 @@ public:
 	// Angles
 	float yaw; 
 	float pitch;
+	float aspect;
 	// Options
-	float zoom;
+	float fov;
 	float movementSpeed;
 	float mouseSensitivity;
 	
 
 	// Functions
-	Camera(vec3 eye = vec3(0, 0, 2), vec3 at = vec3(0, 0, 0), vec3 up = vec3(0, 1, 0));
+	Camera(vec3 eye = vec3(0, 0, 0.3), vec3 at = vec3(0, 0, 0), vec3 up = vec3(0, 1, 0));
 
 	// Deep copy constructor
 	Camera(const Camera& other);
@@ -53,14 +56,13 @@ public:
 	// Projections
 	void setOrtho(float left, float right, float bottom, float top, float zNear, float zFar);
 	void setPerspective(float left, float right, float bottom, float top, float zNear, float zFar);
+	void setPerspective(float fovy, float aspect, float zNear, float zFar);
 	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
 	//mat4 Perspective(float fovy, float aspect, float zNear, float zFar);
 	void handleWindowReshape(int width, int height);
 	// Functions
-	void Translate(const vec3& translation);
+	void translate(const vec3& translation);
 	void Rotate(const vec3& axis, float angle);
-	void ZoomIn(float zoom);
-
 	void handleMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 	void handleMouseScroll(float yoffset);
 	void handleKeyboardInput(int key, float deltaTime);

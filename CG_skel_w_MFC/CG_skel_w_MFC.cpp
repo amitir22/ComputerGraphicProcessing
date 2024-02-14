@@ -70,24 +70,19 @@ bool lb_down, rb_down, mb_down;
 //----------------------------------------------------------------------------
 // Callbacks
 
-void display( void )
-{
-	scene->draw(); // TODO: check that initial black screen is ok
+void display( void ) {
+	scene->draw();
 }
 
-void reshape( int width, int height )
-{
-	// Set the viewport to cover the whole window
+void reshape( int width, int height ) {
 	glViewport(0, 0, width, height);
 	if (height == 0) height = 1;
 
-	// Tell your Renderer to handle window reshape
 	renderer->handleWindowReshape(width, height);
 	scene->handleWindowReshape(width, height);
 }
 
-void keyboard( unsigned char key, int x, int y )
-{
+void keyboard( unsigned char key, int x, int y ) {
 	Camera* activeCamera = scene->getActiveCamera();
 	bool shouldRedraw = false;
 	switch (key) {
@@ -127,15 +122,16 @@ void keyboard( unsigned char key, int x, int y )
 
 void mouseWheel(int button, int dir, int x, int y) {
 	if (dir > 0) {
-		cout << "scroll up" << endl;
-		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(1.1, 1.1, 1.1));
-		scene->applyTransformation(scaleMatrix);
+		//mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(1.1, 1.1, 1.1));
+		//scene->applyTransformation(scaleMatrix);
+		scene->getActiveCamera()->handleMouseScroll(1);
 	}
 	else {
-		cout << "scroll down" << endl;
-		mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(0.9, 0.9, 0.9));
-		scene->applyTransformation(scaleMatrix);
+		//mat4 scaleMatrix =  Geometry::makeScaleMatrix(vec3(0.9, 0.9, 0.9));
+		//scene->applyTransformation(scaleMatrix);
+		scene->getActiveCamera()->handleMouseScroll(-1);
 	}
+	glutPostRedisplay();
 
 	return;
 }
@@ -182,6 +178,7 @@ void motion(int x, int y)
 	// update last x,y
 	lastX = x;
 	lastY = y;
+	cout << "motion(): " <<  "dx = " << dx << " dy = " << dy << endl;
 	activeCamera->handleMouseMovement(dx, dy);
 }
 
@@ -601,7 +598,7 @@ int my_main( int argc, char **argv )
 
 	glutDisplayFunc( display );
 	glutKeyboardFunc( keyboard );
-	//glutMouseFunc( mouse );
+	glutMouseFunc( mouse );
 	glutMouseWheelFunc(mouseWheel);
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );

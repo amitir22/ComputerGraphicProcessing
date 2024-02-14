@@ -4,6 +4,8 @@
 
 // We call this orthographic projection, but we don't really project, since we don't want to lose depth information.
 // zNear and zFar are the distances to the near and far planes. They must be positive.
+float Geometry::radians(float degrees) { return degrees * M_PI / 180; }
+
 mat4 Geometry::getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	// translate center of orthographic viewing volume to origin (0,0,0)
@@ -40,6 +42,15 @@ mat4 Geometry::getPerspectiveProjection(float left, float right, float bottom, f
 	
 }
 
+mat4 Geometry::getPerspectiveProjection(float fovy, float aspect, float zNear, float zFar)
+{
+	// fovy is the field of view in the y direction, in degrees
+	// aspect is the ratio of the width to the height of the viewing volume
+	// zNear and zFar are the distances to the near and far planes. They must be positive.
+	float top = zNear * tan(radians(fovy) / 2);
+	float right = top * aspect;
+	return getPerspectiveProjection(-right, right, -top, top, zNear, zFar);
+}
 mat4 Geometry::makeRotationMatrix(const vec3& axis, float angle)
 {
 	mat4 rotationMatrix = mat4(
