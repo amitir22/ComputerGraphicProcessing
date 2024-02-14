@@ -94,7 +94,7 @@ mat4 Geometry::makeTranslationMatrix(vec3 translation)
 {
 	return mat4(
 		vec4(1, 0, 0, translation.x),
-		vec4(0, 1, 0, translation.x),
-		vec4(0, 0, 1, translation.x),
+		vec4(0, 1, 0, translation.y),
+		vec4(0, 0, 1, translation.z),
 		vec4(0, 0, 0, 1));
 }

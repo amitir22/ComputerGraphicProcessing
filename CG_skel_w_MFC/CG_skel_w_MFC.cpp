@@ -52,6 +52,7 @@ int objectsStartOffsetID;
 int viewShowVertexNormalsMenuEntryID;
 int viewShowFaceNormalsMenuEntryID;
 int viewShowBoundingBoxMenuEntryID;
+int viewDispOrthographicMenuEntryID;
 int transformsTranslateEntryID;
 int transformsRotateEntryID;
 int transformsScaleEntryID;
@@ -281,6 +282,10 @@ void handleViewMenu(int id)
 	{
 		scene->isShowBoundingBox = !(scene->isShowBoundingBox);
 	}
+	else if (viewDispOrthographicMenuEntryID == id)
+	{
+		scene->isOrthographic = !(scene->isOrthographic);
+	}
 
 	refreshGUI();
 }
@@ -446,7 +451,7 @@ void Menu::buildGlutMenu()
 	if (scene->activeModel == 0) // special case = default
 		currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
 	objectsStartOffsetID = menuEntryCounter++;
-	glutAddMenuEntry(currentObjectName.c_str(), objectsStartOffsetID);
+	glutAddMenuEntry(currentObjectNameWprefix.c_str(), objectsStartOffsetID);
 
 	for (int objectIndex = 1; objectIndex < scene->models.size(); objectIndex++)
 	{
@@ -456,7 +461,7 @@ void Menu::buildGlutMenu()
 		if (scene->activeModel == objectIndex)
 			currentObjectNameWprefix = SELECTED_PREFIX + currentObjectName;
 
-		glutAddMenuEntry(currentObjectName.c_str(), menuEntryCounter++);
+		glutAddMenuEntry(currentObjectNameWprefix.c_str(), menuEntryCounter++);
 	}
 
 	// transforms menu
@@ -474,6 +479,7 @@ void Menu::buildGlutMenu()
 	string viewVertexNormalsPrefix = PREFIX;
 	string viewFaceNormalsPrefix = PREFIX;
 	string viewBoundingBoxPrefix = PREFIX;
+	string viewOrthographicPrefix = PREFIX;
 
 	if (scene->isShowVertexNormals) {
 		viewVertexNormalsPrefix = MARKED_PREFIX;
@@ -484,10 +490,14 @@ void Menu::buildGlutMenu()
 	if (scene->isShowBoundingBox) {
 		viewBoundingBoxPrefix = MARKED_PREFIX;
 	}
+	if (scene->isOrthographic) {
+		viewOrthographicPrefix = MARKED_PREFIX;
+	}
 
 	string viewVertexNormals = viewVertexNormalsPrefix + string("Show vertex normals");
 	string viewFaceNormals = viewFaceNormalsPrefix + string("Show face normals");
 	string viewBoundingBox = viewBoundingBoxPrefix + string("Show bounding box");
+	string viewOrthographic = viewOrthographicPrefix + string("Orthographic display");
 
 	viewSubMenuID = glutCreateMenu(handleViewMenu);
 	viewShowVertexNormalsMenuEntryID = menuEntryCounter++;
@@ -496,6 +506,8 @@ void Menu::buildGlutMenu()
 	glutAddMenuEntry(viewFaceNormals.c_str(), viewShowFaceNormalsMenuEntryID);
 	viewShowBoundingBoxMenuEntryID = menuEntryCounter++;
 	glutAddMenuEntry(viewBoundingBox.c_str(), viewShowBoundingBoxMenuEntryID);
+	viewDispOrthographicMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry(viewOrthographic.c_str(), viewDispOrthographicMenuEntryID);
 
 	// shapes menu
 	shapesSubMenuID = glutCreateMenu(handleShapesMenu);

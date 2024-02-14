@@ -43,5 +43,5 @@ public:
 	bool isShowVertexNormals = false;
 	bool isShowFaceNormals = false;
 	bool isShowBoundingBox = false;
-
+	bool isOrthographic = false;
 };
