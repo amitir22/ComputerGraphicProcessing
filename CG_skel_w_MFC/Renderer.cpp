@@ -166,44 +166,79 @@ void Renderer::computeViewPortMatrix()
 	m_viewPortTransform[2][2] = 1;
 }
 
-void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
-	// Check if line is not completely inside the rectangle
-	
-	// Make sure we draw from left to right
-	if (x0 > x1) {
-		swap(x0, x1);
-		swap(y0, y1);
-	}
-
-	const bool steep = abs(y1 - y0) > abs(x1 - x0);
-	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
-	if (steep) {
-		swap(x0, y0);
-		swap(x1, y1);
-	}
-	const int dx = x1 - x0;
-	const int dy = std::abs(y1 - y0); // Also handle negative slopes
-	const int ystep = (y0 < y1) ? 1 : -1;
-	int D = 2 * dy - dx;
-	int y = y0;
-	for (int x = x0; x <= x1; x++) {
-		if (steep) {
-			DrawPixel(y, x);
+void Renderer::DrawLine(int xa, int ya, int xb, int yb) {
+	int dx = abs(xb - xa);
+	int dy = abs(yb - ya);
+	int x, y;
+	if (dx >= dy){
+		int d = 2 * dy - dx;
+		int ds = 2 * dy;
+		int dt = 2 * (dy - dx);
+		if (xa < xb)
+		{
+			x = xa;
+			y = ya;
 		}
-		else {
+		else
+		{
+			x = xb;
+			y = yb;
+			xb = xa;
+			yb = ya;
+		}
+		DrawPixel(x, y);
+		while (x < xb)
+		{
+			if (d < 0)
+				d += ds;
+			else {
+				if (y < yb) {
+					y++;
+					d += dt;
+				}
+				else {
+					y--;
+					d += dt;
+				}
+			}
+			x++;
 			DrawPixel(x, y);
 		}
-		if (D > 0) { // If D > 0, we should move one step in the y direction
-			y += ystep;
-			D += 2 * (dy - dx);
+	}
+	else {
+		int d = 2 * dx - dy;
+		int ds = 2 * dx;
+		int dt = 2 * (dx - dy);
+		if (ya < yb) {
+			x = xa;
+			y = ya;
 		}
-		else { // Else, don't increment
-			D += 2 * dy;
+		else {
+			x = xb;
+			y = yb;
+			yb = ya;
+			xb = xa;
+		}
+		DrawPixel(x, y);
+		while (y < yb)
+		{
+			if (d < 0)
+				d += ds;
+			else {
+				if (x > xb) {
+					x--;
+					d += dt;
+				}
+				else {
+					x++;
+					d += dt;
+				}
+			}
+			y++;
+			DrawPixel(x, y);
 		}
 	}
 }
-
-
 
 void Renderer::DrawPixel(int x, int y, int z) {
 	if (x < 0 || x >= m_width || y < 0 || y >= m_height || z < -1 || z > 1 ) {
