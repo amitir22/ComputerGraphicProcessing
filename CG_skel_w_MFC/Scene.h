@@ -22,18 +22,7 @@ public:
 	std::vector<std::shared_ptr<Light>> lights;
 	std::vector<std::shared_ptr<Camera>> cameras;
 	Renderer* m_renderer;
-	// Constructors
-	Scene() {};
-	Scene(Renderer* renderer);
-	
-	void loadOBJModel(string fileName);
-	void draw();
-	void handleWindowReshape(int width, int height);
-	void drawDemo();
-	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
-	MeshModel* getActiveModel() { return models[activeModel].get(); }
-	void applyTransformation(mat4 transformation) { models[activeModel]->applyTransformation(transformation);}
-	
+
 	int activeCamera;
 	int activeModel;
 	int activeLight;
@@ -42,4 +31,17 @@ public:
 	bool isShowVertexNormals = false;
 	bool isShowFaceNormals = false;
 	bool isShowBoundingBox = false;
+	bool isShowAxis = true;
+
+	// Constructors
+	Scene() {};
+	Scene(Renderer* renderer);
+
+	void loadOBJModel(string fileName);
+	void draw();
+	void handleWindowReshape(int width, int height);
+	void drawDemo();
+	Camera* getActiveCamera() { return cameras[activeCamera].get(); }
+	MeshModel* getActiveModel() { return models[activeModel].get(); }
+	void applyTransformation(mat4 transformation) { models[activeModel]->applyTransformation(transformation); }
 };

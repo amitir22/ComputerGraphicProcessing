@@ -243,11 +243,79 @@ LineModel::LineModel(vec3 startPoint, vec3 endPoint, vec3 color)
 
 void LineModel::draw(Renderer& renderer)
 {
-	// TODO
+	vector<vec3> vertices = vector<vec3>();
+	vector<vec3> normals = vector<vec3>();
+	vec3 midPoint = 0.5 * (this->startPoint + this->endPoint);
+	// vec3 midPoint = vec3(0.001, 0, 0); // TODO: this should be taken care of ASAP
+
+	vertices.push_back(this->startPoint);
+	vertices.push_back(midPoint);
+	vertices.push_back(this->endPoint);
+	normals.push_back(vec3(1, 0, 0));
+	normals.push_back(vec3(0, 1, 0));
+	normals.push_back(vec3(0, 0, 1));
+
+	// TODO: remove this ASAP
+	cout << "line model draw: " << endl;
+	renderer.updateMVP();
+	renderer.DrawTriangles(&vertices, &normals);
 }
 
+AxisModel3D::AxisModel3D()
+{
+	this->xAxis = buildAxis(vec3(1, 0, 0));
+	this->yAxis = buildAxis(vec3(0, 1, 0));
+	this->zAxis = buildAxis(vec3(0, 0, 1));
+}
+
+void AxisModel3D::draw(Renderer& renderer)
+{
+	// draw x-axis
+	for (auto& line : this->xAxis)
+	{
+		line.draw(renderer);
+	}
+	
+	// draw y-axis
+	for (auto& line : this->yAxis)
+	{
+		line.draw(renderer);
+	}
+	
+	// draw z-axis
+	for (auto& line : this->zAxis)
+	{
+		line.draw(renderer);
+	}
+}
+
+vector<LineModel> AxisModel3D::buildAxis(vec3 unit, 
+	unsigned int size/* = DEFAULT_AXIS_SIZE*/, vec3 color/* = DEFAULT_AXIS_COLOR*/)
+{
+	vector<LineModel> axis = vector<LineModel>();
+	vec3 negStartPoint;
+	vec3 negEndPoint;
+	vec3 posStartPoint;
+	vec3 posEndPoint;
+	
+	for (unsigned int u = 0; u < size; ++u)
+	{
+		// add negative part
+		negStartPoint = (-u) * unit;
+		negEndPoint = (-u - 1) * unit;
+		axis.push_back(LineModel(negStartPoint, negEndPoint, color));
+		
+		// add positive part
+		posStartPoint = u * unit;
+		posEndPoint = (u + 1) * unit;
+		axis.push_back(LineModel(posStartPoint, posEndPoint, color));
+	}
+
+	return axis;
+}
 
 // Local inline functions
+
 
 static inline face* makeTriangleFacesForBox(vec3 min, vec3 max)
 {

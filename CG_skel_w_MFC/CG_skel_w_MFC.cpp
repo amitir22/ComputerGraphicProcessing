@@ -52,6 +52,7 @@ int objectsStartOffsetID;
 int viewShowVertexNormalsMenuEntryID;
 int viewShowFaceNormalsMenuEntryID;
 int viewShowBoundingBoxMenuEntryID;
+int viewShowAxisMenuEntryID;
 int viewDispOrthographicMenuEntryID;
 int transformsTranslateEntryID;
 int transformsRotateEntryID;
@@ -282,6 +283,10 @@ void handleViewMenu(int id)
 	{
 		scene->isShowBoundingBox = !(scene->isShowBoundingBox);
 	}
+	else if (viewShowAxisMenuEntryID == id)
+	{
+		scene->isShowAxis = !(scene->isShowAxis);
+	}
 	else if (viewDispOrthographicMenuEntryID == id)
 	{
 		// TODO: (ORTHOGRAPHIC) handle the change with setters and getters
@@ -490,24 +495,34 @@ void Menu::buildGlutMenu()
 	string viewVertexNormalsPrefix = PREFIX;
 	string viewFaceNormalsPrefix = PREFIX;
 	string viewBoundingBoxPrefix = PREFIX;
+	string viewAxisPrefix = PREFIX;
 	string viewOrthographicPrefix = PREFIX;
 
-	if (scene->isShowVertexNormals) {
+	if (scene->isShowVertexNormals) 
+	{
 		viewVertexNormalsPrefix = MARKED_PREFIX;
 	}
-	if (scene->isShowFaceNormals) {
+	if (scene->isShowFaceNormals) 
+	{
 		viewFaceNormalsPrefix = MARKED_PREFIX;
 	}
-	if (scene->isShowBoundingBox) {
+	if (scene->isShowBoundingBox) 
+	{
 		viewBoundingBoxPrefix = MARKED_PREFIX;
 	}
-	if (!renderer->m_isPerspective) {
+	if (scene->isShowAxis)
+	{
+		viewAxisPrefix = MARKED_PREFIX;
+	}
+	if (!renderer->m_isPerspective) 
+	{
 		viewOrthographicPrefix = MARKED_PREFIX;
 	}
 
 	string viewVertexNormals = viewVertexNormalsPrefix + string("Show vertex normals");
 	string viewFaceNormals = viewFaceNormalsPrefix + string("Show face normals");
 	string viewBoundingBox = viewBoundingBoxPrefix + string("Show bounding box");
+	string viewaxis = viewAxisPrefix + string("Show Axis");
 	string viewOrthographic = viewOrthographicPrefix + string("Orthographic display");
 
 	viewSubMenuID = glutCreateMenu(handleViewMenu);
@@ -517,6 +532,8 @@ void Menu::buildGlutMenu()
 	glutAddMenuEntry(viewFaceNormals.c_str(), viewShowFaceNormalsMenuEntryID);
 	viewShowBoundingBoxMenuEntryID = menuEntryCounter++;
 	glutAddMenuEntry(viewBoundingBox.c_str(), viewShowBoundingBoxMenuEntryID);
+	viewShowAxisMenuEntryID = menuEntryCounter++;
+	glutAddMenuEntry(viewaxis.c_str(), viewShowAxisMenuEntryID);
 	viewDispOrthographicMenuEntryID = menuEntryCounter++;
 	glutAddMenuEntry(viewOrthographic.c_str(), viewDispOrthographicMenuEntryID);
 

@@ -101,7 +101,7 @@ public:
 		vec3 min, vec3 max);
 };
 
-class LineModel
+class LineModel : public MeshModel
 {
 public:
 	vec3 startPoint;
@@ -111,4 +111,20 @@ public:
 	LineModel() noexcept;
 	LineModel(vec3 startPoint, vec3 endPoint, vec3 color);
 	void draw(Renderer& renderer);
+};
+
+#define DEFAULT_AXIS_SIZE (10)
+#define DEFAULT_AXIS_COLOR (vec3(0, 1, 0)) /*0,1,0 = green*/
+
+class AxisModel3D
+{
+public:
+	vector<LineModel> xAxis;
+	vector<LineModel> yAxis;
+	vector<LineModel> zAxis;
+
+	AxisModel3D();
+	void draw(Renderer& renderer);
+	static vector<LineModel> buildAxis(vec3 unit,
+		unsigned int size = DEFAULT_AXIS_SIZE, vec3 color = DEFAULT_AXIS_COLOR);
 };

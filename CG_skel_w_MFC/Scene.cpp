@@ -50,6 +50,12 @@ void Scene::draw()
 		{
 			model->drawVertexNormals(*m_renderer);
 		}
+		if (this->isShowAxis)
+		{
+			AxisModel3D axes = AxisModel3D();
+		
+			//axes.draw(*m_renderer); not working :(
+		}
 	}
 
 	m_renderer->SwapBuffers();
