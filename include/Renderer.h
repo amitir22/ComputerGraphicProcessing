@@ -1,17 +1,15 @@
 // Renderer.h
 #pragma once
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include "glad/glad.h"
-#include "CG.h"
-#include "vec.h"
-#include "mat.h"
+
 #include "Geometry.h" // For viewport
 
 class Renderer
 {
 public:
-	//std::unique_ptr<float[]> framebuffer_;
 	GLubyte* framebuffer_;
 	std::unique_ptr<float[]> z_buffer_;
 	int width_, height_;

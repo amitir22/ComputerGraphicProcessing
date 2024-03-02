@@ -1,14 +1,13 @@
 // Camera.h
 #pragma once
-#include "mat.h"
-#include "vec.h"
-#include "Geometry.h"
 #include <cmath>
-using namespace std;
+
+#include <Eigen/Dense>
+
+#include "Geometry.h"
 
 static const float YAW = -90.0f;
-//static const float SPEED = 2.5f;
-static const float SPEED = 1.0f;
+static const float SPEED = 2.5f;
 static const float SENSITIVITY = 0.1f;
 static const float PITCH = 0.0f;
 static const float ZOOM = 45.0f;

@@ -1,17 +1,19 @@
 #include "Camera.h"
-#include <cmath>
 
-float radians(float degrees) { return degrees * M_PI / 180; }
+#include <cmath> // for M_PI
+#include <iostream>
+#define M_PI 3.14159265358979323846f
+float radians(float degrees) { return degrees * M_PI / 180.0f; }
 
 
 // Constructor implementation
 Camera::Camera(vec3 eye, vec3 at, vec3 up) : eye(eye), up(up), yaw(YAW), pitch(PITCH),
 zoom(ZOOM), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0, 1, 0) {
-	gaze = normalize(at - eye); // points to negative z
-	right = cross(up, -gaze);  // points to positive x
+	gaze = (at - eye).normalized(); // points to negative z
+	right = up.cross(- gaze);  // points to positive x
 	LookAt(eye, at, up);
-	SetOrtho(-1, 1, -1, 1, 0.1, 10);
-	//SetPerspective(-1, 1, -1, 1, 0.1, 10);
+	//SetOrtho(-1, 1, -1, 1, 0.1f, 10);
+	SetPerspective(-1, 1, -1, 1, 0.1f, 10);
 	UpdateVectors();
 }
 
@@ -20,19 +22,23 @@ zoom(ZOOM), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0, 1
 mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 {
 	// Compute translation matrix 
-	mat4 translation_matrix = mat4(1.0f, 0.0f, 0.0f, 0.0f, // column/row-major
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		-eye.x, -eye.y, -eye.z, 1.0f);
+	mat4 translation_matrix{ 
+		{1, 0, 0, -eye.x()},
+		{0, 1, 0, -eye.y()},
+		{0, 0, 1, -eye.z()},
+		{0, 0, 0, 1 }
+		};
 
 	// Compute rotation matrix. 
-	vec3 n = normalize(eye - at); // points to positive z, aka forward
-	vec3 u = normalize(cross(up, n)); // points to positive x
-	vec3 v = normalize(cross(n, u)); // points to positive y, really just normalization of up
-	mat4 rotation_matrix = mat4(vec4(u.x, u.y, u.z, 0.0f),
-		vec4(v.x, v.y, v.z, 0.0f),
-		vec4(n.x, n.y, n.z, 0.0f),
-		vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	vec3 n = (eye - at).normalized(); // points to positive z, aka forward
+	vec3 u = (up.cross(n)).normalized(); // points to positive x
+	vec3 v = (n.cross(u)).normalized(); // points to positive y, really just normalization of up
+	mat4 rotation_matrix{
+		{u.x(), u.y(), u.z(), 0.0f},
+		{v.x(), v.y(), v.z(), 0.0f},
+		{n.x(), n.y(), n.z(), 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}
+	};
 	view_transform = rotation_matrix * translation_matrix;
 	return view_transform;
 }
@@ -86,16 +92,16 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 }
 
 void Camera::UpdateVectors() {
-	gaze.x = cos(radians(yaw)) * cos(radians(pitch));
-	gaze.y = sin(radians(pitch));
-	gaze.z = sin(radians(yaw)) * cos(radians(pitch));
-	gaze = normalize(gaze);
-	right = normalize(cross(gaze, world_up));
-	up = normalize(cross(right, gaze));
+	gaze.x() = cos(radians(yaw)) * cos(radians(pitch));
+	gaze.y() = sin(radians(pitch));
+	gaze.z() = sin(radians(yaw)) * cos(radians(pitch));
+	gaze = gaze.normalized();
+	right = (gaze.cross(world_up)).normalized();
+	up = (right.cross(gaze)).normalized();
 }
 
 void Camera::Translate(const vec3& translation)
 {
 	eye += translation;
-	cout << eye << endl;
+	std::cout << eye.transpose() << std::endl;
 }

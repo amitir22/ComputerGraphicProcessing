@@ -1,12 +1,13 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <Eigen/Core>
-
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+
+#include <Eigen/Core>
+#include <glad/glad.h>
+
 
 class Shader
 {

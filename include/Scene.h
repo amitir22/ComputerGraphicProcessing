@@ -1,11 +1,13 @@
 // Scene.h
 #pragma once
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <vector>
-#include <string>
-#include <memory>
+
 #include "Renderer.h"
 #include "Camera.h"
 #include "PathConfig.h" // for RESOURCE_DIR
@@ -33,7 +35,7 @@ public:
 	Scene() {};
 	Scene(Renderer* renderer);
 
-	void LoadOBJModel(string fileName);
+	void LoadOBJModel(std::string file_name);
 	void Draw();
 	void DrawDemo();
 	Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }

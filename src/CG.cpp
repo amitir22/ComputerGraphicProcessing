@@ -1,16 +1,17 @@
 ﻿// CG.cpp : Defines the entry point for the application.
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "CG.h"
-#include "Shader.h"
-#include "PathConfig.h" // for RESOURCES_DIR
-
-#include <iostream>
-#include <Eigen/Dense>
-
 #include <iostream>
 #include <string>
-#include <Scene.h>
+
+#include <Eigen/Dense>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "Constants.h"
+#include "PathConfig.h" // for RESOURCES_DIR
+#include "Shader.h"
+#include "Scene.h"
+
+
 
 Renderer* renderer;
 Scene* scene;

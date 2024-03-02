@@ -1,6 +1,11 @@
 #pragma once
-#include "vec.h"
-#include "mat.h"
+#include <Eigen/Dense>
+
+using vec2 = Eigen::Vector2f;
+using vec3 = Eigen::Vector3f;
+using vec4 = Eigen::Vector4f;
+using mat3 = Eigen::Matrix3f;
+using mat4 = Eigen::Matrix4f;
 
 namespace Geometry {
 	mat4 makeRotationMatrix(const vec3& axis, float angle);

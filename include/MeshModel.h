@@ -1,11 +1,13 @@
 // MeshModel.h
 #pragma once
-#include "scene.h"
-#include "vec.h"
-#include "mat.h"
-#include <vector>
-#include <string>
+
 #include <memory>
+#include <string>
+#include <vector>
+
+#include <Eigen/Dense>
+
+#include "Scene.h"
 
 using namespace std;
 

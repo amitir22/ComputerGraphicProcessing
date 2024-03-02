@@ -1,22 +1,23 @@
 // Renderer.cpp
+#include "Renderer.h" 
+
 #include <algorithm> // for std::swap, 
 #include <cmath>   // for std::abs
-#include "CG.h"
-#include "Renderer.h" 
+
+#include "Constants.h" // for cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
 Renderer::Renderer() : Renderer(cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT) {};
 
 Renderer::Renderer(int width, int height) : width_(width), height_(height) {
-	//framebuffer_ = std::make_unique<float[]>(m_width * m_height * 3);
 	framebuffer_ = new GLubyte[width_ * height_ * 3];
 	// TODO init z-buffer
-	model_transform_ = mat4(1.0);
-	view_transform_ = mat4(1.0);
-	projection_transform_ = mat4(1.0);
+	model_transform_ = mat4::Identity();
+	view_transform_ = mat4::Identity();
+	projection_transform_ = mat4::Identity();
 	view_port_transform_ = Geometry::getViewPortTransform(width_, height_);
-	normal_transform_ = mat3(1.0);
+	normal_transform_ = mat3::Identity();
 	is_perspective_ = false;
 }
 
@@ -24,7 +25,6 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	width_ = new_width;
 	height_ = new_height;
 	delete framebuffer_;
-	//framebuffer_  = std::make_unique<float[]>(width_ * height_ * 3);
 	framebuffer_ = new GLubyte[width_ * height_ * 3];
 	view_port_transform_ = Geometry::getViewPortTransform(width_, height_);
 }
@@ -41,22 +41,22 @@ void Renderer::DrawTriangles(const std::vector<vec3>* vertices, const std::vecto
 	// create a vector of screen vertices initialized to zero of size vertices->size()
 	std::vector<vec4> screen_vertices(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
-		vec4 local_vertex = vec4((*vertices)[i].x, (*vertices)[i].y, (*vertices)[i].z, 1);
+		vec4 local_vertex{ (*vertices)[i].x(), (*vertices)[i].y(), (*vertices)[i].z(), 1 };
 		vec4 clip_vertex = mvp * local_vertex; // normalized device coordinates
 		if (is_perspective_)
-			clip_vertex = vec4(clip_vertex.x / clip_vertex.w, clip_vertex.y / clip_vertex.w, clip_vertex.z / clip_vertex.w, 1);
+			clip_vertex /= clip_vertex.w();
 		screen_vertices[i] = view_port_transform_ * clip_vertex; // pixel coordinates
 	}
 
 	// Draw each triangle
 	for (int i = 0; i < screen_vertices.size(); i += 3) {
 		// call drawLine and cast the vertices to int
-		DrawLine((int)screen_vertices[i].x, (int)screen_vertices[i].y,
-			(int)screen_vertices[i + 1].x, (int)screen_vertices[i + 1].y);
-		DrawLine((int)screen_vertices[i + 1].x, (int)screen_vertices[i + 1].y,
-			(int)screen_vertices[i + 2].x, (int)screen_vertices[i + 2].y);
-		DrawLine((int)screen_vertices[i + 2].x, (int)screen_vertices[i + 2].y,
-			(int)screen_vertices[i].x, (int)screen_vertices[i].y);
+		DrawLine((int)screen_vertices[i].x(), (int)screen_vertices[i].y(),
+			(int)screen_vertices[i + 1].x(), (int)screen_vertices[i + 1].y());
+		DrawLine((int)screen_vertices[i + 1].x(), (int)screen_vertices[i + 1].y(),
+			(int)screen_vertices[i + 2].x(), (int)screen_vertices[i + 2].y());
+		DrawLine((int)screen_vertices[i + 2].x(), (int)screen_vertices[i + 2].y(),
+			(int)screen_vertices[i].x(), (int)screen_vertices[i].y());
 	}
 }
 
@@ -130,6 +130,5 @@ void Renderer::SetModelTransform(const mat4& model_transform, const mat3& normal
 void Renderer::ClearBuffers()
 {
 	memset(framebuffer_, 0, width_ * height_ * 3); // Initialize with black color
-	//std::fill(framebuffer_.get(), framebuffer_.get() + 3 * width_ * height_, 0);
 	// TODO clear z_buffer_
 }

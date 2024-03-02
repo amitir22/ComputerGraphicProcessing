@@ -1,12 +1,12 @@
 // MeshModel.cpp
 #include "MeshModel.h"
-#include "vec.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-using namespace std;
+#include <Eigen/Dense>
 vec3 vec3fFromStream(std::istream& a_stream)
 {
 	float x, y, z;
@@ -24,8 +24,8 @@ vec2 vec2fFromStream(std::istream& a_stream)
 
 MeshModel::MeshModel() noexcept
 {
-	model_transform_ = mat4(1.0f);
-	normal_transform_ = mat3(1.0f);
+	model_transform_ = mat4::Identity();
+	normal_transform_ = mat3::Identity();
 }
 
 
