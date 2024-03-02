@@ -20,4 +20,5 @@ Release/
 
 # Exclude VS control folder
 .vs/
-.vscode/
+out/
+bin/
