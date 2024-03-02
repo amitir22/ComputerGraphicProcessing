@@ -6,20 +6,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Callbacks.h"
 #include "Constants.h"
+#include "ControlState.h"
 #include "PathConfig.h" // for RESOURCES_DIR
 #include "Shader.h"
 #include "Scene.h"
 
-
-
 Renderer* renderer;
 Scene* scene;
-
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-void ProcessInput(GLFWwindow* window);
-
-
 
 int main()
 {
@@ -43,8 +38,13 @@ int main()
         glfwTerminate();
         return -1;
     }
+    ControlState control_state(cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT);
+    glfwSetWindowUserPointer(window, &control_state);
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+    glfwSetCursorPosCallback(window, MouseCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -104,16 +104,17 @@ int main()
     renderer = new Renderer(cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT);
     scene = new Scene(renderer);
 
-
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+        // per-frame time logic
+        // --------------------
+        control_state.UpdateDeltaTime(static_cast<float>(glfwGetTime()));
         // input
         // -----
         ProcessInput(window);
         scene->Draw();
-        //renderer->DrawLine(0, 0, 10, 10);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, renderer->width_, renderer->height_, GL_RGB, GL_UNSIGNED_BYTE, renderer->framebuffer_);
@@ -149,19 +150,3 @@ int main()
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void ProcessInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-}

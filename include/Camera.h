@@ -1,24 +1,20 @@
 // Camera.h
 #pragma once
-#include <cmath>
-
 #include <Eigen/Dense>
 
+#include <cmath> // for sin,cos
+
+#include "Constants.h" // for CameraMovement
 #include "Geometry.h"
 
 static const float YAW = -90.0f;
 static const float SPEED = 2.5f;
-static const float SENSITIVITY = 0.1f;
+static const float SENSITIVITY = 0.05f;
 static const float PITCH = 0.0f;
 static const float ZOOM = 45.0f;
 
 
-enum Camera_Movement {
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT
-};
+
 
 class Camera {
 public:
@@ -55,11 +51,11 @@ public:
 	void Rotate(const vec3& axis, float angle);
 	void ZoomIn(float zoom);
 
-	void HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch = true);
+	void HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch=true);
 	void HandleMouseScroll(float y_offset);
 	void HandleKeyboardInput(int key, float deltaTime);
 	void UpdateVectors();
-	bool IsPerspectiveProjection() { return is_perspective_; }
+	bool IsPerspectiveProjection() const { return is_perspective_; }
 private:
 	bool is_perspective_;
 };

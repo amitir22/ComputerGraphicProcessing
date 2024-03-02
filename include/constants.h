@@ -1,5 +1,11 @@
 // constants.h
 #pragma once
+enum CameraMovement {
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT
+};
 namespace cg {
 	namespace constants {
 		// default width and height values

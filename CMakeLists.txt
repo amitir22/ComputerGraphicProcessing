@@ -14,14 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project ("CG")
 
 ##### source files #####
-#file(GLOB SHADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.vs" "${PROJECT_SOURCE_DIR}/src/*.fs")
-#foreach(SHADER ${SHADERS})
-  #get_filename_component(SHADER_NAME ${SHADER} NAME)
-  #configure_file(${SHADER} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${SHADER_NAME} COPYONLY)
-#endforeach()
 file(GLOB PROJECT_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.c")
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "include/Shader.h" "include/vec.h" "include/mat.h")
-# add_custom_command(TARGET ${NAME} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SHADER} $<TARGET_FILE_DIR:${NAME}>)
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "include/Shader.h")
 # Configure a header file to pass the assets directory to the source code
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 configure_file("${PROJECT_SOURCE_DIR}/config/PathConfig.h.in" "${CMAKE_BINARY_DIR}/config/PathConfig.h")

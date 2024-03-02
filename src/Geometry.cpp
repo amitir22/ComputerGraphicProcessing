@@ -47,8 +47,9 @@ mat4 Geometry::getViewPortTransform(int width, int height)
 
 	viewPortTransform(0,3) = (width) / 2.0;
 	viewPortTransform(1,3) = (height) / 2.0;
-	// Keeping z values between [-1,1]
-	viewPortTransform(2,2) = 1;
+	
+	viewPortTransform(2,2) = 1; // Keeping z values between [-1,1]
+	
 	return viewPortTransform;
 }
 

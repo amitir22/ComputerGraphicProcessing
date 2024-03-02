@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-#include <cmath> // for M_PI
 #include <iostream>
+
 #define M_PI 3.14159265358979323846f
 float radians(float degrees) { return degrees * M_PI / 180.0f; }
 
@@ -10,7 +10,7 @@ float radians(float degrees) { return degrees * M_PI / 180.0f; }
 Camera::Camera(vec3 eye, vec3 at, vec3 up) : eye(eye), up(up), yaw(YAW), pitch(PITCH),
 zoom(ZOOM), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0, 1, 0) {
 	gaze = (at - eye).normalized(); // points to negative z
-	right = up.cross(- gaze);  // points to positive x
+	right = up.cross(-gaze);  // points to positive x
 	LookAt(eye, at, up);
 	//SetOrtho(-1, 1, -1, 1, 0.1f, 10);
 	SetPerspective(-1, 1, -1, 1, 0.1f, 10);
@@ -78,16 +78,25 @@ void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_
 
 }
 
+void Camera::HandleMouseScroll(float y_offset)
+{
+	zoom -= y_offset;
+	if (zoom <= 1.0f)
+		zoom = 1.0f;
+	if (zoom >= 60.0f)
+		zoom = 60.0f;
+}
+
 void Camera::HandleKeyboardInput(int key, float delta_time)
 {
 	float velocity = movement_speed * delta_time;
-	if (key == FORWARD)
+	if (key == CameraMovement::FORWARD)
 		Translate(velocity * gaze);
-	if (key == BACKWARD)
+	if (key == CameraMovement::BACKWARD)
 		Translate(velocity * (-gaze));
-	if (key == LEFT)
+	if (key == CameraMovement::LEFT)
 		Translate(velocity * (-right));
-	if (key == RIGHT)
+	if (key == CameraMovement::RIGHT)
 		Translate(velocity * right);
 }
 
@@ -95,7 +104,7 @@ void Camera::UpdateVectors() {
 	gaze.x() = cos(radians(yaw)) * cos(radians(pitch));
 	gaze.y() = sin(radians(pitch));
 	gaze.z() = sin(radians(yaw)) * cos(radians(pitch));
-	gaze = gaze.normalized();
+	gaze.normalize();
 	right = (gaze.cross(world_up)).normalized();
 	up = (right.cross(gaze)).normalized();
 }
