@@ -96,13 +96,20 @@ void MeshModel::Draw(Renderer& renderer)
 // 		Transformation functions	  //
 ////////////////////////////////////////
 void MeshModel::Translate(vec3 translation)
-{ // TODO
+{
+	model_transform_ = geometry::makeTranslationMatrix(translation) * model_transform_;
+	//_normal_transform = Geometry::makeTranslationMatrix(translation) * _normal_transform;
 }
 
 void MeshModel::Rotate(vec3 axis, float angle)
-{ // TODO
+{
+	model_transform_ = geometry::makeRotationMatrix(axis, angle) * model_transform_;
+	//_normal_transform = Geometry::makeRotationMatrix(axis, angle) * _normal_transform;
+
 }
 
 void MeshModel::Scale(vec3 scale)
-{ // TODO
+{
+	model_transform_ = geometry::makeScaleMatrix(scale) * model_transform_;
+	//_normal_transform = Geometry::makeScaleMatrix(scale) * _normal_transform; TODO
 }

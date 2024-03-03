@@ -16,7 +16,7 @@ Renderer::Renderer(int width, int height) : width_(width), height_(height) {
 	model_transform_ = mat4::Identity();
 	view_transform_ = mat4::Identity();
 	projection_transform_ = mat4::Identity();
-	view_port_transform_ = Geometry::getViewPortTransform(width_, height_);
+	view_port_transform_ = geometry::getViewPortTransform(width_, height_);
 	normal_transform_ = mat3::Identity();
 	is_perspective_ = false;
 }
@@ -26,7 +26,7 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	height_ = new_height;
 	delete framebuffer_;
 	framebuffer_ = new GLubyte[width_ * height_ * 3];
-	view_port_transform_ = Geometry::getViewPortTransform(width_, height_);
+	view_port_transform_ = geometry::getViewPortTransform(width_, height_);
 }
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
@@ -110,9 +110,7 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 }
 
 void Renderer::DrawPixel(int x, int y) {
-	int res = INDEX(width_, x, y, 2);
-	// do this with a try and except
-	if (res < 0 || res >= width_ * height_ * 3) {
+	if (x < 0 || x >= width_ || y < 0 || y >= height_) {
 		return;
 	}
 	framebuffer_[INDEX(width_, x, y, 0)] = 255;

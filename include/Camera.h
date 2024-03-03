@@ -1,8 +1,8 @@
 // Camera.h
 #pragma once
-#include <Eigen/Dense>
-
 #include <cmath> // for sin,cos
+
+#include <Eigen/Dense>
 
 #include "Constants.h" // for CameraMovement
 #include "Geometry.h"
@@ -11,9 +11,9 @@ static const float YAW = -90.0f;
 static const float SPEED = 2.5f;
 static const float SENSITIVITY = 0.05f;
 static const float PITCH = 0.0f;
-static const float ZOOM = 45.0f;
-
-
+static const float FOV = 45.0f;
+static const float Z_NEAR = 0.1f;
+static const float Z_FAR = 100.0f;
 
 
 class Camera {
@@ -31,7 +31,8 @@ public:
 	float yaw;
 	float pitch;
 	// Options
-	float zoom;
+	float aspect;
+	float fov;
 	float movement_speed;
 	float mouse_sensitivity;
 
@@ -41,21 +42,18 @@ public:
 
 	mat4 LookAt(const vec3& eye, const vec3& at, const vec3& up);
 	mat4 GetCameraTransform();
+	bool IsPerspectiveProjection() const { return is_perspective_; }
 	// Projections
 	void SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar);
-	void SetPerspective(float left, float right, float bottom, float top, float zNear, float zFar);
-	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
-	//mat4 Perspective(float fovy, float aspect, float zNear, float zFar);
-	// Functions
+	void SetPerspective(float fovy, float aspect, float zNear, float zFar);	
+	// Transformations
 	void Translate(const vec3& translation);
 	void Rotate(const vec3& axis, float angle);
-	void ZoomIn(float zoom);
-
+	// Input
 	void HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch=true);
 	void HandleMouseScroll(float y_offset);
-	void HandleKeyboardInput(int key, float deltaTime);
+	void HandleKeyboardInput(int key, float delta_time);
 	void UpdateVectors();
-	bool IsPerspectiveProjection() const { return is_perspective_; }
 private:
 	bool is_perspective_;
 };

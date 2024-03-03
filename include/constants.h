@@ -4,7 +4,9 @@ enum CameraMovement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
-	RIGHT
+	RIGHT,
+	UP,
+	DOWN
 };
 namespace cg {
 	namespace constants {

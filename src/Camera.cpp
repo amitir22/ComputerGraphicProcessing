@@ -1,24 +1,20 @@
+// Camera.cpp
 #include "Camera.h"
 
 #include <iostream>
 
-#define M_PI 3.14159265358979323846f
-float radians(float degrees) { return degrees * M_PI / 180.0f; }
-
-
 // Constructor implementation
 Camera::Camera(vec3 eye, vec3 at, vec3 up) : eye(eye), up(up), yaw(YAW), pitch(PITCH),
-zoom(ZOOM), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0, 1, 0) {
+fov(FOV), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0,1,0) {
 	gaze = (at - eye).normalized(); // points to negative z
 	right = up.cross(-gaze);  // points to positive x
 	LookAt(eye, at, up);
+	aspect = float(cg::constants::SCR_WIDTH) / float(cg::constants::SCR_HEIGHT);
+	SetPerspective(fov, aspect, Z_NEAR,Z_FAR);
 	//SetOrtho(-1, 1, -1, 1, 0.1f, 10);
-	SetPerspective(-1, 1, -1, 1, 0.1f, 10);
 	UpdateVectors();
 }
 
-// compute change-of-basis from world pose to camera pose, keeping in mind that the camera looks towards -z 
-// We've used https://www.songho.ca/opengl/gl_camera.html#lookat as a reference
 mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 {
 	// Compute translation matrix 
@@ -47,17 +43,15 @@ mat4 Camera::GetCameraTransform() {
 	return LookAt(eye, eye + gaze, up);
 }
 
-
 void Camera::SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	this->is_perspective_ = false;
-	projection = Geometry::getOrthoProjection(left, right, bottom, top, zNear, zFar);
+	projection = geometry::getOrthoProjection(left, right, bottom, top, zNear, zFar);
 }
 
-void Camera::SetPerspective(float left, float right, float bottom, float top, float zNear, float zFar)
-{
+void Camera::SetPerspective(float fovy, float aspect, float zNear, float zFar) {
 	this->is_perspective_ = true;
-	projection = Geometry::getPerspectiveProjection(left, right, bottom, top, zNear, zFar);
+	projection = geometry::getPerspectiveProjection(fovy, aspect, zNear, zFar);
 }
 
 void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch)
@@ -75,16 +69,17 @@ void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_
 			pitch = -89.0f;
 	}
 	UpdateVectors();
-
 }
 
 void Camera::HandleMouseScroll(float y_offset)
 {
-	zoom -= y_offset;
-	if (zoom <= 1.0f)
-		zoom = 1.0f;
-	if (zoom >= 60.0f)
-		zoom = 60.0f;
+	fov -= y_offset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 70.0f)
+		fov = 70.0f;
+	std::cout << "fov: " << fov << std::endl;
+	SetPerspective(fov, aspect, Z_NEAR, Z_FAR);
 }
 
 void Camera::HandleKeyboardInput(int key, float delta_time)
@@ -101,9 +96,9 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 }
 
 void Camera::UpdateVectors() {
-	gaze.x() = cos(radians(yaw)) * cos(radians(pitch));
-	gaze.y() = sin(radians(pitch));
-	gaze.z() = sin(radians(yaw)) * cos(radians(pitch));
+	gaze.x() = cos(geometry::radians(yaw)) * cos(geometry::radians(pitch));
+	gaze.y() = sin(geometry::radians(pitch));
+	gaze.z() = sin(geometry::radians(yaw)) * cos(geometry::radians(pitch));
 	gaze.normalize();
 	right = (gaze.cross(world_up)).normalized();
 	up = (right.cross(gaze)).normalized();
@@ -112,5 +107,5 @@ void Camera::UpdateVectors() {
 void Camera::Translate(const vec3& translation)
 {
 	eye += translation;
-	std::cout << eye.transpose() << std::endl;
+	std::cout << "eye: " << eye.transpose() << std::endl;
 }
