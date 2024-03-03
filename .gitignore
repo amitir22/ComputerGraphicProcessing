@@ -24,4 +24,3 @@ Release/
 out/
 bin/
 stam*
-!libs/*
