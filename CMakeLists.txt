@@ -15,7 +15,9 @@ project ("CG")
 
 ##### source files #####
 file(GLOB PROJECT_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.c")
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "include/Shader.h")
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c")
+# add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "include/Shader.h")
+
 # Configure a header file to pass the assets directory to the source code
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 configure_file("${PROJECT_SOURCE_DIR}/config/PathConfig.h.in" "${CMAKE_BINARY_DIR}/config/PathConfig.h")
@@ -25,12 +27,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_BINARY_DIR}/config")
 #GLFW#
 if(MSVC)
   set(GLFW_LIB_PATH "${PROJECT_SOURCE_DIR}/libs/lib-vc2022")
+elseif(UNIX AND NOT APPLE) # Check if the system is Linux
+  set(GLFW_LIB_PATH "${PROJECT_SOURCE_DIR}/libs")
 else()
   # Set the path for GLFW for non-MSVC compilers here
   set(GLFW_LIB_PATH "[path to your non-MSVC glfw lib directory]")
 endif()
 
-find_library(GLFW_LIBRARY NAMES glfw3 PATHS ${GLFW_LIB_PATH} NO_DEFAULT_PATH)
+find_library(GLFW_LIBRARY NAMES glfw3 glfw PATHS ${GLFW_LIB_PATH} NO_DEFAULT_PATH)
 if(NOT GLFW_LIBRARY)
   message(FATAL_ERROR "GLFW library not found in ${GLFW_LIB_PATH}")
 endif()
@@ -41,10 +45,8 @@ endif()
 
 ##### include directories #####
 target_include_directories(${PROJECT_NAME} PUBLIC "include")
-file(GLOB INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/*")
-foreach(DIR ${INCLUDE_DIRS})
-	target_include_directories(${PROJECT_NAME} PUBLIC ${DIR})
-endforeach()
 target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include/glad")
-#target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/config")
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
+endif()

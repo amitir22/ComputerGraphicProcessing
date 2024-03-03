@@ -12,7 +12,7 @@ Scene::Scene(Renderer* renderer) : renderer_(renderer) {
 	active_camera_idx = 0;
 	active_model_idx = 0;
 	active_light_idx = 0;
-	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
+	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/Bunny.obj");
 }
 
 void Scene::LoadOBJModel(string fileName)

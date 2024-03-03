@@ -1,4 +1,4 @@
-// constants.h
+// Constants.h
 #pragma once
 enum CameraMovement {
 	FORWARD,

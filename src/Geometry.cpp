@@ -1,7 +1,7 @@
 #include "Geometry.h"
 #include <cmath> // for sin,cos
 
-#define M_PI 3.14159265358979323846f
+// #define M_PI 3.14159265358979323846f
 float geometry::radians(float degrees) { return degrees * M_PI / 180; }
 
 // We call this orthographic projection, but we don't really project, since we don't want to lose depth information.
