@@ -11,7 +11,7 @@
 #include "ControlState.h"
 #include "PathConfig.h" // for RESOURCES_DIR
 #include "Shader.h"
-#include "Scene.h"
+#include "Renderer.h"
 
 Renderer* renderer;
 Scene* scene;
@@ -101,8 +101,8 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
     // Prepare data for texture
+    scene = new Scene();
     renderer = new Renderer(cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT);
-    scene = new Scene(renderer);
 
     // render loop
     // -----------
@@ -114,10 +114,10 @@ int main()
         // input
         // -----
         ProcessInput(window);
-        scene->Draw();
+        renderer->DrawScene(scene);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, renderer->width_, renderer->height_, GL_RGB, GL_UNSIGNED_BYTE, renderer->framebuffer_);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, renderer->width_, renderer->height_, GL_RGB, GL_UNSIGNED_BYTE, renderer->framebuffer_.get());
 
         // Render
         glClearColor(0.f, 0.f, 0.f, 0.f);

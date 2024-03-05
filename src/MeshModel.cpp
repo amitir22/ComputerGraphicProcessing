@@ -1,33 +1,19 @@
 // MeshModel.cpp
 #include "MeshModel.h"
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
 
 #include <Eigen/Dense>
-vec3 vec3fFromStream(std::istream& a_stream)
-{
-	float x, y, z;
-	a_stream >> x >> std::ws >> y >> std::ws >> z;
-	return vec3(x, y, z);
-}
 
-vec2 vec2fFromStream(std::istream& a_stream)
-{
-	float x, y;
-	a_stream >> x >> std::ws >> y;
-	return vec2(x, y);
-}
-
+#include "Geometry.h" // For vec3fFromStream
 
 MeshModel::MeshModel() noexcept
 {
 	model_transform_ = mat4::Identity();
-	normal_transform_ = mat3::Identity();
 }
-
 
 MeshModel::MeshModel(string file_name) : MeshModel()
 {
@@ -38,7 +24,7 @@ MeshModel::MeshModel(string file_name) : MeshModel()
 void MeshModel::LoadFile(string file_name)
 {
 	ifstream ifile(file_name.c_str());
-	vector<FaceIdcs> faces;
+	vector<FaceIdcs> faces_indices;
 	vector<vec3> vertices;
 	vector<vec3> normals;
 	// while not end of file
@@ -58,7 +44,7 @@ void MeshModel::LoadFile(string file_name)
 		else if (lineType == "vn")
 			normals.push_back(vec3fFromStream(issLine));
 		else if (lineType == "f")
-			faces.push_back(FaceIdcs(issLine));
+			faces_indices.push_back(FaceIdcs(issLine));
 		else if (lineType == "#" || lineType == "") {
 			// do nothing if the line is a comment or empty
 		}
@@ -71,25 +57,19 @@ void MeshModel::LoadFile(string file_name)
 		//f 1 3 4
 		//Then vertex_positions should contain:
 		//vertex_positions={v1,v2,v3,v1,v3,v4}
-		vertex_positions.resize(faces.size() * 3);
-		normal_positions.resize(faces.size() * 3);
-		for (int i = 0; i < faces.size(); i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				vertex_positions[i * 3 + j] = vertices[faces[i].v[j] - 1];
-				normal_positions[i * 3 + j] = normals[faces[i].vn[j] - 1];
+		vertex_positions.resize(faces_indices.size() * 3);
+		normal_positions.resize(faces_indices.size() * 3);
+		for (int i = 0; i < faces_indices.size(); i++) {
+			Face face;
+			for (int j = 0; j < 3; j++) {
+				face.vertices[j].position_in_local_coords = vertices[faces_indices[i].v[j] - 1];
+				face.vertices[j].normal_in_local_coords = normals[faces_indices[i].vn[j] - 1];
+				vertex_positions[i * 3 + j] = vertices[faces_indices[i].v[j] - 1];
+				normal_positions[i * 3 + j] = normals[faces_indices[i].vn[j] - 1];
 			}
+			faces.push_back(face);
 		}
 	}
-}
-
-
-
-void MeshModel::Draw(Renderer& renderer)
-{
-	renderer.SetModelTransform(model_transform_, normal_transform_);
-	renderer.DrawTriangles(&vertex_positions, &normal_positions);
 }
 
 ////////////////////////////////////////
@@ -98,18 +78,14 @@ void MeshModel::Draw(Renderer& renderer)
 void MeshModel::Translate(vec3 translation)
 {
 	model_transform_ = geometry::makeTranslationMatrix(translation) * model_transform_;
-	//_normal_transform = Geometry::makeTranslationMatrix(translation) * _normal_transform;
 }
 
 void MeshModel::Rotate(vec3 axis, float angle)
 {
 	model_transform_ = geometry::makeRotationMatrix(axis, angle) * model_transform_;
-	//_normal_transform = Geometry::makeRotationMatrix(axis, angle) * _normal_transform;
-
 }
 
 void MeshModel::Scale(vec3 scale)
 {
 	model_transform_ = geometry::makeScaleMatrix(scale) * model_transform_;
-	//_normal_transform = Geometry::makeScaleMatrix(scale) * _normal_transform; TODO
 }

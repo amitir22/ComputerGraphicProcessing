@@ -4,6 +4,24 @@
 // #define M_PI 3.14159265358979323846f
 float geometry::radians(float degrees) { return degrees * M_PI / 180; }
 
+vec3 vec3fFromStream(std::istream& a_stream)
+{
+	float x, y, z;
+	a_stream >> x >> std::ws >> y >> std::ws >> z;
+	return vec3(x, y, z);
+}
+
+vec2 vec2fFromStream(std::istream& a_stream)
+{
+	float x, y;
+	a_stream >> x >> std::ws >> y;
+	return vec2(x, y);
+}
+
+vec4 homogoneize_vector(vec3 v) {
+	return vec4(v.x(), v.y(), v.z(), 1);
+}
+
 // We call this orthographic projection, but we don't really project, since we don't want to lose depth information.
 mat4 geometry::getOrthoProjection(float left, float right, float bottom, float top,
 								  float zNear, float zFar)
@@ -68,6 +86,21 @@ mat4 geometry::getViewPortTransform(int width, int height)
 	return viewPortTransform;
 }
 
+mat3 geometry::getNormalTransfrom(const mat4 &m)
+{
+    mat3 n;
+    n(0,0) = m(1,1)*m(2,2) - m(1,2)*m(2,1);
+    n(0,1) = m(1,2)*m(2,0) - m(1,0)*m(2,2);
+    n(0,2) = m(1,0)*m(2,1) - m(1,1)*m(2,0);
+    n(1,0) = m(0,2)*m(2,1) - m(0,1)*m(2,2);
+    n(1,1) = m(0,0)*m(2,2) - m(0,2)*m(2,0);
+    n(1,2) = m(0,1)*m(2,0) - m(0,0)*m(2,1);
+    n(2,0) = m(0,1)*m(1,2) - m(0,2)*m(1,1);
+    n(2,1) = m(0,2)*m(1,0) - m(0,0)*m(1,2);
+    n(2,2) = m(0,0)*m(1,1) - m(0,1)*m(1,0);
+    return n;
+}
+
 mat4 geometry::makeRotationMatrix(const vec3& axis, float angle)
 {
 	return mat4 {
@@ -120,4 +153,26 @@ mat4 geometry::makeTranslationMatrix(vec3 translation)
 		{0, 0, 0, 1}
 	};
 }
+Face::Face()
+{
+	// Default constructor
+	// Initialize vertices with default values
+	vertices[0] = Vertex();
+	vertices[1] = Vertex();
+	vertices[2] = Vertex();
 
+	// Set face normal to zero vector
+	normal_ = vec3(0, 0, 0);
+}
+
+Face::Face(const Vertex &v1, const Vertex &v2, const Vertex &v3)
+{
+	vertices[0] = v1;
+	vertices[1] = v2;
+	vertices[2] = v3;
+
+	// compute face normal using the cross product
+	vec3 edge1 = v2.position_in_local_coords - v1.position_in_local_coords;
+	vec3 edge2 = v3.position_in_local_coords - v1.position_in_local_coords;
+	normal_ = edge1.cross(edge2).normalized();
+}

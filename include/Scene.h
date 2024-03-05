@@ -8,41 +8,24 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Renderer.h"
 #include "Camera.h"
+#include "Light.h"
+#include "MeshModel.h"
 #include "PathConfig.h" // for RESOURCE_DIR
 
-
-class Model {
-public:
-	virtual ~Model() {}
-	void virtual Draw(Renderer& renderer) = 0;
-};
-
-
-class Light {
-
-};
-
-
 class Scene {
-	std::vector<std::unique_ptr<Model>> models_;
+	std::vector<std::unique_ptr<MeshModel>> models_;
 	std::vector<std::unique_ptr<Camera>> cameras_;
 	std::vector<std::unique_ptr<Light>> lights_;
-	Renderer* renderer_;
 public:
 	// Constructors
-	Scene() {};
-	Scene(Renderer* renderer);
+	Scene();
 
 	void LoadOBJModel(std::string file_name);
-	void Draw();
-	void DrawDemo();
-	Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
+    std::vector<MeshModel*> GetModels();
+    Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
 
-
-	int active_camera_idx;
+    int active_camera_idx;
 	int active_model_idx;
 	int active_light_idx;
-
 };

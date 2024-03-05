@@ -7,7 +7,7 @@
 
 #include <Eigen/Dense>
 
-#include "Scene.h"
+#include "Geometry.h"
 
 using namespace std;
 
@@ -51,24 +51,25 @@ struct FaceIdcs
 };
 
 
-class MeshModel : public Model
+class MeshModel
 {
 protected:
-	std::vector<vec3> vertex_positions;
-	std::vector<vec3> normal_positions;
+	std::vector<vec3> vertex_positions; // in local space
+	std::vector<vec3> normal_positions; // in local space
+	std::vector<Face> faces;
 
 	mat4 model_transform_; // also known as model transform
-	mat3 normal_transform_;
 
 public:
 	MeshModel() noexcept;
+
 	explicit MeshModel(string fileName);
 	void LoadFile(string fileName);
-	void Draw(Renderer& renderer);
 	// User Transformation
 	void Translate(vec3 translation);
 	void Rotate(vec3 axis, float angle);
 	void Scale(vec3 scale);
-
-
+	
+	mat4 GetModelTransform() const {return model_transform_;}
+	std::vector<Face>& GetFaces() {return faces;}
 };

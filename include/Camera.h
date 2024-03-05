@@ -41,7 +41,8 @@ public:
 	Camera(vec3 eye = vec3(0, 0, 2), vec3 at = vec3(0, 0, 0), vec3 up = vec3(0, 1, 0));
 
 	mat4 LookAt(const vec3& eye, const vec3& at, const vec3& up);
-	mat4 GetCameraTransform();
+	mat4 GetViewTransform();
+	mat4 GetProjectionTransform() { return projection; };
 	bool IsPerspectiveProjection() const { return is_perspective_; }
 	// Projections
 	void SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar);

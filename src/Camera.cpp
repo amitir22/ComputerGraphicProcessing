@@ -39,7 +39,7 @@ mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 	return view_transform;
 }
 
-mat4 Camera::GetCameraTransform() {
+mat4 Camera::GetViewTransform() {
 	return LookAt(eye, eye + gaze, up);
 }
 

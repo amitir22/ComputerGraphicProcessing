@@ -6,14 +6,17 @@
 using namespace std;
 
 // Constructors
-Scene::Scene(Renderer* renderer) : renderer_(renderer) {
+Scene::Scene() {
 	// create a default camera
 	cameras_.push_back(std::make_unique<Camera>());
 	active_camera_idx = 0;
 	active_model_idx = 0;
 	active_light_idx = 0;
+	// TODO delete, load from menu
 	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/Bunny.obj");
 }
+
+
 
 void Scene::LoadOBJModel(string fileName)
 {
@@ -21,17 +24,10 @@ void Scene::LoadOBJModel(string fileName)
 	active_model_idx = models_.size() - 1;
 }
 
-void Scene::Draw()
-{
-	renderer_->ClearBuffers();
-	// 1. Send the renderer the active camera transform and the projection
-	Camera* active_cam = cameras_[active_camera_idx].get();
-	renderer_->SetViewTransform(active_cam->GetCameraTransform());
-	renderer_->SetProjectionTransform(active_cam->projection, active_cam->IsPerspectiveProjection());
-
-	// 2. Tell all models to draw themselves
-	for (auto& model : models_)
-	{
-		model->Draw(*renderer_);
+std::vector<MeshModel*> Scene::GetModels() {
+	std::vector<MeshModel*> models;
+	for (const auto& model : models_) {
+		models.push_back(model.get());
 	}
+	return models;
 }
