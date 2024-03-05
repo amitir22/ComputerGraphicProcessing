@@ -62,8 +62,8 @@ void MeshModel::LoadFile(string file_name)
 		for (int i = 0; i < faces_indices.size(); i++) {
 			Face face;
 			for (int j = 0; j < 3; j++) {
-				face.vertices[j].position_in_local_coords = vertices[faces_indices[i].v[j] - 1];
-				face.vertices[j].normal_in_local_coords = normals[faces_indices[i].vn[j] - 1];
+				face.vertices[j].position_in_local_space = vertices[faces_indices[i].v[j] - 1];
+				face.vertices[j].normal_in_local_space = normals[faces_indices[i].vn[j] - 1];
 				vertex_positions[i * 3 + j] = vertices[faces_indices[i].v[j] - 1];
 				normal_positions[i * 3 + j] = normals[faces_indices[i].vn[j] - 1];
 			}

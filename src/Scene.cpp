@@ -13,7 +13,8 @@ Scene::Scene() {
 	active_model_idx = 0;
 	active_light_idx = 0;
 	// TODO delete, load from menu
-	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/Bunny.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/Bunny.obj");
+	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle.obj");
 }
 
 

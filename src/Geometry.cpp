@@ -172,7 +172,7 @@ Face::Face(const Vertex &v1, const Vertex &v2, const Vertex &v3)
 	vertices[2] = v3;
 
 	// compute face normal using the cross product
-	vec3 edge1 = v2.position_in_local_coords - v1.position_in_local_coords;
-	vec3 edge2 = v3.position_in_local_coords - v1.position_in_local_coords;
+	vec3 edge1 = v2.position_in_local_space - v1.position_in_local_space;
+	vec3 edge2 = v3.position_in_local_space - v1.position_in_local_space;
 	normal_ = edge1.cross(edge2).normalized();
 }

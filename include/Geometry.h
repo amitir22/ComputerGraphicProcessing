@@ -15,6 +15,21 @@ vec3 vec3fFromStream(std::istream& a_stream);
 
 vec4 homogoneize_vector(vec3 v);
 
+struct Vertex{ // don't change order
+	vec3 position_in_local_space;
+	vec3 normal_in_local_space;
+	// vec2 texture;
+};
+
+struct Face{ // don't change order
+	std::array<Vertex, 3> vertices; // in local space
+	vec3 normal_; // face normal, in local space
+
+    Face();
+
+    Face(const Vertex &v1, const Vertex &v2, const Vertex &v3);
+};
+
 namespace geometry {
 	float radians(float degrees);
 	mat4 makeRotationMatrix(const vec3& axis, float angle);
@@ -27,19 +42,5 @@ namespace geometry {
 	mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
 
 	mat3 getNormalTransfrom(const mat4& m); // from modelview
-}
+} // namespace geometry
 
-struct Vertex{ // don't change order
-	vec3 position_in_local_coords; // in local space
-	vec3 normal_in_local_coords;
-	// vec2 texture;
-};
-
-struct Face{ // don't change order
-	std::array<Vertex, 3> vertices; // in local space
-	vec3 normal_; // in local space
-
-    Face();
-
-    Face(const Vertex &v1, const Vertex &v2, const Vertex &v3);
-};
