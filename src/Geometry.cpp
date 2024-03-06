@@ -1,7 +1,7 @@
 #include "Geometry.h"
 #include <cmath> // for sin,cos
 
-// #define M_PI 3.14159265358979323846f
+#define M_PI 3.14159265358979323846f
 float geometry::radians(float degrees) { return degrees * M_PI / 180; }
 
 vec3 vec3fFromStream(std::istream& a_stream)

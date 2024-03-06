@@ -6,7 +6,8 @@ enum CameraMovement {
 	LEFT,
 	RIGHT,
 	UP,
-	DOWN
+	DOWN,
+	ROTATE
 };
 namespace cg {
 	namespace constants {

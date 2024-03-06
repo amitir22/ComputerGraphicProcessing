@@ -25,6 +25,8 @@ void ProcessInput(GLFWwindow* window)
         active_camera->HandleKeyboardInput(UP, control_state->delta_time);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         active_camera->HandleKeyboardInput(DOWN, control_state->delta_time);
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        active_camera->HandleKeyboardInput(ROTATE, control_state->delta_time);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

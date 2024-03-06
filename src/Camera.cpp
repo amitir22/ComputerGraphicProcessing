@@ -31,6 +31,7 @@ mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 
 	// Compute rotation matrix. 
 	vec3 n = (eye - at).normalized(); // points to positive z, aka forward
+	//this->gaze = n;
 	vec3 u = (up.cross(n)).normalized(); // points to positive x
 	vec3 v = (n.cross(u)).normalized(); // points to positive y, really just normalization of up
 	mat4 rotation_matrix{
@@ -102,8 +103,11 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 		Translate(velocity * up);
 	if (key == CameraMovement::DOWN)
 		Translate(velocity * (-up));
+	if (key == CameraMovement::ROTATE)
+		Rotate();
 	
 }
+
 
 void Camera::UpdateVectors() {
 	gaze.x() = cos(geometry::radians(yaw)) * cos(geometry::radians(pitch));
@@ -118,4 +122,14 @@ void Camera::Translate(const vec3& translation)
 {
 	eye += translation;
 	std::cout << "eye: " << eye.transpose() << std::endl;
+} 
+
+void Camera::Rotate()
+{
+	float step_size = 0.1;
+	vec3 translate_dir = this->eye.cross(this->up);
+	float resize_factor = step_size / translate_dir.norm();
+
+	this->eye += resize_factor * translate_dir;
+	this->gaze = -this->eye.normalized();
 }

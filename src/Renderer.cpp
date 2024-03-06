@@ -53,6 +53,7 @@ void Renderer::DrawScene(Scene *scene)
 	for (const auto& model : models) {
 		// set transforms
 		model_transform_ =  model->GetModelTransform();
+		// TODO get model material
 		mat4 modelview_matrix = view_transform_ * model_transform_;
 		normal_transform_ = geometry::getNormalTransfrom(modelview_matrix);
 		// Get model faces
@@ -60,21 +61,25 @@ void Renderer::DrawScene(Scene *scene)
 		std::vector<Face> faces = model->GetFaces();
 		// Render each face
 		for (const auto& face : faces) {
-			// RenderFace(face);
+			 //RenderFace(face);
 			RenderFaceScratch(face);
 		}
 	}
 }
 
 
-
-
 void Renderer::RenderFace(const Face& face){
 	// TODO Backface culling
-	// vec3 face_normal_in_view_space = (normal_transform_ * face.normal_).normalized();
-	// if (face_normal_in_view_space.z() > 0) {
-	// 	return;
-	// }
+	vec3 gaze = scene_->GetActiveCamera()->gaze;
+	vec3 face_normal = face.normal_;
+	float z_dot = scene_->GetActiveCamera()->gaze.dot(face.normal_);
+	//std::cout << "z_dot: " << z_dot << std::endl;
+	
+	if (z_dot >= 0)
+	{
+		return;
+	}
+
 	// Project vertices to view-space using view_transform_ * model_transform_ 
 	std::vector<vec4> vertices_in_view_space(face.vertices.size());
 	std::vector<vec3> vertex_normals_in_view_space(face.vertices.size());
@@ -165,7 +170,8 @@ void Renderer::SetScene(Scene *scene)
 	projection_transform_ = scene->GetActiveCamera()->GetProjectionTransform();
 	is_perspective_ = scene->GetActiveCamera()->IsPerspectiveProjection();
 
-	// TODO delete
+	// TODO get light
+
 	z_near = scene->GetActiveCamera()->z_near_;
 	z_far = scene->GetActiveCamera()->z_far_;
 	right = scene->GetActiveCamera()->right_;

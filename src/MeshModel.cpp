@@ -57,16 +57,22 @@ void MeshModel::LoadFile(string file_name)
 		//f 1 3 4
 		//Then vertex_positions should contain:
 		//vertex_positions={v1,v2,v3,v1,v3,v4}
-		vertex_positions.resize(faces_indices.size() * 3);
-		normal_positions.resize(faces_indices.size() * 3);
+		//vertex_positions.resize(faces_indices.size() * 3);
+		//normal_positions.resize(faces_indices.size() * 3);
 		for (int i = 0; i < faces_indices.size(); i++) {
-			Face face;
-			for (int j = 0; j < 3; j++) {
-				face.vertices[j].position_in_local_space = vertices[faces_indices[i].v[j] - 1];
-				face.vertices[j].normal_in_local_space = normals[faces_indices[i].vn[j] - 1];
-				vertex_positions[i * 3 + j] = vertices[faces_indices[i].v[j] - 1];
-				normal_positions[i * 3 + j] = normals[faces_indices[i].vn[j] - 1];
-			}
+			Vertex v1, v2, v3;
+
+			v1.position_in_local_space = vertices[faces_indices[i].v[0] - 1];
+			v1.normal_in_local_space = normals[faces_indices[i].vn[0] - 1];
+			v2.position_in_local_space = vertices[faces_indices[i].v[1] - 1];
+			v2.normal_in_local_space = normals[faces_indices[i].vn[1] - 1];
+			v3.position_in_local_space = vertices[faces_indices[i].v[2] - 1];
+			v3.normal_in_local_space = normals[faces_indices[i].vn[2] - 1];
+			//vertex_positions[i * 3 + j] = vertices[faces_indices[i].v[j] - 1];
+			//normal_positions[i * 3 + j] = normals[faces_indices[i].vn[j] - 1];
+
+			Face face = Face(v1, v2, v3);
+
 			faces.push_back(face);
 		}
 	}

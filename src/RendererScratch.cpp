@@ -90,6 +90,16 @@ void ProjectFaceToRasterScratch(const Face& face, const mat4& mvp, const mat4& v
 }
 
 void Renderer::RenderFaceScratch(const Face& face) {
+    // TODO Backface culling
+    vec3 gaze = scene_->GetActiveCamera()->gaze;
+    vec3 face_normal = face.normal_;
+    float z_dot = scene_->GetActiveCamera()->gaze.dot(face.normal_);
+    //std::cout << "z_dot: " << z_dot << std::endl;
+
+    if (z_dot >= 0)
+    {
+        return;
+    }
     // convert face vertices to Vec3f
     // const Vec3f &v0 = EigenVec3ToGeometryVec3(face.vertices[0].position_in_local_space);
     // const Vec3f &v1 = EigenVec3ToGeometryVec3(face.vertices[1].position_in_local_space);
@@ -153,9 +163,13 @@ void Renderer::RenderFaceScratch(const Face& face) {
                 // Depth-buffer test
                 if (z < z_buffer_[y * imageWidth + x]) {
                     z_buffer_[y * imageWidth + x] = z;
+                    // TODO fragment shader - compute color, according to selected lighting method
+                    // Renderer::getShadingForFragment(Face, fragment)
                     DrawPixel(x, y);
                 } // end if depth-buffer test
             } // end if inside
         } // end for x
     } // end for y
 }
+
+// Renderer::getShadingForFragment(Face, fragment)
