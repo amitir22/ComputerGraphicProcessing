@@ -10,6 +10,10 @@ fov(FOV), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0,1,0)
 	right = up.cross(-gaze);  // points to positive x
 	LookAt(eye, at, up);
 	aspect = float(cg::constants::SCR_WIDTH) / float(cg::constants::SCR_HEIGHT);
+	z_near_ = Z_NEAR;
+	z_far_ = Z_FAR;
+	top_ = 0.0f;
+	right_ = 0.0f;
 	SetPerspective(fov, aspect, Z_NEAR,Z_FAR);
 	//SetOrtho(-1, 1, -1, 1, 0.1f, 10);
 	UpdateVectors();
@@ -51,6 +55,7 @@ void Camera::SetOrtho(float left, float right, float bottom, float top, float zN
 
 void Camera::SetPerspective(float fovy, float aspect, float zNear, float zFar) {
 	this->is_perspective_ = true;
+	geometry::getTopAndRight(fovy, aspect, zNear, top_, right_);
 	projection = geometry::getPerspectiveProjection(fovy, aspect, zNear, zFar);
 }
 
@@ -93,6 +98,11 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 		Translate(velocity * (-right));
 	if (key == CameraMovement::RIGHT)
 		Translate(velocity * right);
+	if (key == CameraMovement::UP)
+		Translate(velocity * up);
+	if (key == CameraMovement::DOWN)
+		Translate(velocity * (-up));
+	
 }
 
 void Camera::UpdateVectors() {

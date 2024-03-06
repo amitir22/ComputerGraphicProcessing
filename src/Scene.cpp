@@ -13,8 +13,12 @@ Scene::Scene() {
 	active_model_idx = 0;
 	active_light_idx = 0;
 	// TODO delete, load from menu
-	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/Bunny.obj");
-	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
+	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/banana.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/two_triangles.obj");
+	// LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/trig_pyramid.obj");
 }
 
 

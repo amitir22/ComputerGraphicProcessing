@@ -62,6 +62,14 @@ mat4 geometry::getPerspectiveProjection(float left, float right, float bottom, f
 	return ortho * P;
 }
 
+void geometry::getTopAndRight(float fovy, float aspect, float zNear, float &top, float &right)
+{
+	// fovy is the field of view in the y direction, in degrees
+	// aspect is the ratio of the width to the height of the viewing volume
+	top = zNear * tan(radians(fovy) / 2);
+	right = top * aspect;
+}
+
 mat4 geometry::getPerspectiveProjection(float fovy, float aspect, float zNear, float zFar)
 {
 	// fovy is the field of view in the y direction, in degrees
@@ -78,8 +86,8 @@ mat4 geometry::getViewPortTransform(int width, int height)
 	viewPortTransform(0,0) = width / 2.0;
 	viewPortTransform(1,1) = height / 2.0;
 
-	viewPortTransform(0,3) = (width) / 2.0;
-	viewPortTransform(1,3) = (height) / 2.0;
+	viewPortTransform(0,3) = width / 2.0;
+	viewPortTransform(1,3) = height / 2.0;
 	
 	viewPortTransform(2,2) = 1; // Keeping z values between [-1,1]
 	

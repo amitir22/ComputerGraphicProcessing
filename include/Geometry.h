@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <Eigen/Dense>
-
+using vec2i = Eigen::Vector2i;
 using vec2 = Eigen::Vector2f;
 using vec3 = Eigen::Vector3f;
 using vec4 = Eigen::Vector4f;
@@ -39,8 +39,9 @@ namespace geometry {
 	mat4 getPerspectiveProjection(float fovy, float aspect, float zNear, float zFar);
 	mat4 getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	mat4 getPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-	mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
+    void getTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
+    mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
 
-	mat3 getNormalTransfrom(const mat4& m); // from modelview
+    mat3 getNormalTransfrom(const mat4& m); // from modelview
 } // namespace geometry
 

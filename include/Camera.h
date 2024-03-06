@@ -36,6 +36,12 @@ public:
 	float movement_speed;
 	float mouse_sensitivity;
 
+	// other
+	float z_near_;
+	float z_far_;
+	float right_; 
+	float top_; 
+
 
 	// Functions
 	Camera(vec3 eye = vec3(0, 0, 2), vec3 at = vec3(0, 0, 0), vec3 up = vec3(0, 1, 0));
@@ -55,6 +61,7 @@ public:
 	void HandleMouseScroll(float y_offset);
 	void HandleKeyboardInput(int key, float delta_time);
 	void UpdateVectors();
+
 private:
 	bool is_perspective_;
 };

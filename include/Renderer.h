@@ -19,6 +19,7 @@ public:
 	mat4 model_transform_; // TODO Maybe delete, replace with Model.transform()
 	mat4 view_transform_; // TODO delete, replace with Camera.toViewSpace()
 	mat4 projection_transform_; // TODO delete, reaplce with Camera.project()
+	mat4 mvp_;
 	bool is_perspective_; // TODO delete, replace with Camera.isPerspective()
 	mat4 view_port_transform_; 
 	mat3 normal_transform_; // TODO delete, replace some Geometry call, that gets camera and model and retruns normal_transform
@@ -30,10 +31,22 @@ public:
 	// Draw functions
 	void DrawScene(Scene* scene);
     void RenderFace(const Face &face);
+	void RenderFaceScratch(const Face& face);
     void DrawPixel(int x, int y);
+	void RasterizeFace_SSLOYSCAN(const std::vector<vec3>& face_vertices_in_screen_space, 
+                                    const std::vector<vec3>& vertex_normals_in_view_space,
+                                    unsigned int width, unsigned int height);
 	// Utils
 	void ClearBuffers();
 	void HandleWindowReshape(int new_width, int new_height);
+	std::vector<vec3> ProjectFaceToRaster(const Face& face);
+
+
+	// TODO delete
+	float z_near;
+	float z_far;
+	float right;
+	float top;
 	
 private:
 	Scene* scene_;
