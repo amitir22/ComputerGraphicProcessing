@@ -21,7 +21,7 @@ public:
 	mat4 projection_transform_; // TODO delete, reaplce with Camera.project()
 	mat4 mvp_;
 	bool is_perspective_; // TODO delete, replace with Camera.isPerspective()
-	mat3 view_port_transform_; 
+	mat4 view_port_transform_; 
 	mat3 normal_transform_; // TODO delete, replace some Geometry call, that gets camera and model and retruns normal_transform
 
 	// Constructors

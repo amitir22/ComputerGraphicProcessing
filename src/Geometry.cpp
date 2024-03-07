@@ -1,7 +1,9 @@
 #include "Geometry.h"
 #include <cmath> // for sin,cos
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846f
+#endif
 float geometry::radians(float degrees) { return degrees * M_PI / 180; }
 
 vec3 vec3fFromStream(std::istream& a_stream)
@@ -97,14 +99,16 @@ mat4 geometry::getPerspectiveProjection(float fovy, float aspect, float zNear, f
 	return getPerspectiveProjection(-right, right, -top, top, zNear, zFar);
 }
 
-mat3 geometry::getViewPortTransform(int width, int height)
+mat4 geometry::getViewPortTransform(int width, int height)
 {
-	mat3 viewPortTransform = mat3::Identity();
+	mat4 viewPortTransform = mat4::Identity();
 	viewPortTransform(0, 0) = static_cast<float>(width) / 2.0f;
 	viewPortTransform(1, 1) = static_cast<float>(height) / 2.0f;
 
-	viewPortTransform(0, 2) = static_cast<float>(width) / 2.0f;
-	viewPortTransform(1, 2) = static_cast<float>(height) / 2.0f;
+	viewPortTransform(0, 3) = static_cast<float>(width) / 2.0f;
+	viewPortTransform(1, 3) = static_cast<float>(height) / 2.0f;
+
+	viewPortTransform(2,2) = 1; // Keeping z values between [-1,1]
 
 	return viewPortTransform;
 }
@@ -127,30 +131,30 @@ mat3 geometry::getNormalTransfrom(const mat4 &m)
 mat4 geometry::makeRotationMatrix(const vec3& axis, float angle)
 {
 	return mat4 {
-	{cos(angle) + axis.x() * axis.x() * (1 - cos(angle)), axis.x() * axis.y() * (1 - cos(angle)) - axis.z() * sin(angle), axis.x() * axis.z() * (1 - cos(angle)) + axis.y() * sin(angle), 0},
-	{axis.y() * axis.x() * (1 - cos(angle)) + axis.z() * sin(angle), cos(angle) + axis.y() * axis.y() * (1 - cos(angle)), axis.y() * axis.z() * (1 - cos(angle)) - axis.x() * sin(angle), 0},
-	{axis.z() * axis.x() * (1 - cos(angle)) - axis.y() * sin(angle), axis.z() * axis.y() * (1 - cos(angle)) + axis.x() * sin(angle), cos(angle) + axis.z() * axis.z() * (1 - cos(angle)), 0},
-	{0, 0, 0, 1}
+		{static_cast<float>(cos(angle)) + axis.x() * axis.x() * (1 - static_cast<float>(cos(angle))), axis.x() * axis.y() * (1 - static_cast<float>(cos(angle))) - axis.z() * static_cast<float>(sin(angle)), axis.x() * axis.z() * (1 - static_cast<float>(cos(angle))) + axis.y() * static_cast<float>(sin(angle)), 0},
+		{axis.y() * axis.x() * (1 - static_cast<float>(cos(angle))) + axis.z() * static_cast<float>(sin(angle)), static_cast<float>(cos(angle)) + axis.y() * axis.y() * (1 - static_cast<float>(cos(angle))), axis.y() * axis.z() * (1 - static_cast<float>(cos(angle))) - axis.x() * static_cast<float>(sin(angle)), 0},
+		{axis.z() * axis.x() * (1 - static_cast<float>(cos(angle))) - axis.y() * static_cast<float>(sin(angle)), axis.z() * axis.y() * (1 - static_cast<float>(cos(angle))) + axis.x() * static_cast<float>(sin(angle)), static_cast<float>(cos(angle)) + axis.z() * axis.z() * (1 - static_cast<float>(cos(angle))), 0},
+		{0, 0, 0, 1}
 	};
 }
 
 mat4 geometry::makeRotationMatrix(float yaw, float pitch, float roll)
 {
 	mat4 yawMatrix{
-		{cos(yaw), 0, sin(yaw), 0},
+		{static_cast<float>(cos(yaw)), 0, static_cast<float>(sin(yaw)), 0},
 		{0, 1, 0, 0},
-		{-sin(yaw), 0, cos(yaw), 0},
+		{-static_cast<float>(sin(yaw)), 0, static_cast<float>(cos(yaw)), 0},
 		{0, 0, 0, 1}
 	};
 	mat4 pitchMatrix{
 		{1, 0, 0, 0},
-		{0, cos(pitch), -sin(pitch), 0},
-		{0, sin(pitch), cos(pitch), 0},
+		{0, static_cast<float>(cos(pitch)), -static_cast<float>(sin(pitch)), 0},
+		{0, static_cast<float>(sin(pitch)), static_cast<float>(cos(pitch)), 0},
 		{0, 0, 0, 1}
 	};
 	mat4 rollMatrix{
-		{cos(roll), -sin(roll), 0, 0},
-		{sin(roll), cos(roll), 0, 0},
+		{static_cast<float>(cos(roll)), -static_cast<float>(sin(roll)), 0, 0},
+		{static_cast<float>(sin(roll)), static_cast<float>(cos(roll)), 0, 0},
 		{0, 0, 1, 0},
 		{0, 0, 0, 1}
 	};

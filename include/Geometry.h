@@ -24,7 +24,7 @@ namespace geometry {
 	mat4 getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	mat4 getPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
     void getTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
-    mat3 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
+    mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
 
     mat3 getNormalTransfrom(const mat4& m); // from modelview
 } // namespace geometry
