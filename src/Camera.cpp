@@ -126,6 +126,7 @@ void Camera::Translate(const vec3& translation)
 	std::cout << "eye: " << eye.transpose() << std::endl;
 } 
 
+// TODO: rename semantic from rotate to orbit
 void Camera::RotateLeft()
 {
 	float step_size = 0.1;
