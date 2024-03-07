@@ -40,6 +40,21 @@ void Renderer::ClearBuffers()
 	memset(z_buffer_.get(), z_far, width_ * height_ * sizeof(float)); // Initialize with z_far
 }
 
+void Renderer::SetScene(Scene *scene)
+{
+	this->scene_ = scene;
+	view_transform_ = scene->GetActiveCamera()->GetViewTransform();
+	projection_transform_ = scene->GetActiveCamera()->GetProjectionTransform();
+	is_perspective_ = scene->GetActiveCamera()->IsPerspectiveProjection();
+
+	// TODO get light
+
+	z_near = scene->GetActiveCamera()->z_near_;
+	z_far = scene->GetActiveCamera()->z_far_;
+	right = scene->GetActiveCamera()->right_;
+	top = scene->GetActiveCamera()->top_;
+}
+
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
@@ -130,6 +145,40 @@ void Renderer::DrawScene(Scene *scene)
 	} // end for each model
 }
 
+void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+	const bool steep = abs(y1 - y0) > abs(x1 - x0);
+	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
+	if (steep) {
+		swap(x0, y0);
+		swap(x1, y1);
+	}
+	
+	// Make sure we draw from left to right
+	if (x0 > x1) {
+		swap(x0, x1);
+		swap(y0, y1);
+	}
+	const int dx = x1 - x0;
+	const int dy = std::abs(y1 - y0); // Also handle negative slopes
+	const int ystep = (y0 < y1) ? 1 : -1;
+	int D = 2 * dy - dx;
+	int y = y0;
+	for (int x = x0; x <= x1; x++) {
+		if (steep) {
+			DrawPixel(y, x);
+		}
+		else {
+			DrawPixel(x, y);
+		}
+		if (D > 0) { // If D > 0, we should move one step in the y direction
+			y += ystep;
+			D += 2 * (dy - dx);
+		}
+		else { // Else, don't increment
+			D += 2 * dy;
+		}
+	}
+}
 
 
 void Renderer::DrawPixel(int x, int y) {
@@ -141,17 +190,4 @@ void Renderer::DrawPixel(int x, int y) {
 	framebuffer_[INDEX(width_, x, y, 2)] = 255;
 }
 
-void Renderer::SetScene(Scene *scene)
-{
-	this->scene_ = scene;
-	view_transform_ = scene->GetActiveCamera()->GetViewTransform();
-	projection_transform_ = scene->GetActiveCamera()->GetProjectionTransform();
-	is_perspective_ = scene->GetActiveCamera()->IsPerspectiveProjection();
 
-	// TODO get light
-
-	z_near = scene->GetActiveCamera()->z_near_;
-	z_far = scene->GetActiveCamera()->z_far_;
-	right = scene->GetActiveCamera()->right_;
-	top = scene->GetActiveCamera()->top_;
-}

@@ -30,8 +30,9 @@ public:
 	
 	// Draw functions
 	void DrawScene(Scene* scene);
+    void DrawLine(int x0, int y0, int x1, int y1);
     void RenderFace(vec3 v0, vec3 v1, vec3 v2, vec3 n0, vec3 n1, vec3 n2, vec3 face_normal);
-	void RenderFaceScratch(vec3 v0, vec3 v1, vec3 v2, vec3 n0, vec3 n1, vec3 n2, vec3 face_normal);
+    void RenderFaceScratch(vec3 v0, vec3 v1, vec3 v2, vec3 n0, vec3 n1, vec3 n2, vec3 face_normal);
     void DrawPixel(int x, int y);
 	void RasterizeFace_SSLOYSCAN(const std::vector<vec3>& face_vertices_in_screen_space, 
                                     const std::vector<vec3>& vertex_normals_in_view_space,

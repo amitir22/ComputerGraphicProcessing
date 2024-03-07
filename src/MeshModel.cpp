@@ -55,8 +55,8 @@ void MeshModel::LoadFile(string file_name)
 	}
 	ifile.close();
 	 //Initialize vertices_local_, normals_local_, and face_normals_local_
-	vertices_local_ = Eigen::MatrixXf(4, vertices.size()*3);
-	normals_local_ = Eigen::MatrixXf(3, normals.size()*3);
+	vertices_local_ = Eigen::MatrixXf(4, faces_indices.size()*3);
+	normals_local_ = Eigen::MatrixXf(3, faces_indices.size()*3);
 	face_normals_local_ = Eigen::MatrixXf(3, faces_indices.size());
 	
 	for (int i = 0; i < faces_indices.size(); i++) {
