@@ -23,7 +23,7 @@ public:
 	mat4 projection;
 	// Position vectors
 	vec3 eye; // camera position
-	vec3 gaze; // negative z
+	vec3 forward; // negative z
 	vec3 up; // positive y
 	vec3 world_up; // positive y
 	vec3 right; // positive x

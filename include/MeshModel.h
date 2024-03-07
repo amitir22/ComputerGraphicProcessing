@@ -54,9 +54,9 @@ struct FaceIdcs
 class MeshModel
 {
 protected:
-	std::vector<vec3> vertex_positions; // in local space
-	std::vector<vec3> normal_positions; // in local space
-	std::vector<Face> faces;
+	Eigen::MatrixXf vertices_local_;
+	Eigen::MatrixXf normals_local_;
+	Eigen::MatrixXf face_normals_local_;
 
 	mat4 model_transform_; // also known as model transform
 
@@ -65,11 +65,16 @@ public:
 
 	explicit MeshModel(string fileName);
 	void LoadFile(string fileName);
-	// User Transformation
+	// User Transformations
 	void Translate(vec3 translation);
 	void Rotate(vec3 axis, float angle);
 	void Scale(vec3 scale);
 	
 	mat4 GetModelTransform() const {return model_transform_;}
-	std::vector<Face>& GetFaces() {return faces;}
+	// Getters for read-only access to the model's data
+	const Eigen::MatrixXf& GetVerticesLocal() const {return vertices_local_;}
+
+	const Eigen::MatrixXf& GetNormalsLocal() const {return normals_local_;}
+
+	const Eigen::MatrixXf& GetFaceNormalsLocal() const {return face_normals_local_;}
 };

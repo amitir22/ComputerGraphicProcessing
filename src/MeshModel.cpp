@@ -24,11 +24,12 @@ MeshModel::MeshModel(string file_name) : MeshModel()
 void MeshModel::LoadFile(string file_name)
 {
 	ifstream ifile(file_name.c_str());
-	vector<FaceIdcs> faces_indices;
 	vector<vec3> vertices;
 	vector<vec3> normals;
+	vector<FaceIdcs> faces_indices;
 	// while not end of file
-	while (!ifile.eof()) {
+	while (!ifile.eof())
+	{
 		// get line
 		string curLine;
 		getline(ifile, curLine);
@@ -51,31 +52,32 @@ void MeshModel::LoadFile(string file_name)
 		else {
 			cout << "Found unknown line Type \"" << lineType << "\"";
 		}
-		//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
-		//If the face part of the obj is
-		//f 1 2 3
-		//f 1 3 4
-		//Then vertex_positions should contain:
-		//vertex_positions={v1,v2,v3,v1,v3,v4}
-		//vertex_positions.resize(faces_indices.size() * 3);
-		//normal_positions.resize(faces_indices.size() * 3);
-		for (int i = 0; i < faces_indices.size(); i++) {
-			Vertex v1, v2, v3;
-
-			v1.position_in_local_space = vertices[faces_indices[i].v[0] - 1];
-			v1.normal_in_local_space = normals[faces_indices[i].vn[0] - 1];
-			v2.position_in_local_space = vertices[faces_indices[i].v[1] - 1];
-			v2.normal_in_local_space = normals[faces_indices[i].vn[1] - 1];
-			v3.position_in_local_space = vertices[faces_indices[i].v[2] - 1];
-			v3.normal_in_local_space = normals[faces_indices[i].vn[2] - 1];
-			//vertex_positions[i * 3 + j] = vertices[faces_indices[i].v[j] - 1];
-			//normal_positions[i * 3 + j] = normals[faces_indices[i].vn[j] - 1];
-
-			Face face = Face(v1, v2, v3);
-
-			faces.push_back(face);
-		}
 	}
+	ifile.close();
+	 //Initialize vertices_local_, normals_local_, and face_normals_local_
+	vertices_local_ = Eigen::MatrixXf(4, vertices.size()*3);
+	normals_local_ = Eigen::MatrixXf(3, normals.size()*3);
+	face_normals_local_ = Eigen::MatrixXf(3, faces_indices.size());
+	
+	for (int i = 0; i < faces_indices.size(); i++) {
+		vec3 v0,v1,v2;
+		v0 = vertices[faces_indices[i].v[0] - 1];
+		v1 = vertices[faces_indices[i].v[1] - 1];
+		v2 = vertices[faces_indices[i].v[2] - 1];
+		// set columns i, i+1, i+2 of vertices_local_ to a homogenized v0, v1, v2
+		vertices_local_.col(i*3)     << v0, 1;
+		vertices_local_.col((i*3)+1) << v1, 1;
+		vertices_local_.col((i*3)+2) << v2, 1;
+		// set columns i, i+1, i+2 of normals_local_ to n0, n1, n2
+		normals_local_.col(i*3)     << normals[faces_indices[i].vn[0] - 1];
+		normals_local_.col((i*3)+1) << normals[faces_indices[i].vn[1] - 1];
+		normals_local_.col((i*3)+2) << normals[faces_indices[i].vn[2] - 1];
+		// compute face normal
+		vec3 n = (v1 - v0).cross(v2 - v0);
+		n.normalize();
+		// set column i of face_normals_local_ to n
+		face_normals_local_.col(i) << n;
+	}		
 }
 
 ////////////////////////////////////////

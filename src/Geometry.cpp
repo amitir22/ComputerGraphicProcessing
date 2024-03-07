@@ -18,9 +18,26 @@ vec2 vec2fFromStream(std::istream& a_stream)
 	return vec2(x, y);
 }
 
-vec4 homogoneize_vector(vec3 v) {
-	return vec4(v.x(), v.y(), v.z(), 1);
-}
+
+//// Convert std::vector<vec3> to Eigen::MatrixXf (3xN) or 4xN
+//Eigen::MatrixXf stdVectorToEigenMatrix(const std::vector<vec3>& vectors, bool homogenize) {
+//	// Create a 4xN matrix where N is the number of vectors
+//	if (homogenize) 
+//		Eigen::MatrixXf points(4, vectors.size());
+//	else 
+//		Eigen::MatrixXf points(3, vectors.size());
+//
+//	// Fill the matrix with the vectors, adding a 1 for the homogenous coordinate
+//	for (size_t i = 0; i < vectors.size(); ++i) {
+//		points(0, i) = vectors[i].x();
+//		points(1, i) = vectors[i].y();
+//		points(2, i) = vectors[i].z();
+//		if (homogenize)
+//			points(3, i) = 1.0f;
+//	}
+//	return points;
+//}
+
 
 // We call this orthographic projection, but we don't really project, since we don't want to lose depth information.
 mat4 geometry::getOrthoProjection(float left, float right, float bottom, float top,
@@ -80,17 +97,15 @@ mat4 geometry::getPerspectiveProjection(float fovy, float aspect, float zNear, f
 	return getPerspectiveProjection(-right, right, -top, top, zNear, zFar);
 }
 
-mat4 geometry::getViewPortTransform(int width, int height)
+mat3 geometry::getViewPortTransform(int width, int height)
 {
-	mat4 viewPortTransform = mat4::Identity();
-	viewPortTransform(0,0) = width / 2.0;
-	viewPortTransform(1,1) = height / 2.0;
+	mat3 viewPortTransform = mat3::Identity();
+	viewPortTransform(0, 0) = static_cast<float>(width) / 2.0f;
+	viewPortTransform(1, 1) = static_cast<float>(height) / 2.0f;
 
-	viewPortTransform(0,3) = width / 2.0;
-	viewPortTransform(1,3) = height / 2.0;
-	
-	viewPortTransform(2,2) = 1; // Keeping z values between [-1,1]
-	
+	viewPortTransform(0, 2) = static_cast<float>(width) / 2.0f;
+	viewPortTransform(1, 2) = static_cast<float>(height) / 2.0f;
+
 	return viewPortTransform;
 }
 
@@ -160,27 +175,4 @@ mat4 geometry::makeTranslationMatrix(vec3 translation)
 		{0, 0, 1, translation.z()},
 		{0, 0, 0, 1}
 	};
-}
-Face::Face()
-{
-	// Default constructor
-	// Initialize vertices with default values
-	vertices[0] = Vertex();
-	vertices[1] = Vertex();
-	vertices[2] = Vertex();
-
-	// Set face normal to zero vector
-	normal_ = vec3(0, 0, 0);
-}
-
-Face::Face(const Vertex &v1, const Vertex &v2, const Vertex &v3)
-{
-	vertices[0] = v1;
-	vertices[1] = v2;
-	vertices[2] = v3;
-
-	// compute face normal using the cross product
-	vec3 edge1 = v2.position_in_local_space - v1.position_in_local_space;
-	vec3 edge2 = v3.position_in_local_space - v1.position_in_local_space;
-	normal_ = edge1.cross(edge2).normalized();
 }

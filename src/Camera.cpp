@@ -6,8 +6,8 @@
 // Constructor implementation
 Camera::Camera(vec3 eye, vec3 at, vec3 up) : eye(eye), up(up), yaw(YAW), pitch(PITCH),
 fov(FOV), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0,1,0) {
-	gaze = (at - eye).normalized(); // points to negative z
-	right = up.cross(-gaze);  // points to positive x
+	forward = (at - eye).normalized(); // points to negative z
+	right = up.cross(-forward);  // points to positive x
 	LookAt(eye, at, up);
 	aspect = float(cg::constants::SCR_WIDTH) / float(cg::constants::SCR_HEIGHT);
 	z_near_ = Z_NEAR;
@@ -45,7 +45,7 @@ mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 }
 
 mat4 Camera::GetViewTransform() {
-	return LookAt(eye, eye + gaze, up);
+	return LookAt(eye, eye + forward, up);
 }
 
 void Camera::SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
@@ -92,9 +92,9 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 {
 	float velocity = movement_speed * delta_time;
 	if (key == CameraMovement::FORWARD)
-		Translate(velocity * gaze);
+		Translate(velocity * forward);
 	if (key == CameraMovement::BACKWARD)
-		Translate(velocity * (-gaze));
+		Translate(velocity * (-forward));
 	if (key == CameraMovement::LEFT)
 		Translate(velocity * (-right));
 	if (key == CameraMovement::RIGHT)
@@ -112,12 +112,12 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 
 
 void Camera::UpdateVectors() {
-	gaze.x() = cos(geometry::radians(yaw)) * cos(geometry::radians(pitch));
-	gaze.y() = sin(geometry::radians(pitch));
-	gaze.z() = sin(geometry::radians(yaw)) * cos(geometry::radians(pitch));
-	gaze.normalize();
-	right = (gaze.cross(world_up)).normalized();
-	up = (right.cross(gaze)).normalized();
+	forward.x() = cos(geometry::radians(yaw)) * cos(geometry::radians(pitch));
+	forward.y() = sin(geometry::radians(pitch));
+	forward.z() = sin(geometry::radians(yaw)) * cos(geometry::radians(pitch));
+	forward.normalize();
+	right = (forward.cross(world_up)).normalized();
+	up = (right.cross(forward)).normalized();
 }
 
 void Camera::Translate(const vec3& translation)
@@ -129,13 +129,13 @@ void Camera::Translate(const vec3& translation)
 // TODO: rename semantic from rotate to orbit
 void Camera::RotateLeft()
 {
-	float step_size = 0.1;
+	float step_size = 0.1f;
 	vec3 translate_dir = this->eye.cross(this->up);
 	float resize_factor = step_size / translate_dir.norm();
 	float prev_eye_norm = this->eye.norm();
 
 	this->eye += resize_factor * translate_dir;
-	this->gaze = -this->eye.normalized();
+	this->forward = -this->eye.normalized();
 
 	// resize this->eye
 	this->eye *= prev_eye_norm / this->eye.norm();
@@ -143,13 +143,13 @@ void Camera::RotateLeft()
 
 void Camera::RotateRight()
 {
-	float step_size = 0.1;
+	float step_size = 0.1f;
 	vec3 translate_dir = this->eye.cross(this->up);
 	float resize_factor = step_size / translate_dir.norm();
 	float prev_eye_norm = this->eye.norm();
 
 	this->eye -= resize_factor * translate_dir;
-	this->gaze = -this->eye.normalized();
+	this->forward = -this->eye.normalized();
 
 	// resize this->eye
 	this->eye *= prev_eye_norm / this->eye.norm();

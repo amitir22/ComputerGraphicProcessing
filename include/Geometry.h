@@ -13,22 +13,6 @@ using mat4 = Eigen::Matrix4f;
 vec2 vec2fFromStream(std::istream& a_stream);
 vec3 vec3fFromStream(std::istream& a_stream);
 
-vec4 homogoneize_vector(vec3 v);
-
-struct Vertex{ // don't change order
-	vec3 position_in_local_space;
-	vec3 normal_in_local_space;
-	// vec2 texture;
-};
-
-struct Face{ // don't change order
-	std::array<Vertex, 3> vertices; // in local space
-	vec3 normal_; // face normal, in local space
-
-    Face();
-
-    Face(const Vertex &v1, const Vertex &v2, const Vertex &v3);
-};
 
 namespace geometry {
 	float radians(float degrees);
@@ -40,7 +24,7 @@ namespace geometry {
 	mat4 getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	mat4 getPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
     void getTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
-    mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
+    mat3 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
 
     mat3 getNormalTransfrom(const mat4& m); // from modelview
 } // namespace geometry
