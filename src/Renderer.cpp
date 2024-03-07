@@ -6,7 +6,7 @@
 
 #include "Constants.h" // for cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT
 #include "Geometry.h"
-//#include "Rasterizer.h"
+#include "RenderUtils.h" // for EdgeFunction, GetIntMin, GetIntMax
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -43,12 +43,7 @@ void Renderer::ClearBuffers()
 /////////////////////////////////////////////////////
 //				DRAW FUNCTIONS
 ///////////////////////////////////////////////////
-float EdgeFunction(const vec3& a, const vec3& b, const vec3& c) {
-	return (c.x() - a.x()) * (b.y() - a.y()) - (c.y() - a.y()) * (b.x() - a.x());
-}
 
-int GetIntMin(float a, float b, float c) { return static_cast<int>(std::floor(std::min(a, std::min(b, c))));}
-int GetIntMax(float a, float b, float c) {return static_cast<int>(std::ceil(std::max(a, std::max(b, c))));}
 void Renderer::DrawScene(Scene *scene)
 {
 	ClearBuffers();
@@ -58,7 +53,7 @@ void Renderer::DrawScene(Scene *scene)
 	std::vector<MeshModel*> models = scene->GetModels();
 	for (const auto& model : models) {
 		// set transforms
-		model_transform_ =  model->GetModelTransform();
+		model_transform_ = model->GetModelTransform();
 		// TODO get model material
 		mat4 modelview_matrix = view_transform_ * model_transform_;
 		normal_transform_ = geometry::getNormalTransfrom(modelview_matrix);
