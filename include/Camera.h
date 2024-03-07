@@ -55,7 +55,8 @@ public:
 	void SetPerspective(float fovy, float aspect, float zNear, float zFar);	
 	// Transformations
 	void Translate(const vec3& translation);
-	void Rotate();
+	void RotateLeft();
+	void RotateRight();
 	void Rotate(const vec3& axis, float angle);
 	// Input
 	void HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch=true);

@@ -103,8 +103,10 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 		Translate(velocity * up);
 	if (key == CameraMovement::DOWN)
 		Translate(velocity * (-up));
-	if (key == CameraMovement::ROTATE)
-		Rotate();
+	if (key == CameraMovement::ROTATE_L)
+		RotateLeft();
+	if (key == CameraMovement::ROTATE_R)
+		RotateRight(); // TODO
 	
 }
 
@@ -124,12 +126,30 @@ void Camera::Translate(const vec3& translation)
 	std::cout << "eye: " << eye.transpose() << std::endl;
 } 
 
-void Camera::Rotate()
+void Camera::RotateLeft()
 {
 	float step_size = 0.1;
 	vec3 translate_dir = this->eye.cross(this->up);
 	float resize_factor = step_size / translate_dir.norm();
+	float prev_eye_norm = this->eye.norm();
 
 	this->eye += resize_factor * translate_dir;
 	this->gaze = -this->eye.normalized();
+
+	// resize this->eye
+	this->eye *= prev_eye_norm / this->eye.norm();
+}
+
+void Camera::RotateRight()
+{
+	float step_size = 0.1;
+	vec3 translate_dir = this->eye.cross(this->up);
+	float resize_factor = step_size / translate_dir.norm();
+	float prev_eye_norm = this->eye.norm();
+
+	this->eye -= resize_factor * translate_dir;
+	this->gaze = -this->eye.normalized();
+
+	// resize this->eye
+	this->eye *= prev_eye_norm / this->eye.norm();
 }

@@ -96,7 +96,7 @@ void Renderer::RenderFaceScratch(const Face& face) {
     float z_dot = scene_->GetActiveCamera()->gaze.dot(face.normal_);
     //std::cout << "z_dot: " << z_dot << std::endl;
 
-    if (z_dot >= 0)
+    if (z_dot > 0)
     {
         return;
     }
