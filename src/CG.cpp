@@ -5,6 +5,11 @@
 #include <Eigen/Dense>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <imfilebrowser.h>
+
 
 #include "Callbacks.h"
 #include "Constants.h"
@@ -104,6 +109,19 @@ int main()
     scene = new Scene();
     renderer = new Renderer(cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT);
 
+    // Dear ImGui setup
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+    // create a file browser instance
+    ImGui::FileBrowser fileDialog;
+
+    // (optional) set browser properties
+    fileDialog.SetTitle("title");
+    //fileDialog.SetTypeFilters({ ".h", ".cpp" });
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -130,6 +148,31 @@ int main()
         shader_program.use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        if (ImGui::Begin("dummy window"))
+        {
+            // open file dialog when user clicks this button
+            if (ImGui::Button("open file dialog"))
+                fileDialog.Open();
+        }
+        ImGui::End();
+
+        fileDialog.Display();
+
+        if (fileDialog.HasSelected())
+        {
+            std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+            fileDialog.ClearSelected();
+        }
+
+        // Rendering
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // GLFW: swap buffers and poll IO events
         glfwSwapBuffers(window);

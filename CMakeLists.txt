@@ -16,8 +16,15 @@ project ("CG")
 
 ##### source files #####
 file(GLOB PROJECT_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.c")
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c")
-# add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "include/Shader.h")
+
+#imgui#
+file(GLOB IMGUI_SOURCES external/imgui/*.cpp)
+list(APPEND IMGUI_SOURCES "external/imgui/backends/imgui_impl_glfw.cpp")
+list(APPEND IMGUI_SOURCES "external/imgui/backends/imgui_impl_opengl3.cpp")
+list(APPEND IMGUI_SOURCES "external/imgui/misc/cpp/imgui_stdlib.cpp")
+list(APPEND IMGUI_SOURCES "external/imgui/misc/debuggers/imgui.natvis" "external/imgui/misc/debuggers/imgui.natstepfilter")
+#### executable ####
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" )
 
 # Configure a header file to pass the assets directory to the source code
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
@@ -46,7 +53,11 @@ endif()
 
 ##### include directories #####
 target_include_directories(${PROJECT_NAME} PUBLIC "include")
-target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include/glad")
+#imgui#
+target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui")
+target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui/backends")
+target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui/misc/cpp")
+
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
