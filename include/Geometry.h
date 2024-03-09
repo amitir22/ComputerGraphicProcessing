@@ -15,17 +15,17 @@ vec3 vec3fFromStream(std::istream& a_stream);
 
 
 namespace geometry {
-	float radians(float degrees);
-	mat4 makeRotationMatrix(const vec3& axis, float angle);
-	mat4 makeRotationMatrix(float yaw, float pitch, float roll);
-	mat4 makeScaleMatrix(const vec3& scale);
-	mat4 makeTranslationMatrix(vec3 translation);
-	mat4 getPerspectiveProjection(float fovy, float aspect, float zNear, float zFar);
-	mat4 getOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-	mat4 getPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-    void getTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
-    mat4 getViewPortTransform(int width, int height); // Map NDC to screen-space coordinates
+	float Radians(float degrees);
+	mat4 GetRotationMatrix(const vec3& axis, float angle);
+	mat4 GetRotationMatrix(float yaw, float pitch, float roll);
+	mat4 GetScaleMatrix(const vec3& scale);
+	mat4 GetTranslationMatrix(vec3 translation);
+	mat4 GetPerspectiveProjection(float fovy, float aspect, float zNear, float zFar);
+	mat4 GetOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
+	mat4 GetPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
+    void GetTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
+    mat4 GetViewportTransform(int width, int height); // Map NDC to screen-space coordinates
 
-    mat3 getNormalTransfrom(const mat4& m); // from modelview
+    mat3 GetNormalTransfrom(const mat4& m); // from modelview
 } // namespace geometry
 

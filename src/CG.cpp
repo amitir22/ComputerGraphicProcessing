@@ -154,21 +154,23 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (ImGui::Begin("dummy window"))
-        {
-            // open file dialog when user clicks this button
-            if (ImGui::Button("open file dialog"))
-                fileDialog.Open();
-        }
-        ImGui::End();
+        //if (ImGui::Begin("dummy window")) { // open file dialog when user clicks this button
+        //    if (ImGui::Button("open file dialog"))
+        //        fileDialog.Open(); }
+        //ImGui::End();
+        //fileDialog.Display();
+        //if (fileDialog.HasSelected()) {
+        //    std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+        //    fileDialog.ClearSelected();}
 
-        fileDialog.Display();
+        ImGui::BeginMainMenuBar(); // Start the main menu bar
 
-        if (fileDialog.HasSelected())
-        {
-            std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-            fileDialog.ClearSelected();
+        if (ImGui::BeginMenu("Options")) {
+            ImGui::MenuItem("Vertex Normals", "", &(renderer->show_vertex_normals_));
+            ImGui::MenuItem("Face Normals", "", &(renderer->show_face_normals_));
+            ImGui::EndMenu();
         }
+        ImGui::EndMainMenuBar();
 
         // Rendering
         ImGui::Render();

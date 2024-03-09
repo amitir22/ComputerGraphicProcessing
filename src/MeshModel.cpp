@@ -85,15 +85,15 @@ void MeshModel::LoadFile(string file_name)
 ////////////////////////////////////////
 void MeshModel::Translate(vec3 translation)
 {
-	model_transform_ = geometry::makeTranslationMatrix(translation) * model_transform_;
+	model_transform_ = geometry::GetTranslationMatrix(translation) * model_transform_;
 }
 
 void MeshModel::Rotate(vec3 axis, float angle)
 {
-	model_transform_ = geometry::makeRotationMatrix(axis, angle) * model_transform_;
+	model_transform_ = geometry::GetRotationMatrix(axis, angle) * model_transform_;
 }
 
 void MeshModel::Scale(vec3 scale)
 {
-	model_transform_ = geometry::makeScaleMatrix(scale) * model_transform_;
+	model_transform_ = geometry::GetScaleMatrix(scale) * model_transform_;
 }

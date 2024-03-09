@@ -51,13 +51,13 @@ mat4 Camera::GetViewTransform() {
 void Camera::SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	this->is_perspective_ = false;
-	projection = geometry::getOrthoProjection(left, right, bottom, top, zNear, zFar);
+	projection = geometry::GetOrthoProjection(left, right, bottom, top, zNear, zFar);
 }
 
 void Camera::SetPerspective(float fovy, float aspect, float zNear, float zFar) {
 	this->is_perspective_ = true;
-	geometry::getTopAndRight(fovy, aspect, zNear, top_, right_);
-	projection = geometry::getPerspectiveProjection(fovy, aspect, zNear, zFar);
+	geometry::GetTopAndRight(fovy, aspect, zNear, top_, right_);
+	projection = geometry::GetPerspectiveProjection(fovy, aspect, zNear, zFar);
 }
 
 void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch)
@@ -111,9 +111,9 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 
 
 void Camera::UpdateVectors() {
-	forward.x() = cos(geometry::radians(yaw)) * cos(geometry::radians(pitch));
-	forward.y() = sin(geometry::radians(pitch));
-	forward.z() = sin(geometry::radians(yaw)) * cos(geometry::radians(pitch));
+	forward.x() = cos(geometry::Radians(yaw)) * cos(geometry::Radians(pitch));
+	forward.y() = sin(geometry::Radians(pitch));
+	forward.z() = sin(geometry::Radians(yaw)) * cos(geometry::Radians(pitch));
 	forward.normalize();
 	right = (forward.cross(world_up)).normalized();
 	up = (right.cross(forward)).normalized();

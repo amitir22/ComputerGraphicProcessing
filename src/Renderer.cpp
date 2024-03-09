@@ -21,7 +21,7 @@ Renderer::Renderer(int width, int height) : width_(width), height_(height) {
 	model_transform_ = mat4::Identity();
 	view_transform_ = mat4::Identity();
 	projection_transform_ = mat4::Identity();
-	view_port_transform_ = geometry::getViewPortTransform(width_, height_);
+	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
 	normal_transform_ = mat3::Identity();
 	is_perspective_ = false;
 }
@@ -31,7 +31,7 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	height_ = new_height;
 	framebuffer_.reset(new GLubyte[width_ * height_ * 3]);
 	z_buffer_.reset(new float[width_ * height_]);
-	view_port_transform_ = geometry::getViewPortTransform(width_, height_);
+	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
 }
 
 void Renderer::ClearBuffers()
@@ -93,21 +93,28 @@ void Renderer::DrawScene(Scene *scene)
 		// set transforms
 		model_transform_ = model->GetModelTransform();
 		// TODO get model material
+		// Compute transformations
 		mat4 modelview_matrix = view_transform_ * model_transform_;
-		normal_transform_ = geometry::getNormalTransfrom(modelview_matrix);
-		// Get model data
+		normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
 		mvp_ = projection_transform_ * modelview_matrix;
+		// Get model data
 		Eigen::MatrixXf vertices_local = model->GetVerticesLocal(); // (4, 3N)
 		Eigen::MatrixXf normals_local = model->GetNormalsLocal(); // (3, 3N)
 		Eigen::MatrixXf face_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+		// Transform model data
+		Eigen::MatrixXf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
+		Eigen::MatrixXf normals_camera = normal_transform_ * normals_local; // (3, 3N)
+		Eigen::MatrixXf normals_end_vertices_camera = vertices_camera; // (4, 3N)
+		normals_end_vertices_camera.topRows(3) += normals_camera; // (4, 3N)
 
-		Eigen::MatrixXf vertices_clip = mvp_ * vertices_local; // (4, 3N)
-		Eigen::MatrixXf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array();
-		// transform to raster space
-		vertices_ndc = view_port_transform_ * vertices_ndc;
-		// set vertices_raster to be top three rows of vertices_ndc
-		Eigen::MatrixXf vertices_raster = vertices_ndc.topRows(3);
-
+		Eigen::MatrixXf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
+		Eigen::MatrixXf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
+		Eigen::MatrixXf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
+		if (this->show_vertex_normals_) {
+			Eigen::MatrixXf normals_end_vertices_clip = projection_transform_ * normals_end_vertices_camera; // (4, 3N)
+			Eigen::MatrixXf normals_end_vertices_ndc = normals_end_vertices_clip.array().rowwise() / normals_end_vertices_clip.row(3).array(); // (4, 3N)
+			normals_end_vertices_raster = (viewport_transform_ * normals_end_vertices_ndc).topRows(3); // (3, 3N)
+		}
 		// RenderTriangle For each face
 		for (int i = 0; i < face_normals_local.cols(); i++) 
 		{
@@ -164,6 +171,21 @@ void Renderer::DrawScene(Scene *scene)
 					} // end if inside
 				} // end for x
 			} // end for y
+			if (this->show_vertex_normals_) {
+			 // For each vertex, check if it's in clipped bounding box, and if so, draw its normal
+				if (IsInBoundingBox(x0, x1, y0, y1, v0_raster.x(), v0_raster.y())) {
+					vec3 v0_normal_end_vertex = normals_end_vertices_raster.col(i * 3);
+					DrawLine(v0_raster.x(), v0_raster.y(), v0_normal_end_vertex.x(), v0_normal_end_vertex.y());
+				}
+				if (IsInBoundingBox(x0, x1, y0, y1, v1_raster.x(), v1_raster.y())) {
+					vec3 v1_normal_end_vertex = normals_end_vertices_raster.col(i * 3 + 1);
+					DrawLine(v1_raster.x(), v1_raster.y(), v1_normal_end_vertex.x(), v1_normal_end_vertex.y());
+				}
+				if (IsInBoundingBox(x0, x1, y0, y1, v2_raster.x(), v2_raster.y())) {
+					vec3 v2_normal_end_vertex = normals_end_vertices_raster.col(i * 3 + 2);
+					DrawLine(v2_raster.x(), v2_raster.y(), v2_normal_end_vertex.x(), v2_normal_end_vertex.y());
+				}
+			}
 		} // end for each Triangle
 	} // end for each model
 }
