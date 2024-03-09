@@ -93,21 +93,20 @@ void Camera::HandleKeyboardInput(int key, float delta_time)
 	float velocity = movement_speed * delta_time;
 	if (key == CameraMovement::FORWARD)
 		Translate(velocity * forward);
-	if (key == CameraMovement::BACKWARD)
+	else if (key == CameraMovement::BACKWARD)
 		Translate(velocity * (-forward));
-	if (key == CameraMovement::LEFT)
+	else if (key == CameraMovement::LEFT)
 		Translate(velocity * (-right));
-	if (key == CameraMovement::RIGHT)
+	else if (key == CameraMovement::RIGHT)
 		Translate(velocity * right);
-	if (key == CameraMovement::UP)
+	else if (key == CameraMovement::UP)
 		Translate(velocity * up);
-	if (key == CameraMovement::DOWN)
+	else if (key == CameraMovement::DOWN)
 		Translate(velocity * (-up));
-	if (key == CameraMovement::ROTATE_L)
-		RotateLeft();
-	if (key == CameraMovement::ROTATE_R)
-		RotateRight(); // TODO
-	
+	else if (key == CameraMovement::ORBIT_L)
+		OrbitLeft();
+	if (key == CameraMovement::ORBIT_R)
+		OrbitRight();
 }
 
 
@@ -127,7 +126,7 @@ void Camera::Translate(const vec3& translation)
 } 
 
 // TODO: rename semantic from rotate to orbit
-void Camera::RotateLeft()
+void Camera::OrbitLeft()
 {
 	float step_size = 0.1f;
 	vec3 translate_dir = this->eye.cross(this->up);
@@ -141,7 +140,7 @@ void Camera::RotateLeft()
 	this->eye *= prev_eye_norm / this->eye.norm();
 }
 
-void Camera::RotateRight()
+void Camera::OrbitRight()
 {
 	float step_size = 0.1f;
 	vec3 translate_dir = this->eye.cross(this->up);
