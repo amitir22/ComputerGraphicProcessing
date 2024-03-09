@@ -78,6 +78,18 @@ void Renderer::DrawScene(Scene *scene)
 	}
 
 	for (const auto& model : models) {
+		if (scene->should_view_face_normals)
+		{
+			// TODO:
+		}
+		if (scene->should_view_vertex_normals)
+		{
+			// TODO:
+		}
+		if (scene->should_view_bounding_box)
+		{
+			// TODO:
+		}
 		// set transforms
 		model_transform_ = model->GetModelTransform();
 		// TODO get model material
