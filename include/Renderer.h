@@ -51,6 +51,7 @@ public:
 	bool show_bounding_box_ = false;
 	bool show_wireframe_ = false;
 	bool show_lights_ = false;
+	bool is_backface_culling_ = true;
 	
 private:
 	Scene* scene_;

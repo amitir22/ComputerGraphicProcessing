@@ -121,11 +121,13 @@ void Renderer::DrawScene(Scene *scene)
 		for (int i = 0; i < num_faces; i++)
 		{
 			// Backface culling
-			vec3 forward = scene_->GetActiveCamera()->forward;
-			vec3 face_normal = f_normals_local.col(i);
-			float z_dot = scene_->GetActiveCamera()->forward.dot(face_normal);
-			if (z_dot >= 0)
-				continue;
+			if (this->is_backface_culling_) {
+				vec3 forward = scene_->GetActiveCamera()->forward;
+				vec3 face_normal = f_normals_local.col(i);
+				float z_dot = scene_->GetActiveCamera()->forward.dot(face_normal);
+				if (z_dot >= 0)
+					continue;
+			}
 			// extract v0, v1,v2 from vertices_ndc
 			Eigen::Vector3f v0_raster = vertices_raster.col(i * 3);
 			Eigen::Vector3f v1_raster = vertices_raster.col(i * 3 + 1);

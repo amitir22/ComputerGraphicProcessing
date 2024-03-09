@@ -172,6 +172,7 @@ int main()
             ImGui::MenuItem("Lights", "", &(renderer->show_lights_));
             ImGui::MenuItem("Wireframe", "", &(renderer->show_wireframe_));
             ImGui::MenuItem("Bounding Box", "", &(renderer->show_bounding_box_));
+            ImGui::MenuItem("Backface Culling", "", &(renderer->is_backface_culling_));
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

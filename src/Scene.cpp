@@ -20,6 +20,8 @@ Scene::Scene() {
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt_flipped.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/two_triangles.obj");
 	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/trig_pyramid.obj");
+	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/cube.obj");
+	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/solids.obj");
 }
 
 

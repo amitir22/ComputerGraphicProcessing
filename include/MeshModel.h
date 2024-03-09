@@ -14,9 +14,9 @@ using namespace std;
 
 struct FaceIdcs
 {
-	int v[4];
-	int vn[4];
-	int vt[4];
+	unsigned short v[4];
+	unsigned short vn[4];
+	unsigned short vt[4];
 
 	FaceIdcs()
 	{
@@ -26,10 +26,41 @@ struct FaceIdcs
 
 	FaceIdcs(std::istream& a_stream)
 	{
+		for (int i = 0; i < 4; ++i)
+			v[i] = vn[i] = vt[i] = 0;
+
+		char c; // For reading the '/' delimiter
+		for (int i = 0; i < 3; ++i)
+		{
+			a_stream >> std::ws >> v[i]; // Read vertex index
+
+			if (a_stream.peek() == '/')
+			{
+				a_stream >> c; // Consume '/'
+
+				if (a_stream.peek() == '/') // Case: v//vn
+				{
+					a_stream >> c >> vn[i]; // Consume second '/' and read vn
+				}
+				else // Case: v/vt or v/vt/vn
+				{
+					a_stream >> vt[i]; // Read vt
+
+					if (a_stream.peek() == '/')
+					{
+						a_stream >> c >> vn[i]; // Consume '/' and read vn
+					}
+				}
+			}
+		}
+	}
+
+	/*FaceIdcs(std::istream& a_stream)
+	{
 		for (int i = 0; i < 4; i++)
 			v[i] = vn[i] = vt[i] = 0;
 
-		char c;
+		unsigned short c;
 		for (int i = 0; i < 3; i++)
 		{
 			a_stream >> std::ws >> v[i] >> std::ws;
@@ -47,7 +78,7 @@ struct FaceIdcs
 				continue;
 			a_stream >> c >> vn[i];
 		}
-	}
+	}*/
 };
 
 
@@ -55,7 +86,7 @@ class MeshModel
 {
 protected:
 	Eigen::MatrixXf vertices_local_;
-	Eigen::MatrixXf normals_local_;
+	Eigen::MatrixXf v_normals_local_;
 	Eigen::MatrixXf face_normals_local_;
 	Eigen::MatrixXf faces_midpoints_local_;
 
@@ -75,7 +106,7 @@ public:
 	// Getters for read-only access to the model's data
 	const Eigen::MatrixXf& GetVerticesLocal() const {return vertices_local_;}
 
-	const Eigen::MatrixXf& GetNormalsLocal() const {return normals_local_;}
+	const Eigen::MatrixXf& GetNormalsLocal() const {return v_normals_local_;}
 
 	const Eigen::MatrixXf& GetFaceNormalsLocal() const {return face_normals_local_;}
 
