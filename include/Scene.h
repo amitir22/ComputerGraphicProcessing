@@ -22,11 +22,6 @@ public:
 	int active_camera_idx;
 	int active_model_idx;
 	int active_light_idx;
-	bool should_render_cameras;
-	bool should_render_lights;
-	bool should_view_bounding_box;
-	bool should_view_face_normals;
-	bool should_view_vertex_normals;
 
 	// Constructors
 	Scene();

@@ -165,9 +165,13 @@ int main()
 
         ImGui::BeginMainMenuBar(); // Start the main menu bar
 
-        if (ImGui::BeginMenu("Options")) {
+        if (ImGui::BeginMenu("Display")) {
             ImGui::MenuItem("Vertex Normals", "", &(renderer->show_vertex_normals_));
             ImGui::MenuItem("Face Normals", "", &(renderer->show_face_normals_));
+            ImGui::MenuItem("Cameras", "", &(renderer->show_cameras_));
+            ImGui::MenuItem("Lights", "", &(renderer->show_lights_));
+            ImGui::MenuItem("Wireframe", "", &(renderer->show_wireframe_));
+            ImGui::MenuItem("Bounding Box", "", &(renderer->show_bounding_box_));
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

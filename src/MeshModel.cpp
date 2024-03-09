@@ -58,6 +58,7 @@ void MeshModel::LoadFile(string file_name)
 	vertices_local_ = Eigen::MatrixXf(4, faces_indices.size()*3);
 	normals_local_ = Eigen::MatrixXf(3, faces_indices.size()*3);
 	face_normals_local_ = Eigen::MatrixXf(3, faces_indices.size());
+	faces_midpoints_local_ = Eigen::MatrixXf(4, faces_indices.size());
 	
 	for (int i = 0; i < faces_indices.size(); i++) {
 		vec3 v0,v1,v2;
@@ -77,6 +78,9 @@ void MeshModel::LoadFile(string file_name)
 		n.normalize();
 		// set column i of face_normals_local_ to n
 		face_normals_local_.col(i) << n;
+		// compute face midpoint, set column i of faces_midpoints_local_ to a homogenized midpoint
+		vec3 midpoint = (v0 + v1 + v2) / 3;
+		faces_midpoints_local_.col(i) << midpoint, 1;
 	}		
 }
 

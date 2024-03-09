@@ -67,29 +67,13 @@ void Renderer::DrawScene(Scene *scene)
 	// Draw models
 	std::vector<MeshModel*> models = scene->GetModels();
 
-	if (scene->should_render_cameras)
-	{
-		// TODO:
+	if (this->show_cameras_){// TODO:
 	}
 
-	if (scene->should_render_lights)
-	{
-		// TODO:
+	if (this->show_lights_){// TODO:
 	}
 
 	for (const auto& model : models) {
-		if (scene->should_view_face_normals)
-		{
-			// TODO:
-		}
-		if (scene->should_view_vertex_normals)
-		{
-			// TODO:
-		}
-		if (scene->should_view_bounding_box)
-		{
-			// TODO:
-		}
 		// set transforms
 		model_transform_ = model->GetModelTransform();
 		// TODO get model material
@@ -99,28 +83,46 @@ void Renderer::DrawScene(Scene *scene)
 		mvp_ = projection_transform_ * modelview_matrix;
 		// Get model data
 		Eigen::MatrixXf vertices_local = model->GetVerticesLocal(); // (4, 3N)
-		Eigen::MatrixXf normals_local = model->GetNormalsLocal(); // (3, 3N)
-		Eigen::MatrixXf face_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+		Eigen::MatrixXf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
+		Eigen::MatrixXf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+		unsigned int num_faces = f_normals_local.cols(); // N
 		// Transform model data
 		Eigen::MatrixXf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
-		Eigen::MatrixXf normals_camera = normal_transform_ * normals_local; // (3, 3N)
-		Eigen::MatrixXf normals_end_vertices_camera = vertices_camera; // (4, 3N)
-		normals_end_vertices_camera.topRows(3) += normals_camera; // (4, 3N)
+		Eigen::MatrixXf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
+		Eigen::MatrixXf v_normals_end_vertices_camera = vertices_camera; // (4, 3N)
+		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
 
 		Eigen::MatrixXf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
 		Eigen::MatrixXf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
 		Eigen::MatrixXf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
+		
 		if (this->show_vertex_normals_) {
-			Eigen::MatrixXf normals_end_vertices_clip = projection_transform_ * normals_end_vertices_camera; // (4, 3N)
-			Eigen::MatrixXf normals_end_vertices_ndc = normals_end_vertices_clip.array().rowwise() / normals_end_vertices_clip.row(3).array(); // (4, 3N)
-			normals_end_vertices_raster = (viewport_transform_ * normals_end_vertices_ndc).topRows(3); // (3, 3N)
+			Eigen::MatrixXf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
+			Eigen::MatrixXf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
+			v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
+		}
+		if (this->show_face_normals_) {
+			Eigen::MatrixXf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
+
+			Eigen::MatrixXf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
+			Eigen::MatrixXf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
+			Eigen::MatrixXf faces_midpoints_clip = projection_transform_ * faces_midpoints_camera; // (4, N)
+			Eigen::MatrixXf faces_midpoints_ndc = faces_midpoints_clip.array().rowwise() / faces_midpoints_clip.row(3).array(); // (4, N)
+			faces_midpoints_raster = (viewport_transform_ * faces_midpoints_ndc).topRows(3); // (3, N)
+
+			Eigen::MatrixXf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
+			f_normals_end_vertices_camera.topRows(3) += f_normals_camera; // (4, N)
+
+			Eigen::MatrixXf f_normals_end_vertices_clip = projection_transform_ * f_normals_end_vertices_camera; // (4, N)
+			Eigen::MatrixXf f_normals_end_vertices_ndc = f_normals_end_vertices_clip.array().rowwise() / f_normals_end_vertices_clip.row(3).array(); // (4, N)
+			f_normals_end_vertices_raster = (viewport_transform_ * f_normals_end_vertices_ndc).topRows(3); // (3, N)
 		}
 		// RenderTriangle For each face
-		for (int i = 0; i < face_normals_local.cols(); i++) 
+		for (int i = 0; i < num_faces; i++)
 		{
 			// Backface culling
 			vec3 forward = scene_->GetActiveCamera()->forward;
-			vec3 face_normal = face_normals_local.col(i);
+			vec3 face_normal = f_normals_local.col(i);
 			float z_dot = scene_->GetActiveCamera()->forward.dot(face_normal);
 			if (z_dot >= 0)
 				continue;
@@ -138,6 +140,10 @@ void Renderer::DrawScene(Scene *scene)
 			// Check if triangle is out of screen
 			if (max_x < 0 || min_x > width_ || max_y < 0 || min_y > height_)
 				continue;
+			// Draw Face normal
+			if (this->show_face_normals_) {
+				DrawLine(faces_midpoints_raster(0, i), faces_midpoints_raster(1, i), f_normals_end_vertices_raster(0, i), f_normals_end_vertices_raster(1, i));
+			}
 			// Clip bounding box to screen
 			uint32_t x0 = std::max(int32_t(0), (int32_t)(std::floor(min_x)));
 			uint32_t x1 = std::min(int32_t(width_) - 1, (int32_t)(std::floor(max_x)));
@@ -174,15 +180,15 @@ void Renderer::DrawScene(Scene *scene)
 			if (this->show_vertex_normals_) {
 			 // For each vertex, check if it's in clipped bounding box, and if so, draw its normal
 				if (IsInBoundingBox(x0, x1, y0, y1, v0_raster.x(), v0_raster.y())) {
-					vec3 v0_normal_end_vertex = normals_end_vertices_raster.col(i * 3);
+					vec3 v0_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3);
 					DrawLine(v0_raster.x(), v0_raster.y(), v0_normal_end_vertex.x(), v0_normal_end_vertex.y());
 				}
 				if (IsInBoundingBox(x0, x1, y0, y1, v1_raster.x(), v1_raster.y())) {
-					vec3 v1_normal_end_vertex = normals_end_vertices_raster.col(i * 3 + 1);
+					vec3 v1_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 1);
 					DrawLine(v1_raster.x(), v1_raster.y(), v1_normal_end_vertex.x(), v1_normal_end_vertex.y());
 				}
 				if (IsInBoundingBox(x0, x1, y0, y1, v2_raster.x(), v2_raster.y())) {
-					vec3 v2_normal_end_vertex = normals_end_vertices_raster.col(i * 3 + 2);
+					vec3 v2_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 2);
 					DrawLine(v2_raster.x(), v2_raster.y(), v2_normal_end_vertex.x(), v2_normal_end_vertex.y());
 				}
 			}

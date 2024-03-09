@@ -57,6 +57,7 @@ protected:
 	Eigen::MatrixXf vertices_local_;
 	Eigen::MatrixXf normals_local_;
 	Eigen::MatrixXf face_normals_local_;
+	Eigen::MatrixXf faces_midpoints_local_;
 
 	mat4 model_transform_; // also known as model transform
 
@@ -77,4 +78,6 @@ public:
 	const Eigen::MatrixXf& GetNormalsLocal() const {return normals_local_;}
 
 	const Eigen::MatrixXf& GetFaceNormalsLocal() const {return face_normals_local_;}
+
+	const Eigen::MatrixXf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
 };

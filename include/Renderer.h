@@ -23,7 +23,9 @@ public:
 	bool is_perspective_; 
 	mat4 viewport_transform_; 
 	mat3 normal_transform_; 
-	Eigen::MatrixXf normals_end_vertices_raster;
+	Eigen::MatrixXf v_normals_end_vertices_raster; // vertex normals end points in raster space
+	Eigen::MatrixXf f_normals_end_vertices_raster; // face normals end points in raster space
+	Eigen::MatrixXf faces_midpoints_raster; // face midpoints in raster space
 	// Constructors
 	Renderer();
 	Renderer(int width, int height);
@@ -45,6 +47,10 @@ public:
 
 	bool show_vertex_normals_ = false;
 	bool show_face_normals_ = false;
+	bool show_cameras_ = false;
+	bool show_bounding_box_ = false;
+	bool show_wireframe_ = false;
+	bool show_lights_ = false;
 	
 private:
 	Scene* scene_;

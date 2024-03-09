@@ -12,11 +12,6 @@ Scene::Scene() {
 	active_camera_idx = 0;
 	active_model_idx = 0;
 	active_light_idx = 0;
-	should_render_cameras = false;
-	should_render_lights = false;
-	should_view_bounding_box = false;
-	should_view_face_normals = false;
-	should_view_vertex_normals = false;
 	// TODO delete, load from menu
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/banana.obj");
