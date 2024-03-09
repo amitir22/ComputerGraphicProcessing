@@ -17,15 +17,21 @@ class Scene {
 	std::vector<std::unique_ptr<MeshModel>> models_;
 	std::vector<std::unique_ptr<Camera>> cameras_;
 	std::vector<std::unique_ptr<Light>> lights_;
+
 public:
+	int active_camera_idx;
+	int active_model_idx;
+	int active_light_idx;
+	bool should_render_cameras;
+	bool should_render_lights;
+	bool should_view_bounding_box;
+	bool should_view_face_normals;
+	bool should_view_vertex_normals;
+
 	// Constructors
 	Scene();
 
 	void LoadOBJModel(std::string file_name);
     std::vector<MeshModel*> GetModels();
     Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
-
-    int active_camera_idx;
-	int active_model_idx;
-	int active_light_idx;
 };

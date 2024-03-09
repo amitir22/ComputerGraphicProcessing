@@ -24,7 +24,7 @@ list(APPEND IMGUI_SOURCES "external/imgui/backends/imgui_impl_opengl3.cpp")
 list(APPEND IMGUI_SOURCES "external/imgui/misc/cpp/imgui_stdlib.cpp")
 list(APPEND IMGUI_SOURCES "external/imgui/misc/debuggers/imgui.natvis" "external/imgui/misc/debuggers/imgui.natstepfilter")
 #### executable ####
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" )
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c"  "src/Material.cpp" "include/Material.h")
 
 # Configure a header file to pass the assets directory to the source code
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")

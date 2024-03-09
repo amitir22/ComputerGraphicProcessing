@@ -66,6 +66,17 @@ void Renderer::DrawScene(Scene *scene)
 	SetScene(scene); 
 	// Draw models
 	std::vector<MeshModel*> models = scene->GetModels();
+
+	if (scene->should_render_cameras)
+	{
+		// TODO:
+	}
+
+	if (scene->should_render_lights)
+	{
+		// TODO:
+	}
+
 	for (const auto& model : models) {
 		// set transforms
 		model_transform_ = model->GetModelTransform();
