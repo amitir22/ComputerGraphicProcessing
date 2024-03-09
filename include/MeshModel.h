@@ -54,31 +54,6 @@ struct FaceIdcs
 			}
 		}
 	}
-
-	/*FaceIdcs(std::istream& a_stream)
-	{
-		for (int i = 0; i < 4; i++)
-			v[i] = vn[i] = vt[i] = 0;
-
-		unsigned short c;
-		for (int i = 0; i < 3; i++)
-		{
-			a_stream >> std::ws >> v[i] >> std::ws;
-			if (a_stream.peek() != '/')
-				continue;
-			a_stream >> c >> std::ws;
-			if (a_stream.peek() == '/')
-			{
-				a_stream >> c >> std::ws >> vn[i];
-				continue;
-			}
-			else
-				a_stream >> vt[i];
-			if (a_stream.peek() != '/')
-				continue;
-			a_stream >> c >> vn[i];
-		}
-	}*/
 };
 
 
