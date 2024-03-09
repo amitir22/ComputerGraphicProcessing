@@ -102,14 +102,9 @@ void Renderer::DrawScene(Scene *scene)
 			v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 		}
 		if (this->show_face_normals_) {
-			Eigen::MatrixXf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
-
 			Eigen::MatrixXf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
 			Eigen::MatrixXf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
-			Eigen::MatrixXf faces_midpoints_clip = projection_transform_ * faces_midpoints_camera; // (4, N)
-			Eigen::MatrixXf faces_midpoints_ndc = faces_midpoints_clip.array().rowwise() / faces_midpoints_clip.row(3).array(); // (4, N)
-			faces_midpoints_raster = (viewport_transform_ * faces_midpoints_ndc).topRows(3); // (3, N)
-
+			Eigen::MatrixXf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
 			Eigen::MatrixXf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
 			f_normals_end_vertices_camera.topRows(3) += f_normals_camera; // (4, N)
 
@@ -135,22 +130,45 @@ void Renderer::DrawScene(Scene *scene)
 			// if all vertices share same y value - continue
 			if (v0_raster.y() == v1_raster.y() && v0_raster.y() == v2_raster.y()) continue;
 			// Compute bounding box
-			int min_x = GetIntMin(v0_raster.x(), v1_raster.x(), v2_raster.x());
-			int max_x = GetIntMax(v0_raster.x(), v1_raster.x(), v2_raster.x());
-			int min_y = GetIntMin(v0_raster.y(), v1_raster.y(), v2_raster.y());
-			int max_y = GetIntMax(v0_raster.y(), v1_raster.y(), v2_raster.y());
+			int min_x, max_x, min_y, max_y;
+			GetBoundingBox(v0_raster, v1_raster, v2_raster, min_x, max_x, min_y, max_y);
 			// Check if triangle is out of screen
 			if (max_x < 0 || min_x > width_ || max_y < 0 || min_y > height_)
 				continue;
 			// Draw Face normal
 			if (this->show_face_normals_) {
-				DrawLine(faces_midpoints_raster(0, i), faces_midpoints_raster(1, i), f_normals_end_vertices_raster(0, i), f_normals_end_vertices_raster(1, i));
+				// Compute midpoint in raster space, using v0_raster, v1_raster, v2_raster
+				vec3 face_midpoint_raster = (v0_raster + v1_raster + v2_raster) / 3.0f;
+				DrawLine(face_midpoint_raster.x(), face_midpoint_raster.y(), f_normals_end_vertices_raster.col(i).x(), f_normals_end_vertices_raster.col(i).y(), MyRGB{0,0,255});
 			}
 			// Clip bounding box to screen
 			uint32_t x0 = std::max(int32_t(0), (int32_t)(std::floor(min_x)));
 			uint32_t x1 = std::min(int32_t(width_) - 1, (int32_t)(std::floor(max_x)));
 			uint32_t y0 = std::max(int32_t(0), (int32_t)(std::floor(min_y)));
 			uint32_t y1 = std::min(int32_t(height_) - 1, (int32_t)(std::floor(max_y)));
+			// Draw Vertex normals
+			if (this->show_vertex_normals_) {
+				// For each vertex, check if it's in clipped bounding box, and if so, draw its normal
+				if (IsInBoundingBox(x0, x1, y0, y1, v0_raster.x(), v0_raster.y())) {
+					vec3 v0_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3);
+					DrawLine(v0_raster.x(), v0_raster.y(), v0_normal_end_vertex.x(), v0_normal_end_vertex.y());
+				}
+				if (IsInBoundingBox(x0, x1, y0, y1, v1_raster.x(), v1_raster.y())) {
+					vec3 v1_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 1);
+					DrawLine(v1_raster.x(), v1_raster.y(), v1_normal_end_vertex.x(), v1_normal_end_vertex.y());
+				}
+				if (IsInBoundingBox(x0, x1, y0, y1, v2_raster.x(), v2_raster.y())) {
+					vec3 v2_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 2);
+					DrawLine(v2_raster.x(), v2_raster.y(), v2_normal_end_vertex.x(), v2_normal_end_vertex.y());
+				}
+			}
+			if (this->show_wireframe_) {
+				DrawLine(static_cast<int>(v0_raster.x()), static_cast<int>(v0_raster.y()), static_cast<int>(v1_raster.x()), static_cast<int>(v1_raster.y()));
+				DrawLine(static_cast<int>(v1_raster.x()), static_cast<int>(v1_raster.y()), static_cast<int>(v2_raster.x()), static_cast<int>(v2_raster.y()));
+				DrawLine(static_cast<int>(v2_raster.x()), static_cast<int>(v2_raster.y()), static_cast<int>(v0_raster.x()), static_cast<int>(v0_raster.y()));
+				continue;
+			}
+			// IF not wireframe, then rasterize triangle
 			// compute area with an edge function
 			float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
 			for (uint32_t y = y0; y <= y1; ++y)
@@ -179,26 +197,16 @@ void Renderer::DrawScene(Scene *scene)
 					} // end if inside
 				} // end for x
 			} // end for y
-			if (this->show_vertex_normals_) {
-			 // For each vertex, check if it's in clipped bounding box, and if so, draw its normal
-				if (IsInBoundingBox(x0, x1, y0, y1, v0_raster.x(), v0_raster.y())) {
-					vec3 v0_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3);
-					DrawLine(v0_raster.x(), v0_raster.y(), v0_normal_end_vertex.x(), v0_normal_end_vertex.y());
-				}
-				if (IsInBoundingBox(x0, x1, y0, y1, v1_raster.x(), v1_raster.y())) {
-					vec3 v1_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 1);
-					DrawLine(v1_raster.x(), v1_raster.y(), v1_normal_end_vertex.x(), v1_normal_end_vertex.y());
-				}
-				if (IsInBoundingBox(x0, x1, y0, y1, v2_raster.x(), v2_raster.y())) {
-					vec3 v2_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3 + 2);
-					DrawLine(v2_raster.x(), v2_raster.y(), v2_normal_end_vertex.x(), v2_normal_end_vertex.y());
-				}
-			}
+			
 		} // end for each Triangle
 	} // end for each model
 }
 
-void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+//void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
+//	DrawLine(x0, y0, x1, y1, RGB{ 255, 255, 255 });
+//}
+
+void Renderer::DrawLine(int x0, int y0, int x1, int y1, MyRGB color) {
 	const bool steep = abs(y1 - y0) > abs(x1 - x0);
 	// If slope (in absolute value) is larger than 1, we switch roles of x and y 
 	if (steep) {
@@ -218,10 +226,10 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
 		if (steep) {
-			DrawPixel(y, x);
+			DrawPixel(y, x, color);
 		}
 		else {
-			DrawPixel(x, y);
+			DrawPixel(x, y, color);
 		}
 		if (D > 0) { // If D > 0, we should move one step in the y direction
 			y += ystep;
@@ -233,14 +241,22 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1) {
 	}
 }
 
+void Renderer::DrawLine(int x0, int y0, int x1, int y1)
+{
+	DrawLine(x0, y0, x1, y1, MyRGB{ 255, 255, 255 });
+}
 
-void Renderer::DrawPixel(int x, int y) {
+
+void Renderer::DrawPixel(int x, int y, MyRGB color) {
 	if (x < 0 || x >= width_ || y < 0 || y >= height_) {
 		return;
 	}
-	framebuffer_[INDEX(width_, x, y, 0)] = 255;
-	framebuffer_[INDEX(width_, x, y, 1)] = 255;
-	framebuffer_[INDEX(width_, x, y, 2)] = 255;
+	framebuffer_[INDEX(width_, x, y, 0)] = color.r;
+	framebuffer_[INDEX(width_, x, y, 1)] = color.g;
+	framebuffer_[INDEX(width_, x, y, 2)] = color.b;
 }
 
+void Renderer::DrawPixel(int x, int y) {
+	DrawPixel(x, y, MyRGB{ 255, 255, 255 });
+}
 

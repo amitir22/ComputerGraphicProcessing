@@ -7,6 +7,8 @@
 
 #include "Geometry.h" // For viewport transformation
 #include "Scene.h"
+#include "MyRGB.h"
+
 
 class Renderer
 {
@@ -32,7 +34,9 @@ public:
 	
 	// Draw functions
 	void DrawScene(Scene* scene);
+	void DrawLine(int x0, int y0, int x1, int y1, MyRGB color);
     void DrawLine(int x0, int y0, int x1, int y1);
+	void DrawPixel(int x, int y, MyRGB color);
     void DrawPixel(int x, int y);
 	// Utils
 	void ClearBuffers();
@@ -46,12 +50,12 @@ public:
 	float top;
 
 	bool show_vertex_normals_ = false;
-	bool show_face_normals_ = false;
+	bool show_face_normals_ = true;
 	bool show_cameras_ = false;
 	bool show_bounding_box_ = false;
 	bool show_wireframe_ = false;
 	bool show_lights_ = false;
-	bool is_backface_culling_ = true;
+	bool is_backface_culling_ = false;
 	
 private:
 	Scene* scene_;

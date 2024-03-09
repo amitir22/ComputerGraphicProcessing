@@ -86,14 +86,13 @@ void MeshModel::LoadFile(string file_name)
 			temp_v_normals.col(v1_index) += normals[faces_indices[i].vn[1] - 1];
 			temp_v_normals.col(v2_index) += normals[faces_indices[i].vn[2] - 1];
 		}
-		
 		n.normalize();
 		// set column i of face_normals_local_ to n
 		face_normals_local_.col(i) << n;
-		// compute face midpoint, set column i of faces_midpoints_local_ to a homogenized midpoint
-		vec3 midpoint = (v0 + v1 + v2) / 3;
-		faces_midpoints_local_.col(i) << midpoint, 1;
-	}
+		// compute face midpoint
+		vec3 face_midpoint = (v0 + v1 + v2) / 3.0f;
+		faces_midpoints_local_.col(i) << face_midpoint, 1;
+	} // end for loop of faces
 	// Normalize temp_v_normals, columnwise 
 	temp_v_normals.colwise().normalize();
 	// compute vertex normals
