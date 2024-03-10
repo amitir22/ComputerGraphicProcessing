@@ -65,39 +65,6 @@ void Camera::SetPerspective(float fovy, float aspect, float z_near, float z_far)
 	projection_ = geometry::GetPerspectiveProjection(fovy, aspect, z_near, z_far);
 }
 
-void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch)
-{
-	x_offset *= mouse_sensitivity;
-	y_offset *= mouse_sensitivity;
-
-	yaw += x_offset;
-	pitch += y_offset;
-
-	if (constrain_pitch) {
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-	}
-	//UpdateVectors();
-}
-
-void Camera::HandleMouseScroll(float y_offset)	
-{
-	// TODO write this in new way
-	fovy_ -= y_offset;
-	if (fovy_ <= 1.0f)
-		fovy_ = 1.0f;
-	if (fovy_ >= 70.0f)
-		fovy_ = 70.0f;
-	std::cout << "fovy_: " << fovy_ << std::endl;
-	SetPerspective(fovy_, aspect_, z_near_, z_far_);
-}
-
-void Camera::HandleKeyboardInput(int key, float delta_time)
-{
-}
-
 void Camera::Translate(CameraMovement direction, float delta_time)
 {
 	// https://learnwebgl.brown37.net/07_cameras/camera_movement.html
@@ -114,6 +81,21 @@ void Camera::Translate(CameraMovement direction, float delta_time)
 		Translate(velocity * v_);
 	else if (direction == CameraMovement::DOWN) // pedestal down
 		Translate(velocity * -v_);
+}
+
+void Camera::Pan(float x_offset, float y_offset)
+{
+	float sensitivity = 0.01f;
+	vec3 translate_dir = u_ * x_offset + v_ * y_offset;
+	translate_dir *= sensitivity;
+	Translate(translate_dir);
+}
+
+void Camera::Dolly(float offset)
+{
+	float sensitivity = 0.05f;
+	float velocity = sensitivity * offset;
+	Translate(velocity * -n_);
 }
 
 void Camera::Translate(const vec3& translation)

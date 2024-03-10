@@ -20,24 +20,6 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
             break;
-        case GLFW_KEY_W:
-            active_camera->Translate(FORWARD, control_state->delta_time);
-            break;
-        case GLFW_KEY_S:
-            active_camera->Translate(BACKWARD, control_state->delta_time);
-            break;
-        case GLFW_KEY_A:
-            active_camera->Translate(LEFT, control_state->delta_time);
-            break;
-        case GLFW_KEY_D:
-            active_camera->Translate(RIGHT, control_state->delta_time);
-            break;
-        case GLFW_KEY_Q:
-            active_camera->Translate(UP, control_state->delta_time);
-            break;
-        case GLFW_KEY_E:
-            active_camera->Translate(DOWN, control_state->delta_time);
-            break;
         case GLFW_KEY_R:
             active_camera->Reset();
             break;
@@ -73,15 +55,21 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
     control_state->last_x = x_pos_in;
     control_state->last_y = y_pos_in;
     if (control_state->left_mouse_pressed) {
-		Camera* active_camera = scene->GetActiveCamera();
-		active_camera->Orbit(x_offset, y_offset);
+        if (control_state->ctrl_pressed) {
+            Camera* active_camera = scene->GetActiveCamera();
+            active_camera->Pan(x_offset, y_offset);
+        }
+        else {
+            Camera* active_camera = scene->GetActiveCamera();
+            active_camera->Orbit(x_offset, y_offset);
+        }
 	}    
 }
 
 void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
 {
     Camera* active_camera = scene->GetActiveCamera();
-    active_camera->HandleMouseScroll(static_cast<float>(y_offset));
+    active_camera->Dolly(static_cast<float>(y_offset));
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

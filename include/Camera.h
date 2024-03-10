@@ -67,10 +67,12 @@ public:
 	// Projections
 	void SetOrtho(float canvas_right, float canvas_top, float z_near, float z_far);
 	void SetPerspective(float fovy, float aspect, float zNear, float zFar);	
-	// Transformations
+	// Camera Movement
 	void Translate(const vec3& translation);
-	void Orbit(float x_offset, float y_offset);
 	void Translate(CameraMovement direction, float delta_time);
+	void Pan(float x_offset, float y_offset);
+	void Dolly(float offset);
+	void Orbit(float x_offset, float y_offset);
 	/*void OrbitLeft();
 	void OrbitRight();*/
 	// Input
