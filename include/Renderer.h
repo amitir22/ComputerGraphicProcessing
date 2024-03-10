@@ -50,12 +50,12 @@ public:
 	float top;
 
 	bool show_vertex_normals_ = false;
-	bool show_face_normals_ = true;
+	bool show_face_normals_ = false;
 	bool show_cameras_ = false;
 	bool show_bounding_box_ = false;
 	bool show_wireframe_ = false;
 	bool show_lights_ = false;
-	bool is_backface_culling_ = false;
+	bool is_backface_culling_ = true;
 	
 private:
 	Scene* scene_;

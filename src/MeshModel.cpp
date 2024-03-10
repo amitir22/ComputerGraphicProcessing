@@ -20,9 +20,27 @@ MeshModel::MeshModel(string file_name) : MeshModel()
 	LoadFile(file_name);
 }
 
+void MeshModel::SetModelName(string file_name) {
+	// Extract the file name (removing directories and .obj extension) from the path.
+	size_t last_slash_idx = file_name.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		model_name_ = file_name.substr(last_slash_idx + 1, file_name.size() - 5 - last_slash_idx);
+	}
+	else
+	{
+		model_name_ = file_name.substr(0, file_name.size() - 4);
+	}
+}
+
 // Read OBJ file and create a mesh model
 void MeshModel::LoadFile(string file_name)
 {
+	SetModelName(file_name);
+	std::cout << "Loading model " << model_name_ << " from file " << file_name << std::endl;
+
+	model_name_ = file_name;
+	// Open file
 	ifstream ifile(file_name.c_str());
 	vector<vec3> vertices;
 	vector<vec3> normals;
@@ -105,8 +123,17 @@ void MeshModel::LoadFile(string file_name)
 		v_normals_local_.col((i * 3) + 1) << temp_v_normals.col(v1_index);
 		v_normals_local_.col((i * 3) + 2) << temp_v_normals.col(v2_index);
 	}
+	// Compute the bounding box of the model
+	ComputeBoundingBox();
 }
 
+void MeshModel::ComputeBoundingBox()
+{
+	// Compute the bounding box of the model
+	vec3 min = vertices_local_.block(0, 0, 3, vertices_local_.cols()).rowwise().minCoeff();
+	vec3 max = vertices_local_.block(0, 0, 3, vertices_local_.cols()).rowwise().maxCoeff();
+	bounding_box_ = geometry::Box(min, max);
+}
 
 
 ////////////////////////////////////////

@@ -60,10 +60,13 @@ struct FaceIdcs
 class MeshModel
 {
 protected:
+	string model_name_;
 	Eigen::MatrixXf vertices_local_;
 	Eigen::MatrixXf v_normals_local_;
 	Eigen::MatrixXf face_normals_local_;
 	Eigen::MatrixXf faces_midpoints_local_;
+	// Bounding Box
+	geometry::Box bounding_box_;
 
 	mat4 model_transform_; // also known as model transform
 
@@ -71,7 +74,9 @@ public:
 	MeshModel() noexcept;
 
 	explicit MeshModel(string fileName);
+	void SetModelName(string file_name);
 	void LoadFile(string fileName);
+	void ComputeBoundingBox();
 	// User Transformations
 	void Translate(vec3 translation);
 	void Rotate(vec3 axis, float angle);

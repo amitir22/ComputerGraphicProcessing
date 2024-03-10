@@ -4,23 +4,24 @@
 #include <iostream>
 
 // Constructor implementation
-Camera::Camera(vec3 eye, vec3 at, vec3 up) : eye(eye), up(up), yaw(YAW), pitch(PITCH),
-fov(FOV), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), world_up(0,1,0) {
-	forward = (at - eye).normalized(); // points to negative z
-	right = up.cross(-forward);  // points to positive x
-	LookAt(eye, at, up);
-	aspect = float(cg::constants::SCR_WIDTH) / float(cg::constants::SCR_HEIGHT);
-	z_near_ = Z_NEAR;
-	z_far_ = Z_FAR;
-	top_ = 0.0f;
-	right_ = 0.0f;
-	SetPerspective(fov, aspect, Z_NEAR,Z_FAR);
+Camera::Camera(vec3 eye, vec3 at, vec3 up) : yaw(YAW), pitch(PITCH), movement_speed(SPEED), mouse_sensitivity(SENSITIVITY) {
+	//forward = (at - eye).normalized(); // points to negative z
+	//right = up.cross(-forward);  // points to positive x
+	Reset();
 	//SetOrtho(-1, 1, -1, 1, 0.1f, 10);
-	UpdateVectors();
+}
+
+void Camera::Reset() {
+	LookAt(DEFAULT_EYE, DEFAULT_AT, DEFAULT_UP);
+	float aspect = float(cg::constants::SCR_WIDTH) / float(cg::constants::SCR_HEIGHT);
+	SetPerspective(FOVY, aspect, Z_NEAR, Z_FAR);
 }
 
 mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 {
+	eye_ = eye;
+	up_ = up;
+	at_ = at;
 	// Compute translation matrix 
 	mat4 translation_matrix{ 
 		{1, 0, 0, -eye.x()},
@@ -30,34 +31,38 @@ mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 		};
 
 	// Compute rotation matrix. 
-	vec3 n = (eye - at).normalized(); // points to positive z, aka forward
+	n_ = (eye - at).normalized(); // points to positive z, aka forward
 	//this->gaze = n;
-	vec3 u = (up.cross(n)).normalized(); // points to positive x
-	vec3 v = (n.cross(u)).normalized(); // points to positive y, really just normalization of up
+	u_ = (up_.cross(n_)).normalized(); // points to positive x
+	v_ = (n_.cross(u_)).normalized(); // points to positive y, really just normalization of up
 	mat4 rotation_matrix{
-		{u.x(), u.y(), u.z(), 0.0f},
-		{v.x(), v.y(), v.z(), 0.0f},
-		{n.x(), n.y(), n.z(), 0.0f},
+		{u_.x(), u_.y(), u_.z(), 0.0f},
+		{v_.x(), v_.y(), v_.z(), 0.0f},
+		{n_.x(), n_.y(), n_.z(), 0.0f},
 		{0.0f, 0.0f, 0.0f, 1.0f}
 	};
-	view_transform = rotation_matrix * translation_matrix;
-	return view_transform;
+	view_transform_ = rotation_matrix * translation_matrix;
+	return view_transform_;
 }
 
-mat4 Camera::GetViewTransform() {
-	return LookAt(eye, eye + forward, up);
-}
-
-void Camera::SetOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
+void Camera::SetOrtho(float canvas_right, float canvas_top, float z_near, float z_far)
 {
+	this->canvas_right_ = canvas_right;
+	this->canvas_top_ = canvas_top;
+	this->z_near_ = z_near;
+	this->z_far_ = z_far;
 	this->is_perspective_ = false;
-	projection = geometry::GetOrthoProjection(left, right, bottom, top, zNear, zFar);
+	projection_ = geometry::GetOrthoProjection(-canvas_right, canvas_right, -canvas_top, canvas_top, z_near, z_far);
 }
 
-void Camera::SetPerspective(float fovy, float aspect, float zNear, float zFar) {
+void Camera::SetPerspective(float fovy, float aspect, float z_near, float z_far) {
 	this->is_perspective_ = true;
-	geometry::GetTopAndRight(fovy, aspect, zNear, top_, right_);
-	projection = geometry::GetPerspectiveProjection(fovy, aspect, zNear, zFar);
+	this->fovy_ = fovy;
+	this->aspect_ = aspect;
+	this->z_near_ = z_near;
+	this->z_far_ = z_far;
+	geometry::GetTopAndRight(fovy, aspect, z_near, canvas_top_, canvas_right_);
+	projection_ = geometry::GetPerspectiveProjection(fovy, aspect, z_near, z_far);
 }
 
 void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_pitch)
@@ -74,82 +79,91 @@ void Camera::HandleMouseMovement(float x_offset, float y_offset, bool constrain_
 		if (pitch < -89.0f)
 			pitch = -89.0f;
 	}
-	UpdateVectors();
+	//UpdateVectors();
 }
 
-void Camera::HandleMouseScroll(float y_offset)
+void Camera::HandleMouseScroll(float y_offset)	
 {
-	fov -= y_offset;
-	if (fov <= 1.0f)
-		fov = 1.0f;
-	if (fov >= 70.0f)
-		fov = 70.0f;
-	std::cout << "fov: " << fov << std::endl;
-	SetPerspective(fov, aspect, Z_NEAR, Z_FAR);
+	// TODO write this in new way
+	fovy_ -= y_offset;
+	if (fovy_ <= 1.0f)
+		fovy_ = 1.0f;
+	if (fovy_ >= 70.0f)
+		fovy_ = 70.0f;
+	std::cout << "fovy_: " << fovy_ << std::endl;
+	SetPerspective(fovy_, aspect_, z_near_, z_far_);
 }
 
 void Camera::HandleKeyboardInput(int key, float delta_time)
 {
-	float velocity = movement_speed * delta_time;
-	if (key == CameraMovement::FORWARD)
-		Translate(velocity * forward);
-	else if (key == CameraMovement::BACKWARD)
-		Translate(velocity * (-forward));
-	else if (key == CameraMovement::LEFT)
-		Translate(velocity * (-right));
-	else if (key == CameraMovement::RIGHT)
-		Translate(velocity * right);
-	else if (key == CameraMovement::UP)
-		Translate(velocity * up);
-	else if (key == CameraMovement::DOWN)
-		Translate(velocity * (-up));
-	else if (key == CameraMovement::ORBIT_L)
-		OrbitLeft();
-	if (key == CameraMovement::ORBIT_R)
-		OrbitRight();
 }
 
-
-void Camera::UpdateVectors() {
-	forward.x() = cos(geometry::Radians(yaw)) * cos(geometry::Radians(pitch));
-	forward.y() = sin(geometry::Radians(pitch));
-	forward.z() = sin(geometry::Radians(yaw)) * cos(geometry::Radians(pitch));
-	forward.normalize();
-	right = (forward.cross(world_up)).normalized();
-	up = (right.cross(forward)).normalized();
+void Camera::Translate(CameraMovement direction, float delta_time)
+{
+	// https://learnwebgl.brown37.net/07_cameras/camera_movement.html
+	float velocity = movement_speed * delta_time;
+	if (direction == CameraMovement::FORWARD) // dolly in
+		Translate(velocity * -n_);
+	else if (direction == CameraMovement::BACKWARD) // dolly out
+		Translate(velocity * n_);
+	else if (direction == CameraMovement::LEFT) // truck left
+		Translate(velocity * -u_);
+	else if (direction == CameraMovement::RIGHT) // truck right
+		Translate(velocity * u_);
+	else if (direction == CameraMovement::UP) // pedestal up
+		Translate(velocity * v_);
+	else if (direction == CameraMovement::DOWN) // pedestal down
+		Translate(velocity * -v_);
 }
 
 void Camera::Translate(const vec3& translation)
 {
-	eye += translation;
-	std::cout << "eye: " << eye.transpose() << std::endl;
-} 
-
-// TODO: rename semantic from rotate to orbit
-void Camera::OrbitLeft()
-{
-	float step_size = 0.1f;
-	vec3 translate_dir = this->eye.cross(this->up);
-	float resize_factor = step_size / translate_dir.norm();
-	float prev_eye_norm = this->eye.norm();
-
-	this->eye += resize_factor * translate_dir;
-	this->forward = -this->eye.normalized();
-
-	// resize this->eye
-	this->eye *= prev_eye_norm / this->eye.norm();
+	LookAt(eye_ + translation, at_ + translation, up_);
 }
 
-void Camera::OrbitRight()
+void Camera::Orbit(float x_offset, float y_offset)
 {
-	float step_size = 0.1f;
-	vec3 translate_dir = this->eye.cross(this->up);
-	float resize_factor = step_size / translate_dir.norm();
-	float prev_eye_norm = this->eye.norm();
+	float yaw = x_offset * 0.1f; // radians
+	float pitch = y_offset * 0.05f; // radians
+	vec3 direction = eye_ - at_; // points to negative z
+	float radius = direction.norm(); // Keep the camera at the same distance from 'at'
+	
+	// Horizontal rotation
+	vec3 rotated_direction = geometry::RotateVector(direction, up_, yaw);
+	
+	// Vertical rotation
+	vec3 horizontal_axis = (up_.cross(direction)).normalized(); // points to positive x
+	rotated_direction = geometry::RotateVector(rotated_direction, horizontal_axis, pitch);
+	vec3 new_eye = at_ + rotated_direction.normalized() * radius;	
 
-	this->eye -= resize_factor * translate_dir;
-	this->forward = -this->eye.normalized();
-
-	// resize this->eye
-	this->eye *= prev_eye_norm / this->eye.norm();
+	// Update camera with the new eye position
+	LookAt(new_eye, at_, up_);
 }
+
+//void Camera::OrbitLeft()
+//{
+//	float step_size = 0.1f;
+//	vec3 translate_dir = this->eye.cross(this->up);
+//	float resize_factor = step_size / translate_dir.norm();
+//	float prev_eye_norm = this->eye.norm();
+//
+//	this->eye += resize_factor * translate_dir;
+//	this->forward = -this->eye.normalized();
+//
+//	// resize this->eye
+//	this->eye *= prev_eye_norm / this->eye.norm();
+//}
+//
+//void Camera::OrbitRight()
+//{
+//	float step_size = 0.1f;
+//	vec3 translate_dir = this->eye.cross(this->up);
+//	float resize_factor = step_size / translate_dir.norm();
+//	float prev_eye_norm = this->eye.norm();
+//
+//	this->eye -= resize_factor * translate_dir;
+//	this->forward = -this->eye.normalized();
+//
+//	// resize this->eye
+//	this->eye *= prev_eye_norm / this->eye.norm();
+//}

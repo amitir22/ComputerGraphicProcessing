@@ -6,6 +6,12 @@
 #endif
 float geometry::Radians(float degrees) { return degrees * M_PI / 180; }
 
+vec3 geometry::RotateVector(const vec3& v, const vec3& axis, float angle)
+{
+	mat3 rotation_matrix = GetRotationMatrix(axis, angle).block<3, 3>(0, 0);
+	return rotation_matrix * v;
+}
+
 vec3 vec3fFromStream(std::istream& a_stream)
 {
 	float x, y, z;
@@ -74,8 +80,8 @@ mat4 geometry::GetPerspectiveProjection(float fovy, float aspect, float z_near, 
 	// fovy is the field of view in the y direction, in degrees
 	// aspect is the ratio of the width to the height of the viewing volume
 	// z_near and z_far are the distances to the near and far planes. They must be positive.
-	float top = z_near * tan(Radians(fovy) / 2);
-	float right = top * aspect;
+	float top, right; 
+	GetTopAndRight(fovy, aspect, z_near, top, right);
 	return GetPerspectiveProjection(-right, right, -top, top, z_near, z_far);
 }
 
@@ -175,3 +181,59 @@ mat4 geometry::GetTranslationMatrix(vec3 translation)
 		{0, 0, 0, 1}
 	};
 }
+
+geometry::Rectangle::Rectangle(const vec2& bottom_left, const vec2& top_right)
+{
+	bottom_left_ = bottom_left;
+	top_right_ = top_right;
+}
+
+geometry::Rectangle::Rectangle()
+{
+	bottom_left_ = vec2();
+	top_right_ = vec2();
+}
+
+geometry::Rectangle::Rectangle(float width, float height, const vec2& bottom_left)
+{
+	bottom_left_ = bottom_left;
+	top_right_ = vec2(bottom_left.x() + width, bottom_left.y() + height);
+}
+
+geometry::Rectangle::Rectangle(float left_x, float right_x, float bottom_y, float top_y)
+{
+	bottom_left_ = vec2(left_x, bottom_y);
+	top_right_ = vec2(right_x, top_y);
+}
+
+geometry::Rectangle::Rectangle(float width, float height)
+{
+	bottom_left_ = vec2();
+	top_right_ = vec2(width, height);
+}
+
+geometry::Box::Box(const vec3& bottom_left_back, const vec3& top_right_front)
+{
+	bottom_left_back_ = bottom_left_back;
+	top_right_front_ = top_right_front;
+}
+
+geometry::Box::Box()
+{
+	bottom_left_back_ = vec3();
+	top_right_front_ = vec3();
+}
+
+geometry::Box::Box(float width, float height, float depth)
+{
+	bottom_left_back_ = vec3();
+	top_right_front_ = vec3(width, height, depth);
+}
+
+geometry::Box::Box(float width, float height, float depth, const vec3& bottom_left_front)
+{
+	bottom_left_back_ = bottom_left_front;
+	top_right_front_ = vec3(bottom_left_front.x() + width, bottom_left_front.y() + height, bottom_left_front.z() + depth);
+}
+
+

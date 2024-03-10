@@ -51,8 +51,8 @@ void Renderer::SetScene(Scene *scene)
 
 	z_near = scene->GetActiveCamera()->z_near_;
 	z_far = scene->GetActiveCamera()->z_far_;
-	right = scene->GetActiveCamera()->right_;
-	top = scene->GetActiveCamera()->top_;
+	right = scene->GetActiveCamera()->canvas_right_;
+	top = scene->GetActiveCamera()->canvas_top_;
 }
 
 /////////////////////////////////////////////////////
@@ -117,9 +117,9 @@ void Renderer::DrawScene(Scene *scene)
 		{
 			// Backface culling
 			if (this->is_backface_culling_) {
-				vec3 forward = scene_->GetActiveCamera()->forward;
+				vec3 forward = -(scene_->GetActiveCamera()->n_);
 				vec3 face_normal = f_normals_local.col(i);
-				float z_dot = scene_->GetActiveCamera()->forward.dot(face_normal);
+				float z_dot = forward.dot(face_normal);
 				if (z_dot >= 0)
 					continue;
 			}

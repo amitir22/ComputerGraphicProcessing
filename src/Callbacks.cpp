@@ -6,29 +6,45 @@
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void ProcessInput(GLFWwindow* window)
-{
+void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     ControlState* control_state = static_cast<ControlState*>(glfwGetWindowUserPointer(window));
     Camera* active_camera = scene->GetActiveCamera();
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(FORWARD, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(BACKWARD, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(LEFT, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(RIGHT, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(UP, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(DOWN, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(ORBIT_L, control_state->delta_time);
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-        active_camera->HandleKeyboardInput(ORBIT_R, control_state->delta_time);
+    // Handle left control key state update
+    if (key == GLFW_KEY_LEFT_CONTROL) {
+        control_state->ctrl_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+    }
+
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(window, true);
+            break;
+        case GLFW_KEY_W:
+            active_camera->Translate(FORWARD, control_state->delta_time);
+            break;
+        case GLFW_KEY_S:
+            active_camera->Translate(BACKWARD, control_state->delta_time);
+            break;
+        case GLFW_KEY_A:
+            active_camera->Translate(LEFT, control_state->delta_time);
+            break;
+        case GLFW_KEY_D:
+            active_camera->Translate(RIGHT, control_state->delta_time);
+            break;
+        case GLFW_KEY_Q:
+            active_camera->Translate(UP, control_state->delta_time);
+            break;
+        case GLFW_KEY_E:
+            active_camera->Translate(DOWN, control_state->delta_time);
+            break;
+        case GLFW_KEY_R:
+            active_camera->Reset();
+            break;
+        }
+    }
+
+    
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -40,10 +56,9 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void MouseCallback(GLFWwindow* window, double x_pos_in, double y_pos_in) 
+void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in) 
 {
     ControlState* control_state = static_cast<ControlState*>(glfwGetWindowUserPointer(window));
-    Camera* active_camera = scene->GetActiveCamera();
 
     if (control_state->first_mouse)
     {
@@ -57,13 +72,26 @@ void MouseCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
 
     control_state->last_x = x_pos_in;
     control_state->last_y = y_pos_in;
-
-    active_camera->HandleMouseMovement(x_offset, y_offset);
+    if (control_state->left_mouse_pressed) {
+		Camera* active_camera = scene->GetActiveCamera();
+		active_camera->Orbit(x_offset, y_offset);
+	}    
 }
 
 void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
 {
     Camera* active_camera = scene->GetActiveCamera();
     active_camera->HandleMouseScroll(static_cast<float>(y_offset));
+}
+
+void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    ControlState* control_state = static_cast<ControlState*>(glfwGetWindowUserPointer(window));
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        control_state->left_mouse_pressed = (action == GLFW_PRESS);
+    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        control_state->right_mouse_pressed = (action == GLFW_PRESS);
+	}
 }
 

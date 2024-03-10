@@ -48,8 +48,10 @@ int main()
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-    glfwSetCursorPosCallback(window, MouseCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetCursorPosCallback(window, MousePosCallback);
     glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetKeyCallback(window, KeyboardCallback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -131,7 +133,6 @@ int main()
         control_state.UpdateDeltaTime(static_cast<float>(glfwGetTime()));
         // input
         // -----
-        ProcessInput(window);
         renderer->DrawScene(scene);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
