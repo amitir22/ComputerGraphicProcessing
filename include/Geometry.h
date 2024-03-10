@@ -69,11 +69,9 @@ namespace geometry {
 
 		vec3 bottom_left_back_;
 		vec3 top_right_front_;
-	};
 
-
-
-
+	}; // Box
+	float FastQuake3InverseSqrt(float num);
 
 } // namespace geometry
 

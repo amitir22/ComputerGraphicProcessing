@@ -8,6 +8,8 @@
 #include <Eigen/Dense>
 
 #include "Geometry.h"
+#include "Material.h"
+
 
 using namespace std;
 
@@ -61,6 +63,7 @@ class MeshModel
 {
 protected:
 	string model_name_;
+	UniformMaterial material;
 	Eigen::MatrixXf vertices_local_;
 	Eigen::MatrixXf v_normals_local_;
 	Eigen::MatrixXf face_normals_local_;
