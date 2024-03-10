@@ -30,6 +30,7 @@ vec2 vec2fFromStream(std::istream& a_stream)
 // We call this orthographic projection, but we don't really project, since we don't want to lose depth information.
 mat4 geometry::GetOrthoProjection(float left, float right, float bottom, float top,
 								  float z_near, float z_far)
+	// z_near and z_far are the distances to the near and far planes. They must be positive.
 {
 	// translate center of orthographic viewing volume to origin (0,0,0)
 	mat4 translation_matrix{

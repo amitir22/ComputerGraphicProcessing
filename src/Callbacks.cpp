@@ -41,6 +41,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
+    renderer->HandleWindowReshape(width, height);
     glViewport(0, 0, width, height);
 }
 

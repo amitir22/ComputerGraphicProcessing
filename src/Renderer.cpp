@@ -32,6 +32,11 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	framebuffer_.reset(new GLubyte[width_ * height_ * 3]);
 	z_buffer_.reset(new float[width_ * height_]);
 	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
+	Scene* scene = scene_;
+	// For every camera in scene, call camera.HandleWindowReshape(new_width, new_height)
+	for (auto& camera : scene->GetCameras()) {
+		camera->HandleWindowReshape(new_width, new_height);
+	}
 }
 
 void Renderer::ClearBuffers()

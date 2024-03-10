@@ -39,3 +39,12 @@ std::vector<MeshModel*> Scene::GetModels() {
 	}
 	return models;
 }
+
+std::vector<Camera*> Scene::GetCameras()
+{
+	std::vector<Camera*> cameras;
+	for (const auto& camera : cameras_) {
+		cameras.push_back(camera.get());
+	}
+	return cameras;
+}

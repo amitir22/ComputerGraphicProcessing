@@ -3,9 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Scene.h"
+#include "Renderer.h"
 
 extern Scene* scene;
+extern Renderer* renderer;
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
