@@ -23,11 +23,11 @@ namespace geometry {
 	mat4 GetScaleMatrix(const vec3& scale);
 	mat4 GetTranslationMatrix(vec3 translation);
 	// Projections
-	mat4 GetPerspectiveProjection(float fovy, float aspect, float zNear, float zFar);
+	mat4 GetPerspectiveProjection(float aspect, float fovy, float zNear, float zFar);
 	mat4 GetPerspectiveProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	mat4 GetOrthoProjection(float aspect, float fovy, float z_near, float z_far);
 	mat4 GetOrthoProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-    void GetTopAndRight(float fovy, float aspect,float zNear, float &top, float &right);
+    void GetTopAndRight(float aspect, float fovy, float zNear, float &top, float &right);
     mat4 GetViewportTransform(int width, int height); // Map NDC to screen-space coordinates
     mat3 GetNormalTransfrom(const mat4& m); // from modelview
 

@@ -62,7 +62,7 @@ public:
 	bool IsPerspectiveProjection() const { return is_perspective_; }
 	// Projections
 	void SetOrtho(float canvas_right, float canvas_top, float z_near, float z_far);
-	void SetPerspective(float fovy, float aspect, float zNear, float zFar);	
+	void SetPerspective(float aspect, float fovy, float zNear, float zFar);
 	// Camera Movement
 	void Translate(const vec3& translation);
 	void Translate(CameraMovement direction, float delta_time);

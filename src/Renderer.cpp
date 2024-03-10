@@ -30,7 +30,9 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	width_ = new_width;
 	height_ = new_height;
 	framebuffer_.reset(new GLubyte[width_ * height_ * 3]);
+	// fill z_buffer with z_far
 	z_buffer_.reset(new float[width_ * height_]);
+	std::fill(z_buffer_.get(), z_buffer_.get() + width_ * height_, z_far_);
 	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
 	Scene* scene = scene_;
 	// For every camera in scene, call camera.HandleWindowReshape(new_width, new_height)
@@ -173,7 +175,7 @@ void Renderer::DrawScene(Scene *scene)
 				DrawLine(v2_raster, v0_raster);
 				continue;
 			}
-			// IF not wireframe, then rasterize triangle
+			// If not wireframe, then rasterize triangle
 			// compute area with an edge function
 			float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
 			for (uint32_t y = y0; y <= y1; ++y)
@@ -196,7 +198,6 @@ void Renderer::DrawScene(Scene *scene)
 						if (z <= z_buffer_[y * width_ + x]) {
 							z_buffer_[y * width_ + x] = z;
 							// TODO fragment shader - compute color, according to selected lighting method
-							// Renderer::getShadingForFragment(Face, fragment)
 							DrawPixel(x, y, z);
 						} // end if depth-buffer test
 					} // end if inside

@@ -39,6 +39,7 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 // ---------------------------------------------------------------------------------------------
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
+    width = height * 4.0 / 3.0;
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     renderer->HandleWindowReshape(width, height);
@@ -80,11 +81,9 @@ void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
     Camera* active_camera = scene->GetActiveCamera();
     // if shift is pressed, dolly the camera
     if (control_state->shift_pressed) {
-        std::cout << "dolly\n";
 		active_camera->Dolly(static_cast<float>(y_offset));
 	} 
     else { // zoom
-        std::cout << "zooming\n";
         active_camera->Zoom(static_cast<float>(y_offset));
     }
 }

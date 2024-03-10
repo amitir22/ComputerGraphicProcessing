@@ -43,7 +43,7 @@ mat4 geometry::GetOrthoProjection(float left, float right, float bottom, float t
 	mat4 scale_matrix{
 		{2 / (right - left), 0, 0, 0},
 		{0, 2 / (top - bottom), 0, 0},
-		{0, 0, 2 / (z_far - z_near), 0},
+		{0, 0, 2 / (z_far - z_near), 0}, // TODO maybe -2?
 		{0, 0, 0, 1}
 	};
 	// The result looks like:
@@ -57,7 +57,7 @@ mat4 geometry::GetOrthoProjection(float left, float right, float bottom, float t
 mat4 geometry::GetOrthoProjection(float aspect, float fovy, float z_near, float z_far)
 {
 	float top, right;
-	GetTopAndRight(fovy, aspect, z_near, top, right);
+	GetTopAndRight(aspect, fovy, z_near, top, right);
 	return GetOrthoProjection(-right, right, -top, top, z_near, z_far);
 }
 
@@ -75,7 +75,7 @@ mat4 geometry::GetPerspectiveProjection(float left, float right, float bottom, f
 	return ortho * P;
 }
 
-void geometry::GetTopAndRight(float fovy, float aspect, float z_near, float &top, float &right)
+void geometry::GetTopAndRight(float aspect, float fovy, float z_near, float &top, float &right)
 {
 	// fovy is the field of view in the y direction, in degrees
 	// aspect is the ratio of the width to the height of the viewing volume
@@ -83,13 +83,15 @@ void geometry::GetTopAndRight(float fovy, float aspect, float z_near, float &top
 	right = top * aspect;
 }
 
-mat4 geometry::GetPerspectiveProjection(float fovy, float aspect, float z_near, float z_far)
+mat4 geometry::GetPerspectiveProjection(float aspect, float fovy, float z_near, float z_far)
 {
 	// fovy is the field of view in the y direction, in degrees
 	// aspect is the ratio of the width to the height of the viewing volume
 	// z_near and z_far are the distances to the near and far planes. They must be positive.
 	float top, right; 
-	GetTopAndRight(fovy, aspect, z_near, top, right);
+	top = z_near * tan(Radians(fovy / 2));
+	right = top * aspect;
+	//std::cout << "top: " << top << " right: " << right << std::endl;
 	return GetPerspectiveProjection(-right, right, -top, top, z_near, z_far);
 }
 

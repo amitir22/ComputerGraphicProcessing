@@ -66,7 +66,7 @@ void Camera::SetPerspective(float aspect, float fovy, float z_near, float z_far)
 	this->aspect_ = aspect;
 	this->z_near_ = z_near;
 	this->z_far_ = z_far;
-	projection_ = geometry::GetPerspectiveProjection(fovy, aspect, z_near, z_far);
+	projection_ = geometry::GetPerspectiveProjection(aspect, fovy, z_near, z_far);
 }
 
 void Camera::Translate(CameraMovement direction, float delta_time)
@@ -167,7 +167,7 @@ void Camera::Orbit(float x_offset, float y_offset)
 void Camera::GetCanvasShape(float& top, float& right) const {
 	
 	if (is_perspective_)
-		geometry::GetTopAndRight(fovy_, aspect_, z_near_, top, right);
+		geometry::GetTopAndRight(aspect_, fovy_, z_near_, top, right);
 	// TODO ortho
 }
 
