@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 
-project ("CG")
+project("CG")
 
 ##### source files #####
 file(GLOB PROJECT_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.c")
@@ -24,7 +24,7 @@ list(APPEND IMGUI_SOURCES "external/imgui/backends/imgui_impl_opengl3.cpp")
 list(APPEND IMGUI_SOURCES "external/imgui/misc/cpp/imgui_stdlib.cpp")
 list(APPEND IMGUI_SOURCES "external/imgui/misc/debuggers/imgui.natvis" "external/imgui/misc/debuggers/imgui.natstepfilter")
 #### executable ####
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "external/eigen.natvis")
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES} "${PROJECT_SOURCE_DIR}/external/glad.c" "external/eigen.natvis" "include/Fragment.h" "src/Fragment.cpp")
 
 # Configure a header file to pass the assets directory to the source code
 set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
