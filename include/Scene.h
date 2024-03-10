@@ -27,6 +27,7 @@ public:
 	Scene();
 
 	void LoadOBJModel(std::string file_name);
-    std::vector<MeshModel*> GetModels();
+    std::vector<MeshModel*>  GetModels();
+	std::vector<Camera*> GetCameras();
     Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
 };

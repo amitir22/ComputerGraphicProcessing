@@ -15,7 +15,7 @@ Scene::Scene() {
 	// TODO delete, load from menu
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/banana.obj");
-	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle.obj");
+	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/cow.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt_flipped.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/two_triangles.obj");
@@ -38,4 +38,13 @@ std::vector<MeshModel*> Scene::GetModels() {
 		models.push_back(model.get());
 	}
 	return models;
+}
+
+std::vector<Camera*> Scene::GetCameras()
+{
+	std::vector<Camera*> cameras;
+	for (const auto& camera : cameras_) {
+		cameras.push_back(camera.get());
+	}
+	return cameras;
 }
