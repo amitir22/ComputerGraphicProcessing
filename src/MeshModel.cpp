@@ -12,6 +12,7 @@
 
 MeshModel::MeshModel() noexcept
 {
+	material = UniformMaterial(Eigen::Vector3f::Random());
 	model_transform_ = mat4::Identity();
 }
 

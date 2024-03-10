@@ -1,30 +1,45 @@
+// Material.h
+#pragma once
 #include <Geometry.h>
 
-typedef Eigen::Vector3f(*colorFunction)(float, float, float);
+#define DEFAULT_MATERIAL_AMBIENT_FACTOR (0.1)
+
+using Eigen::Vector3f;
+
+typedef Vector3f(*colorFunction)(float, float, float);
 
 class Material
 {
+	float k_diffuse; // Between 0 and 1.0
+	float k_specular;
+	float k_ambient;
 public:
-	Material();
-	virtual Eigen::Vector3f getColorFor(float x, float y, float z);
+
+	Material(float smoothness = 0, float k_ambient = DEFAULT_MATERIAL_AMBIENT_FACTOR);
+	virtual Vector3f getColorFor(Vector3f vertex);
+	float getKAmbient();
+	float getKDiffuse();
+	float getKSpecular();
+	void setSmoothness(float smoothness);
 };
 
 class UniformMaterial : public Material
 {
-public:
-	Eigen::Vector3f color;
+	Vector3f color;
 
-	UniformMaterial(Eigen::Vector3f color);
-	Eigen::Vector3f getColorFor(float x, float y, float z);
+public:
+	UniformMaterial();
+	UniformMaterial(Vector3f color);
+	Vector3f getColorFor(Vector3f vertex);
 };
 
-Eigen::Vector3f someLinearColoring(float x, float y, float z);
+Vector3f someLinearColoring(float x, float y, float z);
 
 class VarMaterial : public Material
 {
-public:
 	colorFunction color_function;
 
+public:
 	VarMaterial(colorFunction color_function = someLinearColoring);
-	Eigen::Vector3f getColorFor(float x, float y, float z);
+	Vector3f getColorFor(Vector3f vertex);
 };

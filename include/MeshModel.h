@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 
 #include "Geometry.h"
+#include "Material.h"
 
 using namespace std;
 
@@ -60,6 +61,8 @@ struct FaceIdcs
 class MeshModel
 {
 protected:
+	UniformMaterial material;
+
 	Eigen::MatrixXf vertices_local_;
 	Eigen::MatrixXf v_normals_local_;
 	Eigen::MatrixXf face_normals_local_;

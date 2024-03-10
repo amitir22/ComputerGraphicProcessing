@@ -27,5 +27,7 @@ namespace geometry {
     mat4 GetViewportTransform(int width, int height); // Map NDC to screen-space coordinates
 
     mat3 GetNormalTransfrom(const mat4& m); // from modelview
+
+	float FastQuake3InverseSqrt(float num);
 } // namespace geometry
 
