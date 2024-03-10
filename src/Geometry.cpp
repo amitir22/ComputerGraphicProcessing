@@ -53,6 +53,13 @@ mat4 geometry::GetOrthoProjection(float left, float right, float bottom, float t
 	return scale_matrix * translation_matrix;
 }
 
+mat4 geometry::GetOrthoProjection(float aspect, float fovy, float z_near, float z_far)
+{
+	float top, right;
+	GetTopAndRight(fovy, aspect, z_near, top, right);
+	return GetOrthoProjection(-right, right, -top, top, z_near, z_far);
+}
+
 mat4 geometry::GetPerspectiveProjection(float left, float right, float bottom, float top,
 										float z_near, float z_far)
 {
@@ -71,7 +78,7 @@ void geometry::GetTopAndRight(float fovy, float aspect, float z_near, float &top
 {
 	// fovy is the field of view in the y direction, in degrees
 	// aspect is the ratio of the width to the height of the viewing volume
-	top = z_near * tan(Radians(fovy) / 2);
+	top = z_near * tan(Radians(fovy/2));
 	right = top * aspect;
 }
 

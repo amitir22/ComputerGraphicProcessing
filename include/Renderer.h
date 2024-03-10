@@ -34,20 +34,23 @@ public:
 	
 	// Draw functions
 	void DrawScene(Scene* scene);
-	void DrawLine(int x0, int y0, int x1, int y1, MyRGB color);
-    void DrawLine(int x0, int y0, int x1, int y1);
-	void DrawPixel(int x, int y, MyRGB color);
-    void DrawPixel(int x, int y);
+	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color);
+	void DrawLine(const vec3& v0, const vec3& v1);
+	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color);
+	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1);
+	void DrawPixel(int x, int y, float z, MyRGB color);
+	void DrawPixel(int x, int y, float z);
+	void DrawPixel(const vec3& v);
+
+	
 	// Utils
 	void ClearBuffers();
 	void HandleWindowReshape(int new_width, int new_height);
 
 
 	// TODO delete
-	float z_near;
-	float z_far;
-	float right;
-	float top;
+	float z_near_, z_far_;
+	float canvas_top_, canvas_right_;
 
 	bool show_vertex_normals_ = false;
 	bool show_face_normals_ = false;
@@ -55,7 +58,7 @@ public:
 	bool show_bounding_box_ = false;
 	bool show_wireframe_ = false;
 	bool show_lights_ = false;
-	bool is_backface_culling_ = true;
+	bool is_backface_culling_ = false;
 	
 private:
 	Scene* scene_;

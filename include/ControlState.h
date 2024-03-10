@@ -10,6 +10,7 @@ struct ControlState {
 	bool left_mouse_pressed;
 	bool right_mouse_pressed;
 	bool ctrl_pressed;
+	bool shift_pressed;
 
 	ControlState(float initial_width, float initial_height);
 	void UpdateDeltaTime(float current_frame);

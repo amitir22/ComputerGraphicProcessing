@@ -7,7 +7,6 @@
 
 extern Scene* scene;
 
-
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in);

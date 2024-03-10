@@ -13,7 +13,13 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
     // Handle left control key state update
     if (key == GLFW_KEY_LEFT_CONTROL) {
         control_state->ctrl_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+        std::cout << "control_state->ctrl_pressed is "  << control_state->ctrl_pressed << std::endl;
     }
+    // if key is shift, update the state of the shift key
+    if (key == GLFW_KEY_LEFT_SHIFT) {
+		control_state->shift_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+        std::cout << "control_state->shift_pressed " << control_state->shift_pressed << std::endl;
+	}
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         switch (key) {
@@ -57,19 +63,29 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
     if (control_state->left_mouse_pressed) {
         if (control_state->ctrl_pressed) {
             Camera* active_camera = scene->GetActiveCamera();
-            active_camera->Pan(x_offset, y_offset);
+            active_camera->Pan(-x_offset, -y_offset);
         }
         else {
             Camera* active_camera = scene->GetActiveCamera();
-            active_camera->Orbit(x_offset, y_offset);
+            std::cout << "y_offset: " << y_offset << std::endl;
+            active_camera->Orbit(-x_offset, y_offset);
         }
 	}    
 }
 
 void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
 {
+    ControlState* control_state = static_cast<ControlState*>(glfwGetWindowUserPointer(window));
     Camera* active_camera = scene->GetActiveCamera();
-    active_camera->Dolly(static_cast<float>(y_offset));
+    // if shift is pressed, dolly the camera
+    if (control_state->shift_pressed) {
+        std::cout << "dolly\n";
+		active_camera->Dolly(static_cast<float>(y_offset));
+	} 
+    else { // zoom
+        std::cout << "zooming\n";
+        active_camera->Zoom(static_cast<float>(y_offset));
+    }
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

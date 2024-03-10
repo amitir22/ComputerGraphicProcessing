@@ -8,7 +8,8 @@ ControlState::ControlState(float initial_width, float initial_height)
     last_frame(0.0f),
     left_mouse_pressed(false),
     right_mouse_pressed(false),
-    ctrl_pressed(false) 
+    ctrl_pressed(false) ,
+    shift_pressed(false)
 {}
 
 void ControlState::UpdateDeltaTime(float current_frame) {
