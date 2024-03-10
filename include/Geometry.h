@@ -9,6 +9,7 @@ using vec3 = Eigen::Vector3f;
 using vec4 = Eigen::Vector4f;
 using mat3 = Eigen::Matrix3f;
 using mat4 = Eigen::Matrix4f;
+using matxf = Eigen::MatrixXf;
 
 vec2 vec2fFromStream(std::istream& a_stream);
 vec3 vec3fFromStream(std::istream& a_stream);
@@ -30,6 +31,8 @@ namespace geometry {
     void GetTopAndRight(float aspect, float fovy, float zNear, float &top, float &right);
     mat4 GetViewportTransform(int width, int height); // Map NDC to screen-space coordinates
     mat3 GetNormalTransfrom(const mat4& m); // from modelview
+
+	mat3 GetWorldNormalTransform(const mat4& m);
 
 	struct Rectangle {
 		Rectangle(const vec2& bottom_left, const vec2& top_right);

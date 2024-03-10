@@ -166,7 +166,8 @@ int main()
 
         ImGui::BeginMainMenuBar(); // Start the main menu bar
 
-        if (ImGui::BeginMenu("Display")) {
+        if (ImGui::BeginMenu("Display")) 
+        {
             ImGui::MenuItem("Vertex Normals", "", &(renderer->show_vertex_normals_));
             ImGui::MenuItem("Face Normals", "", &(renderer->show_face_normals_));
             ImGui::MenuItem("Cameras", "", &(renderer->show_cameras_));
@@ -174,6 +175,20 @@ int main()
             ImGui::MenuItem("Wireframe", "", &(renderer->show_wireframe_));
             ImGui::MenuItem("Bounding Box", "", &(renderer->show_bounding_box_));
             ImGui::MenuItem("Backface Culling", "", &(renderer->is_backface_culling_));
+            ImGui::MenuItem("Clipping", "", &(renderer->is_clipping_));
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Shading Type"))
+        {
+            if (ImGui::MenuItem("Flat", NULL, renderer->selected_shading_type == FLAT)) {
+                renderer->selected_shading_type = FLAT;
+            }
+            if (ImGui::MenuItem("Gouraud", NULL, renderer->selected_shading_type == GOURAUD)) {
+                renderer->selected_shading_type = GOURAUD;
+            }
+            if (ImGui::MenuItem("Phong", NULL, renderer->selected_shading_type == PHONG)) {
+                renderer->selected_shading_type = PHONG;
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

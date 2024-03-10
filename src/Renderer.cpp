@@ -5,6 +5,7 @@
 #include <cmath>   // for std::abs
 
 #include "Constants.h" // for cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT
+#include "Fragment.h"
 #include "Geometry.h"
 #include "RenderUtils.h" // for EdgeFunction, GetIntMin, GetIntMax
 
@@ -81,41 +82,46 @@ void Renderer::DrawScene(Scene *scene)
 
 	for (const auto& model : models) {
 		// set transforms
-		model_transform_ = model->GetModelTransform();
+		model_transform_ = model->GetModelTransform(); // mat4
 		// TODO get model material
 		// Compute transformations
 		mat4 modelview_matrix = view_transform_ * model_transform_;
 		normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
 		mvp_ = projection_transform_ * modelview_matrix;
 		// Get model data
-		Eigen::MatrixXf vertices_local = model->GetVerticesLocal(); // (4, 3N)
-		Eigen::MatrixXf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
-		Eigen::MatrixXf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+		matxf vertices_local = model->GetVerticesLocal(); // (4, 3N)
+		matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
+		matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
 		unsigned int num_faces = f_normals_local.cols(); // N
 		// Transform model data
-		Eigen::MatrixXf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
-		Eigen::MatrixXf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
-		Eigen::MatrixXf v_normals_end_vertices_camera = vertices_camera; // (4, 3N)
-		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
-
-		Eigen::MatrixXf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
-		Eigen::MatrixXf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
-		Eigen::MatrixXf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
+		matxf vertices_world = model_transform_ * vertices_local; // (4, 3N)
+		mat3 world_normal_transform = geometry::GetWorldNormalTransform(model_transform_);
+		matxf v_normals_world = world_normal_transform * v_normals_local; // (3, 3N)
+		matxf f_normals_world = world_normal_transform * f_normals_local; // (3, 3N)
+		// camera space
+		matxf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
+		matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
+		// clip,ndc,raster space
+		matxf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
+		matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
+		matxf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
 		
 		if (this->show_vertex_normals_) {
-			Eigen::MatrixXf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
-			Eigen::MatrixXf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
+			matxf v_normals_end_vertices_camera = vertices_camera; // (4, 3N)
+			v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
+			matxf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
+			matxf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
 			v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 		}
 		if (this->show_face_normals_) {
-			Eigen::MatrixXf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
-			Eigen::MatrixXf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
-			Eigen::MatrixXf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
-			Eigen::MatrixXf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
+			matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
+			matxf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
+			matxf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
+			matxf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
 			f_normals_end_vertices_camera.topRows(3) += f_normals_camera; // (4, N)
 
-			Eigen::MatrixXf f_normals_end_vertices_clip = projection_transform_ * f_normals_end_vertices_camera; // (4, N)
-			Eigen::MatrixXf f_normals_end_vertices_ndc = f_normals_end_vertices_clip.array().rowwise() / f_normals_end_vertices_clip.row(3).array(); // (4, N)
+			matxf f_normals_end_vertices_clip = projection_transform_ * f_normals_end_vertices_camera; // (4, N)
+			matxf f_normals_end_vertices_ndc = f_normals_end_vertices_clip.array().rowwise() / f_normals_end_vertices_clip.row(3).array(); // (4, N)
 			f_normals_end_vertices_raster = (viewport_transform_ * f_normals_end_vertices_ndc).topRows(3); // (3, N)
 		}
 		// RenderTriangle For each face
@@ -125,8 +131,8 @@ void Renderer::DrawScene(Scene *scene)
 			// Backface culling
 			if (this->is_backface_culling_) {
 				
-				vec3 face_normal = f_normals_local.col(i);
-				float z_dot = forward.dot(face_normal);
+				vec3 face_normal_local = f_normals_local.col(i);
+				float z_dot = forward.dot(face_normal_local);
 				if (z_dot >= 0)
 					continue;
 			}
@@ -146,7 +152,8 @@ void Renderer::DrawScene(Scene *scene)
 			if (this->show_face_normals_) {
 				// Compute midpoint in raster space, using v0_raster, v1_raster, v2_raster
 				vec3 face_midpoint_raster = (v0_raster + v1_raster + v2_raster) / 3.0f;
-				DrawLine(face_midpoint_raster.x(), face_midpoint_raster.y(),face_midpoint_raster.z(), f_normals_end_vertices_raster.col(i).x(), f_normals_end_vertices_raster.col(i).y(), f_normals_end_vertices_raster.col(i).z(), MyRGB{0,0,255});
+				DrawLine(face_midpoint_raster.x(), face_midpoint_raster.y(), face_midpoint_raster.z(), f_normals_end_vertices_raster.col(i).x(), f_normals_end_vertices_raster.col(i).y(), f_normals_end_vertices_raster.col(i).z(), 
+					MyRGB((unsigned char)0, (unsigned char)0, (unsigned char)255));
 			}
 			// Clip bounding box to screen
 			uint32_t x0 = std::max(int32_t(0), (int32_t)(std::floor(min_x)));
@@ -199,7 +206,33 @@ void Renderer::DrawScene(Scene *scene)
 							z_buffer_[y * width_ + x] = z;
 							// TODO fragment shader - compute color, according to selected lighting method
 							// TODO: create fragment and pass color
-							DrawPixel(x, y, z);
+							// Get Face Normal world
+							vec3 v0_world = vertices_world.col(i * 3).topRows(3);
+							vec3 v1_world = vertices_world.col(i * 3 + 1).topRows(3);
+							vec3 v2_world = vertices_world.col(i * 3 + 2).topRows(3);
+							vec3 face_normal_world = f_normals_world.col(i);
+							vec3 v0_normal_world = v_normals_world.col(i * 3);
+							vec3 v1_normal_world = v_normals_world.col(i * 3 + 1);
+							vec3 v2_normal_world = v_normals_world.col(i * 3 + 2);
+
+							Fragment frag = Fragment(model->GetMaterial(), v0_world, v1_world, v2_world, v0_normal_world, v1_normal_world, v2_normal_world, face_normal_world, w0, w1, w2);
+
+							vec3 color;
+							switch (this->selected_shading_type)
+							{
+							case FLAT:
+								color = frag.ComputeColorFlat(scene_->GetLights());
+								break;
+							case GOURAUD:
+								color = frag.ComputeColorGouraud(scene_->GetLights());
+								break;
+							case PHONG:
+								color = frag.ComputeColorPhong(scene_->GetLights());
+								break;
+							}
+							MyRGB color256 = MyRGB(color);
+
+							DrawPixel(x, y, z, color256);
 						} // end if depth-buffer test
 					} // end if inside
 				} // end for x
@@ -213,7 +246,7 @@ void Renderer::DrawLine(const vec3& v0, const vec3& v1, MyRGB color) {
 		DrawLine(static_cast<int>(v0.x()), static_cast<int>(v0.y()), v0.z(), static_cast<int>(v1.x()), static_cast<int>(v1.y()), v1.z(), color);
 }
 void Renderer::DrawLine(const vec3& v0, const vec3& v1) {
-	DrawLine(v0, v1, MyRGB{ 255, 255, 255 });
+	DrawLine(v0, v1, MyRGB((unsigned char)255, (unsigned char)255, (unsigned char)255));
 }
 
 void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color) {
@@ -258,7 +291,7 @@ void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRG
 
 void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1)
 {
-	DrawLine(x0, y0, z0, x1, y1, z1, MyRGB{ 255, 255, 255 });
+	DrawLine(x0, y0, z0, x1, y1, z1, MyRGB((unsigned char)255, (unsigned char)255, (unsigned char)255));
 }
 
 
@@ -276,7 +309,7 @@ void Renderer::DrawPixel(int x, int y, float z, MyRGB color) {
 }
 
 void Renderer::DrawPixel(int x, int y, float z) {
-	DrawPixel(x, y, z, MyRGB{ 255, 255, 255 });
+	DrawPixel(x, y, z, MyRGB((unsigned char)255, (unsigned char)255, (unsigned char)255));
 }
 
 void Renderer::DrawPixel(const vec3& v) {

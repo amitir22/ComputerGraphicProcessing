@@ -109,7 +109,7 @@ mat4 geometry::GetViewportTransform(int width, int height)
 	return viewport_transform;
 }
 
-mat3 geometry::GetNormalTransfrom(const mat4 &m)
+mat3 geometry::GetNormalTransfrom(const mat4 &m) // for modelview
 {
     mat3 n = mat3::Identity();
     n(0,0) = m(1,1)*m(2,2) - m(1,2)*m(2,1);
@@ -122,6 +122,11 @@ mat3 geometry::GetNormalTransfrom(const mat4 &m)
     n(2,1) = m(0,2)*m(1,0) - m(0,0)*m(1,2);
     n(2,2) = m(0,0)*m(1,1) - m(0,1)*m(1,0);
     return n;
+}
+
+mat3 geometry::GetWorldNormalTransform(const mat4& m) {
+	mat3 n = m.block(0, 0, 3, 3);
+	return n.inverse().transpose();
 }
 
 //mat4 geometry::GetNormalTransfromFromModel(const mat4& model)

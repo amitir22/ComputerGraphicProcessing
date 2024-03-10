@@ -63,7 +63,7 @@ class MeshModel
 {
 protected:
 	string model_name_;
-	UniformMaterial material;
+	Material material;
 	Eigen::MatrixXf vertices_local_;
 	Eigen::MatrixXf v_normals_local_;
 	Eigen::MatrixXf face_normals_local_;
@@ -94,4 +94,7 @@ public:
 	const Eigen::MatrixXf& GetFaceNormalsLocal() const {return face_normals_local_;}
 
 	const Eigen::MatrixXf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
+
+	void SetMaterial(Material material) { this->material = material; }
+	Material GetMaterial() { return this->material; }
 };

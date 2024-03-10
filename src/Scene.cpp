@@ -48,3 +48,12 @@ std::vector<Camera*> Scene::GetCameras()
 	}
 	return cameras;
 }
+
+std::vector<Light*> Scene::GetLights()
+{
+	std::vector<Light*> lights;
+	for (const auto& light : lights_) {
+		lights.push_back(light.get());
+	}
+	return lights;
+}

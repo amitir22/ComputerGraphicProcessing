@@ -10,6 +10,13 @@ enum CameraMovement {
 	ORBIT_L,
 	ORBIT_R
 };
+
+enum ShadingType {
+	FLAT,
+	GOURAUD,
+	PHONG
+};
+
 namespace cg {
 	namespace constants {
 		// default width and height values
