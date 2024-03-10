@@ -3,6 +3,7 @@
 #include <Geometry.h>
 
 #define DEFAULT_MATERIAL_AMBIENT_FACTOR (0.1)
+#define DEFAULT_MATERIAL_SMOOTHNESS (0.5)
 
 using Eigen::Vector3f;
 
@@ -15,7 +16,8 @@ class Material
 	float k_ambient;
 public:
 
-	Material(float smoothness = 0, float k_ambient = DEFAULT_MATERIAL_AMBIENT_FACTOR);
+	Material(float smoothness = DEFAULT_MATERIAL_SMOOTHNESS, 
+			 float k_ambient = DEFAULT_MATERIAL_AMBIENT_FACTOR);
 	virtual Vector3f getColorFor(Vector3f vertex);
 	float getKAmbient();
 	float getKDiffuse();

@@ -198,6 +198,7 @@ void Renderer::DrawScene(Scene *scene)
 						if (z <= z_buffer_[y * width_ + x]) {
 							z_buffer_[y * width_ + x] = z;
 							// TODO fragment shader - compute color, according to selected lighting method
+							// TODO: create fragment and pass color
 							DrawPixel(x, y, z);
 						} // end if depth-buffer test
 					} // end if inside

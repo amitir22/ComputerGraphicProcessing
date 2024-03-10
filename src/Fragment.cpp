@@ -16,12 +16,12 @@ vec3 Fragment::ComputeColorFlat(std::vector<Light> lights)
 
 	for (auto &light : lights)
 	{
-		float current_intensity = light.getLightIntensityAt(Vector3f(this->v_center));
+		float current_intensity = light.getLightIntensityAt(this->v_center);
 		vec3 c1 = this->material.getColorFor(this->v1);
 		vec3 c2 = this->material.getColorFor(this->v2);
 		vec3 c3 = this->material.getColorFor(this->v3);
 		vec3 l = light.getLightDirectionAt(this->v_center);
-		Vector3f n = this->face_normal.normalized();
+		vec3 n = this->face_normal.normalized();
 
 		if (intensity_sum < MAX_INTENSITY)
 		{

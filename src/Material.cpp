@@ -35,7 +35,7 @@ void Material::setSmoothness(float smoothness)
 	this->k_specular = smoothness * diff;
 	this->k_diffuse = diff - this->k_specular;
 
-	assert(this->k_ambient + this->k_diffuse + this->k_specular <= 1.0);
+	assert(this->k_ambient + this->k_diffuse + this->k_specular <= 1.00001);
 }
 
 
