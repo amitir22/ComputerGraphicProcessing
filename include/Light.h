@@ -12,16 +12,16 @@ public:
 
 class PointLight : public Light {
 public:
-	Eigen::Vector3f location; // TODO: maybe some other type?
+	vec3 location; // TODO: maybe some other type?
 
-	PointLight(float intensity, Eigen::Vector3f location);
+	PointLight(float intensity, vec3 location);
 };
 
 class ParallelLight : public Light {
 public:
-	Eigen::Vector3f direction;
+	vec3 direction;
 
-	ParallelLight(float intensity, Eigen::Vector3f direction);
+	ParallelLight(float intensity, vec3 direction);
 };
 
 class AmbientLight : public Light {
