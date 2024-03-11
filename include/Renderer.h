@@ -40,6 +40,7 @@ public:
 	void Draw_GL_LINE(const vec3& v0_world, const vec3& v1_world, MyRGB color = WHITE);
 	void Draw_GL_LINE_STRIP(const matxf& vertices_world, MyRGB color = WHITE);
 	void Draw_GL_LINE_LOOP(const matxf& vertices_world, MyRGB color = WHITE); // Like Draw_GL_LINE_STRIP, but we also draw a line from the last vertex to the first
+	void DrawAxes();
 	void DrawMeshModel(MeshModel* model);
 	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color = WHITE);
 	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color = WHITE);
@@ -59,11 +60,12 @@ public:
 	bool show_face_normals_ = false;
 	bool show_cameras_ = false;
 	bool show_bounding_box_ = false;
-	bool show_wireframe_ = false;
+	bool show_wireframe_ = true;
 	bool show_lights_ = false;
 	bool is_backface_culling_ = false;
-	bool is_clipping_ = false;
-	ShadingType selected_shading_type;
+	bool is_clipping_ = true;
+	bool show_axes_ = true;
+	ShadingType selected_shading_type = WHITE_SHADING;
 	
 private:
 	Scene* scene_;

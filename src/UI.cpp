@@ -43,6 +43,8 @@ void UI::ShowUI()
         ImGui::MenuItem("Bounding Box", "", &(renderer_->show_bounding_box_));
         ImGui::MenuItem("Backface Culling", "", &(renderer_->is_backface_culling_));
         ImGui::MenuItem("Clipping", "", &(renderer_->is_clipping_));
+        // draw_axes
+        ImGui::MenuItem("Axes", "", &(renderer_->show_axes_));
         ImGui::EndMenu();
     }
     

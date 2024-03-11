@@ -74,6 +74,11 @@ void Renderer::DrawScene(Scene *scene)
 	ClearBuffers();
 	// Set scene and transformations
 	SetScene(scene); 
+
+	// Draw axes
+	if (this->show_axes_) {
+		DrawAxes();
+	}
 	// Draw models
 	std::vector<MeshModel*> mesh_models = scene->GetModels();
 
@@ -356,4 +361,14 @@ void Renderer::Draw_GL_LINE_LOOP(const matxf& vertices_world, MyRGB color)
 	new_points.conservativeResize(4, vertices_world.cols() + 1);
 	new_points.col(vertices_world.cols()) = vertices_world.col(0);
 	Draw_GL_LINE_STRIP(new_points, color);
+}
+
+void Renderer::DrawAxes() {
+	// Draw X axis
+	Draw_GL_LINE(vec3(0, 0, 0), vec3(1, 0, 0), RED);
+	// Draw Y axis
+	Draw_GL_LINE(vec3(0, 0, 0), vec3(0, 1, 0), GREEN);
+	// Draw Z axis
+	Draw_GL_LINE(vec3(0, 0, 0), vec3(0, 0, 1), BLUE);
+	
 }
