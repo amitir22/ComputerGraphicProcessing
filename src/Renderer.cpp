@@ -111,8 +111,8 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 	if (is_clipping_) {
 		vec4 center_of_mass_local = model->center_of_mass_.homogeneous();
 		float radius = model->radius_bounding_sphere_;
-		matxf circle_xz = geometry::GetXZCircle(center_of_mass_local, radius);
-		matxf circle_xy = geometry::GetXYCircle(center_of_mass_local, radius);
+		matxf circle_xz = geometry::GetXZCircle(center_of_mass_local, radius, 30);
+		matxf circle_xy = geometry::GetXYCircle(center_of_mass_local, radius, 30);
 		// Draw circles
 		Draw_GL_LINE_LOOP(circle_xz, GREEN);
 		Draw_GL_LINE_LOOP(circle_xy, LIGHT_GRAY);

@@ -68,7 +68,8 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
     Camera* active_camera = scene->GetActiveCamera();
     if (control_state->left_mouse_pressed) {
         if (control_state->ctrl_pressed) {
-            active_camera->Pan(-x_offset, -y_offset);
+            std::cout << "x_offset: " << x_offset << " y_offset: " << y_offset << "\n";
+            active_camera->Pan(x_offset, -y_offset);
         }
         else {
             active_camera->Orbit(-x_offset, y_offset);

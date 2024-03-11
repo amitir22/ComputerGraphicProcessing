@@ -25,8 +25,8 @@ void Camera::Reset() {
 mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 {
 	eye_ = eye;
-	up_ = up;
 	at_ = at;
+	up_ = up;
 	// Compute translation matrix 
 	mat4 translation_matrix{ 
 		{1, 0, 0, -eye.x()},
@@ -36,10 +36,10 @@ mat4 Camera::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 		};
 
 	// Compute rotation matrix. 
-	vec3 n = (eye - at).normalized(); // points to positive z, aka forward
+	vec3 n = (eye - at).normalized(); // points to positive z
 	//this->gaze = n;
 	vec3 u = (up_.cross(n)).normalized(); // points to positive x
-	vec3 v = (n.cross(u)).normalized(); // points to positive y, really just normalization of up
+	vec3 v = (n.cross(u)).normalized(); // points to positive y
 	mat4 rotation_matrix{
 		{u.x(), u.y(), u.z(), 0.0f},
 		{v.x(), v.y(), v.z(), 0.0f},
@@ -93,7 +93,7 @@ void Camera::Translate(CameraMovement direction, float delta_time)
 void Camera::Pan(float x_offset, float y_offset)
 {
 	vec3 n = (eye_ - at_).normalized(); // points to positive z
-	vec3 u = (up_.cross(-n)).normalized(); // points to positive x
+	vec3 u = (up_.cross(n)).normalized(); // points to positive x
 	vec3 v = (n.cross(u)).normalized(); // points to positive y
 	vec3 translate_dir = u * x_offset + v * y_offset;
 	translate_dir *= sensitivity_;
