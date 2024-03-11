@@ -64,10 +64,10 @@ class MeshModel
 protected:
 	string model_name_;
 	Material material;
-	Eigen::MatrixXf vertices_local_;
-	Eigen::MatrixXf v_normals_local_;
-	Eigen::MatrixXf face_normals_local_;
-	Eigen::MatrixXf faces_midpoints_local_;
+	matxf vertices_local_;
+	matxf v_normals_local_;
+	matxf face_normals_local_;
+	matxf faces_midpoints_local_;
 	// Bounding Box
 	geometry::Box bounding_box_;
 	vec3 center_of_mass_;
@@ -80,23 +80,19 @@ public:
 
 	explicit MeshModel(string fileName);
 	void SetModelName(string file_name);
+	std::string GetModelName() const { return model_name_; }
 	void LoadFile(string fileName);
-	void ComputeBoundingBox();
-	void ComputeBoundingSphere();
-	// User Transformations
+
+	// Model Transformations
 	void Translate(vec3 translation);
 	void Rotate(vec3 axis, float angle);
 	void Scale(vec3 scale);
-	
 	mat4 GetModelTransform() const {return model_transform_;}
-	// Getters for read-only access to the model's data
-	const Eigen::MatrixXf& GetVerticesLocal() const {return vertices_local_;}
-
-	const Eigen::MatrixXf& GetNormalsLocal() const {return v_normals_local_;}
-
-	const Eigen::MatrixXf& GetFaceNormalsLocal() const {return face_normals_local_;}
-
-	const Eigen::MatrixXf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
+	// Model Data
+	const matxf& GetVerticesLocal() const { return vertices_local_; }
+	const matxf& GetNormalsLocal() const { return v_normals_local_; }
+	const matxf& GetFaceNormalsLocal() const { return face_normals_local_; }
+	const matxf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
 
 	void SetMaterial(Material material) { this->material = material; }
 	Material GetMaterial() { return this->material; }

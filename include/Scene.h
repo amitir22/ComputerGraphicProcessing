@@ -20,8 +20,8 @@ class Scene {
 	std::shared_ptr<AmbientLight> ambient_light_;
 
 public:
-	int active_camera_idx;
-	int active_model_idx;
+	int active_camera_idx_;
+	int active_model_idx_;
 	int active_light_idx;
 
 	// Constructors
@@ -29,8 +29,10 @@ public:
 
 	void LoadOBJModel(std::string file_name);
     std::vector<MeshModel*>  GetModels();
+	std::vector<std::string> GetModelsNames();
+	void DeleteModel(int idx);
 	std::vector<Camera*> GetCameras();
 	std::vector<Light*> GetLights();
 	AmbientLight* GetAmbientLight();
-    Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
+    Camera* GetActiveCamera() { return cameras_[active_camera_idx_].get(); }
 };

@@ -2,7 +2,6 @@
 #include "Scene.h"
 #include "MeshModel.h"
 
-
 using namespace std;
 
 // Constructors
@@ -11,8 +10,8 @@ Scene::Scene() {
 	cameras_.push_back(std::make_unique<Camera>());
 	lights_.push_back(std::make_unique<PointLight>());
 	ambient_light_ = make_shared<AmbientLight>();
-	active_camera_idx = 0;
-	active_model_idx = 0;
+	active_camera_idx_ = 0;
+	active_model_idx_ = 0;
 	active_light_idx = 0;
 	// TODO delete, load from menu
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
@@ -31,7 +30,7 @@ Scene::Scene() {
 void Scene::LoadOBJModel(string fileName)
 {
 	models_.push_back(std::make_unique<MeshModel>(fileName));
-	active_model_idx = models_.size() - 1;
+	active_model_idx_ = models_.size() - 1;
 }
 
 std::vector<MeshModel*> Scene::GetModels() {
@@ -40,6 +39,31 @@ std::vector<MeshModel*> Scene::GetModels() {
 		models.push_back(model.get());
 	}
 	return models;
+}
+
+std::vector<std::string> Scene::GetModelsNames()
+{
+	std::vector<std::string> model_names;
+	for (const auto& model : models_) {
+		model_names.push_back(model->GetModelName());
+	}
+	return model_names;
+}
+
+void Scene::DeleteModel(int idx)
+{
+	if (models_.size() == 0) {
+		return;
+	}
+	models_.erase(models_.begin() + idx);
+	// update active model index accordingly. If deleted model was the active one, set active_model_idx_ to be new size minus 1
+	if (active_model_idx_ == idx) {
+		active_model_idx_ = models_.size() - 1;
+	}
+	else if (active_model_idx_ > idx) {
+		active_model_idx_--;
+	}
+
 }
 
 std::vector<Camera*> Scene::GetCameras()

@@ -38,9 +38,6 @@ void MeshModel::SetModelName(string file_name) {
 void MeshModel::LoadFile(string file_name)
 {
 	SetModelName(file_name);
-	std::cout << "Loading model " << model_name_ << " from file " << file_name << std::endl;
-
-	model_name_ = file_name;
 	// Open file
 	ifstream ifile(file_name.c_str());
 	vector<vec3> vertices;
@@ -125,28 +122,8 @@ void MeshModel::LoadFile(string file_name)
 		v_normals_local_.col((i * 3) + 2) << temp_v_normals.col(v2_index);
 	}
 	// Compute the bounding box of the model
-	ComputeBoundingBox();
-	ComputeBoundingSphere();
-}
-
-void MeshModel::ComputeBoundingBox(matxf vertices)
-{
-	// Compute the bounding box of the model
-	vec3 min = vertices.block(0, 0, 3, vertices.cols()).rowwise().minCoeff();
-	vec3 max = vertices.block(0, 0, 3, vertices.cols()).rowwise().maxCoeff();
-	geometry::Box bounding_box = geometry::Box(min, max);
-}
-
-vec3 GetCenterOfMass(matxf vertices) {
-	// Compute center of mass
-	return vertices.block(0, 0, 3, vertices.cols()).rowwise().mean();
-}
-
-void MeshModel::ComputeBoundingSphere(matxf vertices) {
-	// Compute center of mass
-	vec3 center_of_mass = vertices.block(0, 0, 3, vertices_local_.cols()).rowwise().mean();
-	// Compute the radius_bounding_sphere_, which is the distance from the center of mass to the farthest vertex
-	float radius_bounding_sphere = (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass_).rowwise().norm().maxCoeff();
+	bounding_box_ = geometry::GetBoundingBox(vertices_local_);
+	// TODO - Compute the center of mass and the radius of the bounding sphere
 }
 
 ////////////////////////////////////////

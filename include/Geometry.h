@@ -73,7 +73,11 @@ namespace geometry {
 		vec3 bottom_left_back_;
 		vec3 top_right_front_;
 
-	}; // Box
+	};
+	
+	Box GetBoundingBox(matxf vertices);
+	vec3 GetCenterOfMass(matxf vertices);
+	float GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass);
 	float FastQuake3InverseSqrt(float num);
 
 	struct HalfPlane {

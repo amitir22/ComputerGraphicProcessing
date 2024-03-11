@@ -68,14 +68,15 @@ public:
 	void Translate(CameraMovement direction, float delta_time);
 	void Pan(float x_offset, float y_offset); // move eye and at along u and v
 	void Zoom(float offset); // change y-field of view
-	void HandleWindowReshape(int new_width, int new_height);
 	void Dolly(float offset); // move eye and at along n
 	void Orbit(float x_offset, float y_offset); // rotate eye circularly around at
 	void GetCanvasShape(float& top, float& right) const;
 	vec3 GetForward() const;
 	void OrbitLeft();
 	void OrbitRight();
+	void TiltAndYaw(float x_offset, float y_offset); // Change at_ but not eye_
 	// Input
+	void HandleWindowReshape(int new_width, int new_height);
 
 private:
 	bool is_perspective_;

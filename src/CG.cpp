@@ -8,7 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <imfilebrowser.h>
+
 
 
 #include "Callbacks.h"
@@ -17,6 +17,7 @@
 #include "PathConfig.h" // for RESOURCES_DIR
 #include "Shader.h"
 #include "Renderer.h"
+#include "UI.h"
 
 Renderer* renderer;
 Scene* scene;
@@ -118,12 +119,11 @@ int main()
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
-    // create a file browser instance
-    ImGui::FileBrowser fileDialog;
+    
+    UI ui = UI(scene, renderer);
+    
 
-    // (optional) set browser properties
-    fileDialog.SetTitle("title");
-    //fileDialog.SetTypeFilters({ ".h", ".cpp" });
+    
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -155,43 +155,7 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //if (ImGui::Begin("dummy window")) { // open file dialog when user clicks this button
-        //    if (ImGui::Button("open file dialog"))
-        //        fileDialog.Open(); }
-        //ImGui::End();
-        //fileDialog.Display();
-        //if (fileDialog.HasSelected()) {
-        //    std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-        //    fileDialog.ClearSelected();}
-
-        ImGui::BeginMainMenuBar(); // Start the main menu bar
-
-        if (ImGui::BeginMenu("Display")) 
-        {
-            ImGui::MenuItem("Vertex Normals", "", &(renderer->show_vertex_normals_));
-            ImGui::MenuItem("Face Normals", "", &(renderer->show_face_normals_));
-            ImGui::MenuItem("Cameras", "", &(renderer->show_cameras_));
-            ImGui::MenuItem("Lights", "", &(renderer->show_lights_));
-            ImGui::MenuItem("Wireframe", "", &(renderer->show_wireframe_));
-            ImGui::MenuItem("Bounding Box", "", &(renderer->show_bounding_box_));
-            ImGui::MenuItem("Backface Culling", "", &(renderer->is_backface_culling_));
-            ImGui::MenuItem("Clipping", "", &(renderer->is_clipping_));
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Shading Type"))
-        {
-            if (ImGui::MenuItem("Flat", NULL, renderer->selected_shading_type == FLAT)) {
-                renderer->selected_shading_type = FLAT;
-            }
-            if (ImGui::MenuItem("Gouraud", NULL, renderer->selected_shading_type == GOURAUD)) {
-                renderer->selected_shading_type = GOURAUD;
-            }
-            if (ImGui::MenuItem("Phong", NULL, renderer->selected_shading_type == PHONG)) {
-                renderer->selected_shading_type = PHONG;
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
+        ui.ShowUI();
 
         // Rendering
         ImGui::Render();
@@ -215,4 +179,6 @@ int main()
     delete scene;
     return 0;
 }
+
+
 

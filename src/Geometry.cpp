@@ -91,7 +91,6 @@ mat4 geometry::GetPerspectiveProjection(float aspect, float fovy, float z_near, 
 	float top, right; 
 	top = z_near * tan(Radians(fovy / 2));
 	right = top * aspect;
-	//std::cout << "top: " << top << " right: " << right << std::endl;
 	return GetPerspectiveProjection(-right, right, -top, top, z_near, z_far);
 }
 
@@ -234,6 +233,20 @@ geometry::Box::Box(float width, float height, float depth, const vec3& bottom_le
 {
 	bottom_left_back_ = bottom_left_front;
 	top_right_front_ = vec3(bottom_left_front.x() + width, bottom_left_front.y() + height, bottom_left_front.z() + depth);
+}
+
+geometry::Box geometry::GetBoundingBox(matxf vertices){
+	vec3 min = vertices.block(0, 0, 3, vertices.cols()).rowwise().minCoeff();
+	vec3 max = vertices.block(0, 0, 3, vertices.cols()).rowwise().maxCoeff();
+	return geometry::Box(min, max);
+}
+
+vec3 geometry::GetCenterOfMass(matxf vertices) {
+	return vertices.block(0, 0, 3, vertices.cols()).rowwise().mean();
+}
+
+float geometry::GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass) {
+	return (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass).rowwise().norm().maxCoeff();
 }
 
 

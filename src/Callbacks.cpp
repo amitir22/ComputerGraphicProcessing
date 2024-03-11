@@ -13,12 +13,10 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
     // Handle left control key state update
     if (key == GLFW_KEY_LEFT_CONTROL) {
         control_state->ctrl_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
-        std::cout << "control_state->ctrl_pressed is " << control_state->ctrl_pressed << std::endl;
     }
     // if key is shift, update the state of the shift key
     if (key == GLFW_KEY_LEFT_SHIFT) {
         control_state->shift_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
-        std::cout << "control_state->shift_pressed " << control_state->shift_pressed << std::endl;
     }
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
@@ -67,16 +65,20 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
 
     control_state->last_x = x_pos_in;
     control_state->last_y = y_pos_in;
+    Camera* active_camera = scene->GetActiveCamera();
     if (control_state->left_mouse_pressed) {
         if (control_state->ctrl_pressed) {
-            Camera* active_camera = scene->GetActiveCamera();
             active_camera->Pan(-x_offset, -y_offset);
         }
         else {
-            Camera* active_camera = scene->GetActiveCamera();
             active_camera->Orbit(-x_offset, y_offset);
         }
-	}    
+	}
+    else if (control_state->right_mouse_pressed) {
+        std::cout << "x_offset: " << x_offset << " y_offset: " << y_offset << "\n";
+        active_camera->TiltAndYaw(-x_offset, y_offset);
+		
+    }
 }
 
 void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)

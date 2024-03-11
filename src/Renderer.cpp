@@ -27,7 +27,7 @@ Renderer::Renderer(int width, int height) : width_(width), height_(height) {
 	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
 	normal_transform_ = mat3::Identity();
 	is_perspective_ = false;
-	selected_shading_type = FLAT;
+	selected_shading_type = WHITE;
 }
 
 void Renderer::HandleWindowReshape(int new_width, int new_height) {
@@ -227,6 +227,9 @@ void Renderer::DrawScene(Scene *scene)
 							vec3 color;
 							switch (this->selected_shading_type)
 							{
+							case WHITE:
+								color = vec3(1, 1, 1);
+								break;
 							case FLAT:
 								color = frag.ComputeColorFlat(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
 								break;

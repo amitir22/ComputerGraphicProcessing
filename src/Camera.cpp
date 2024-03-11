@@ -203,3 +203,29 @@ void Camera::OrbitRight()
 	this->eye_ *= prev_eye_norm / this->eye_.norm();
 	this->LookAt(this->eye_, this->at_, this->up_);
 }
+
+void Camera::TiltAndYaw(float x_offset, float y_offset) // Change at_ but not eye_
+{
+	// For tilt, Compute new at_, based on y_offset that tells us change in pitch. We will rotate around the v axis
+	float pitch = y_offset * 0.001f; // radians
+	// constrain pitch
+	if (pitch_ + pitch > 1.57f) {
+		pitch_ = 1.57f;
+		pitch = 0;
+	}
+	else if (pitch_ + pitch < -1.57f) {
+		pitch_ = -1.57f;
+		pitch = 0;
+	}
+	else
+		pitch_ += pitch;
+
+	vec3 forward = (at_ - eye_); // points to negative z
+	vec3 right = (forward.cross(up_)).normalized(); // points to positive x
+	vec3 rotated_direction = geometry::RotateVector(forward, right, pitch);
+	// now compute for yaw
+	float yaw = x_offset * 0.001f; // radians
+	rotated_direction = geometry::RotateVector(rotated_direction, up_, yaw);
+	vec3 new_at = eye_ + rotated_direction;
+	LookAt(eye_, new_at, up_);
+}
