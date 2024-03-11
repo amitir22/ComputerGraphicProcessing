@@ -48,8 +48,8 @@ void UI::ShowUI()
     
     if (ImGui::BeginMenu("Shading Type"))
     {
-        if (ImGui::MenuItem("White", NULL, renderer_->selected_shading_type == WHITE)) {
-            renderer_->selected_shading_type = WHITE;
+        if (ImGui::MenuItem("White", NULL, renderer_->selected_shading_type == WHITE_SHADING)) {
+            renderer_->selected_shading_type = WHITE_SHADING;
         }
         if (ImGui::MenuItem("Flat", NULL, renderer_->selected_shading_type == FLAT)) {
             renderer_->selected_shading_type = FLAT;
@@ -92,7 +92,7 @@ void UI::ShowModelListWindow() {
 
             // 'X' button for deleting the model
             if (ImGui::Button("X")) {
-                scene_->DeleteModel(i);
+                scene_->DeleteMeshModel(i);
             }
 
             ImGui::PopID();

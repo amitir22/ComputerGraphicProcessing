@@ -30,7 +30,7 @@ public:
 	void LoadOBJModel(std::string file_name);
     std::vector<MeshModel*>  GetModels();
 	std::vector<std::string> GetModelsNames();
-	void DeleteModel(int idx);
+	void DeleteMeshModel(int idx);
 	std::vector<Camera*> GetCameras();
 	std::vector<Light*> GetLights();
 	AmbientLight* GetAmbientLight();

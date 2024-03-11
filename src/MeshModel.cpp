@@ -121,9 +121,10 @@ void MeshModel::LoadFile(string file_name)
 		v_normals_local_.col((i * 3) + 1) << temp_v_normals.col(v1_index);
 		v_normals_local_.col((i * 3) + 2) << temp_v_normals.col(v2_index);
 	}
-	// Compute the bounding box of the model
+	// Compute the bounding box and sphere of the model
 	bounding_box_ = geometry::GetBoundingBox(vertices_local_);
-	// TODO - Compute the center of mass and the radius of the bounding sphere
+	center_of_mass_ = geometry::GetCenterOfMass(vertices_local_);
+	radius_bounding_sphere_ = geometry::GetRadiusBoundingSphere(vertices_local_, center_of_mass_);
 }
 
 ////////////////////////////////////////

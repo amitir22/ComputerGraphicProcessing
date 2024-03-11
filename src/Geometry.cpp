@@ -246,7 +246,7 @@ vec3 geometry::GetCenterOfMass(matxf vertices) {
 }
 
 float geometry::GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass) {
-	return (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass).rowwise().norm().maxCoeff();
+	return (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass).colwise().norm().maxCoeff();
 }
 
 
@@ -264,4 +264,41 @@ float geometry::FastQuake3InverseSqrt(float number)
 	y = y * (threehalfs - (x2 * y * y));
 
 	return y;
+}
+
+
+
+matxf geometry::GetXYCircle(const vec4& center, float radius, size_t num_of_points)
+{
+	// Compute num_of_points points on the circle with center and radius, all having the same z value
+	matxf points(4, num_of_points);
+	float angle = 0;
+	float angle_increment = 2 * M_PI / num_of_points;
+	for (size_t i = 0; i < num_of_points; i++)
+	{
+		points(0, i) = center.x() + radius * cos(angle);
+		points(1, i) = center.y() + radius * sin(angle);
+		points(2, i) = center.z();
+		points(3, i) = 1;
+		angle += angle_increment;
+	}
+	return points;
+}
+
+matxf geometry::GetXZCircle(const vec4& center, float radius, int num_of_points)
+{
+	// Compute num_of_points points on the circle with center and radius, all having the same y value
+	matxf points(4, num_of_points);
+	float angle = 0;
+	float angle_increment = 2 * M_PI / num_of_points;
+	for (int i = 0; i < num_of_points; i++)
+	{
+		points(0, i) = center.x() + radius * cos(angle);
+		points(1, i) = center.y();
+		points(2, i) = center.z() + radius * sin(angle);
+		points(3, i) = 1;
+		angle += angle_increment;
+	}
+	return points;
+
 }

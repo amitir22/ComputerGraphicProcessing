@@ -80,6 +80,9 @@ namespace geometry {
 	float GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass);
 	float FastQuake3InverseSqrt(float num);
 
+	matxf GetXZCircle(const vec4& center, float radius, int num_of_points = 10);
+	matxf GetXYCircle(const vec4& center, float radius, size_t num_of_points = 10);
+
 	struct HalfPlane {
 		// such that v dot normal + d = 0
 		vec3 normal_; // unit vector
@@ -106,4 +109,5 @@ namespace geometry {
 	};
 
 } // namespace geometry
+
 

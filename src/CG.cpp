@@ -155,7 +155,7 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ui.ShowUI();
+        ui.ShowUI(); 
 
         // Rendering
         ImGui::Render();

@@ -61,7 +61,7 @@ struct FaceIdcs
 
 class MeshModel
 {
-protected:
+public:
 	string model_name_;
 	Material material;
 	matxf vertices_local_;
@@ -75,7 +75,6 @@ protected:
 
 	mat4 model_transform_; // also known as model transform
 
-public:
 	MeshModel() noexcept;
 
 	explicit MeshModel(string fileName);

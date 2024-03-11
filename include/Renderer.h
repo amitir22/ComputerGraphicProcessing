@@ -34,13 +34,17 @@ public:
 	
 	// Draw functions
 	void DrawScene(Scene* scene);
-	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color);
-	void DrawLine(const vec3& v0, const vec3& v1);
-	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color);
-	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1);
-	void DrawPixel(int x, int y, float z, MyRGB color);
-	void DrawPixel(int x, int y, float z);
-	void DrawPixel(const vec3& v);
+	//vec3 ProjectPoint(const vec3& v_world);
+	vec3 ProjectPoint(const vec4& v_world);
+	void Draw_GL_LINE(const vec4& v0_world, const vec4& v1_world, MyRGB color = WHITE);
+	void Draw_GL_LINE(const vec3& v0_world, const vec3& v1_world, MyRGB color = WHITE);
+	void Draw_GL_LINE_STRIP(const matxf& vertices_world, MyRGB color = WHITE);
+	void Draw_GL_LINE_LOOP(const matxf& vertices_world, MyRGB color = WHITE); // Like Draw_GL_LINE_STRIP, but we also draw a line from the last vertex to the first
+	void DrawMeshModel(MeshModel* model);
+	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color = WHITE);
+	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color = WHITE);
+	void DrawPixel(int x, int y, float z, MyRGB color = WHITE);
+	void DrawPixel(const vec3& v, MyRGB color = WHITE) { DrawPixel(static_cast<int>(v.x()), static_cast<int>(v.y()), v.z(), color); }
 	
 	// Utils
 	void ClearBuffers();

@@ -12,7 +12,7 @@ enum CameraMovement {
 };
 
 enum ShadingType {
-	WHITE,
+	WHITE_SHADING,
 	FLAT,
 	GOURAUD,
 	PHONG
