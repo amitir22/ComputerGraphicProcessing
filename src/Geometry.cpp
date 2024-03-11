@@ -129,21 +129,6 @@ mat3 geometry::GetWorldNormalTransform(const mat4& m) {
 	return n.inverse().transpose();
 }
 
-//mat4 geometry::GetNormalTransfromFromModel(const mat4& model)
-//{
-//	mat4 n = mat4::Identity();
-//	n(0, 0) = m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1);
-//	n(0, 1) = m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2);
-//	n(0, 2) = m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0);
-//	n(1, 0) = m(0, 2) * m(2, 1) - m(0, 1) * m(2, 2);
-//	n(1, 1) = m(0, 0) * m(2, 2) - m(0, 2) * m(2, 0);
-//	n(1, 2) = m(0, 1) * m(2, 0) - m(0, 0) * m(2, 1);
-//	n(2, 0) = m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1);
-//	n(2, 1) = m(0, 2) * m(1, 0) - m(0, 0) * m(1, 2);
-//	n(2, 2) = m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
-//	return n;
-//}
-
 mat4 geometry::GetRotationMatrix(const vec3& axis, float angle)
 {
 	return mat4 {

@@ -4,10 +4,12 @@
 #include <algorithm> // for std::swap, 
 #include <cmath>   // for std::abs
 
+#include "Clipper.h"
 #include "Constants.h" // for cg::constants::SCR_WIDTH, cg::constants::SCR_HEIGHT
 #include "Fragment.h"
 #include "Geometry.h"
 #include "RenderUtils.h" // for EdgeFunction, GetIntMin, GetIntMax
+
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -25,6 +27,7 @@ Renderer::Renderer(int width, int height) : width_(width), height_(height) {
 	viewport_transform_ = geometry::GetViewportTransform(width_, height_);
 	normal_transform_ = mat3::Identity();
 	is_perspective_ = false;
+	selected_shading_type = FLAT;
 }
 
 void Renderer::HandleWindowReshape(int new_width, int new_height) {
@@ -101,6 +104,10 @@ void Renderer::DrawScene(Scene *scene)
 		// camera space
 		matxf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
 		matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
+		// Clipping entire model
+		if (is_clipping_) {
+
+		}
 		// clip,ndc,raster space
 		matxf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
 		matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)

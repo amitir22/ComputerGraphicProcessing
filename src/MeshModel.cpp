@@ -126,16 +126,28 @@ void MeshModel::LoadFile(string file_name)
 	}
 	// Compute the bounding box of the model
 	ComputeBoundingBox();
+	ComputeBoundingSphere();
 }
 
-void MeshModel::ComputeBoundingBox()
+void MeshModel::ComputeBoundingBox(matxf vertices)
 {
 	// Compute the bounding box of the model
-	vec3 min = vertices_local_.block(0, 0, 3, vertices_local_.cols()).rowwise().minCoeff();
-	vec3 max = vertices_local_.block(0, 0, 3, vertices_local_.cols()).rowwise().maxCoeff();
-	bounding_box_ = geometry::Box(min, max);
+	vec3 min = vertices.block(0, 0, 3, vertices.cols()).rowwise().minCoeff();
+	vec3 max = vertices.block(0, 0, 3, vertices.cols()).rowwise().maxCoeff();
+	geometry::Box bounding_box = geometry::Box(min, max);
 }
 
+vec3 GetCenterOfMass(matxf vertices) {
+	// Compute center of mass
+	return vertices.block(0, 0, 3, vertices.cols()).rowwise().mean();
+}
+
+void MeshModel::ComputeBoundingSphere(matxf vertices) {
+	// Compute center of mass
+	vec3 center_of_mass = vertices.block(0, 0, 3, vertices_local_.cols()).rowwise().mean();
+	// Compute the radius_bounding_sphere_, which is the distance from the center of mass to the farthest vertex
+	float radius_bounding_sphere = (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass_).rowwise().norm().maxCoeff();
+}
 
 ////////////////////////////////////////
 // 		Transformation functions	  //

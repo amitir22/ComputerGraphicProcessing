@@ -74,7 +74,6 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
         }
         else {
             Camera* active_camera = scene->GetActiveCamera();
-            std::cout << "y_offset: " << y_offset << std::endl;
             active_camera->Orbit(-x_offset, y_offset);
         }
 	}    

@@ -70,6 +70,8 @@ protected:
 	Eigen::MatrixXf faces_midpoints_local_;
 	// Bounding Box
 	geometry::Box bounding_box_;
+	vec3 center_of_mass_;
+	float radius_bounding_sphere_; // radius from center of mass to the farthest vertex 
 
 	mat4 model_transform_; // also known as model transform
 
@@ -80,6 +82,7 @@ public:
 	void SetModelName(string file_name);
 	void LoadFile(string fileName);
 	void ComputeBoundingBox();
+	void ComputeBoundingSphere();
 	// User Transformations
 	void Translate(vec3 translation);
 	void Rotate(vec3 axis, float angle);

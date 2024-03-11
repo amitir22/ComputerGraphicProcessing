@@ -76,5 +76,30 @@ namespace geometry {
 	}; // Box
 	float FastQuake3InverseSqrt(float num);
 
+	struct HalfPlane {
+		// such that v dot normal + d = 0
+		vec3 normal_; // unit vector
+		float d_;
+
+		HalfPlane(const vec3& normal, float d) : normal_(normal.normalized()), d_(d) {}
+		HalfPlane() : normal_(vec3()), d_(0) {}
+
+		float Distance(const vec3& point) const {
+			return normal_.dot(point) + d_;
+		}
+
+		bool IsInside(const vec3& point) const {
+			return Distance(point) > 0;
+		}
+
+		bool IsOutside(const vec3& point) const {
+			return Distance(point) < 0;
+		}
+
+		bool IsOnPlane(const vec3& point) const {
+			return Distance(point) == 0;
+		}
+	};
+
 } // namespace geometry
 
