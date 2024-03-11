@@ -17,6 +17,7 @@ class Scene {
 	std::vector<std::unique_ptr<MeshModel>> models_;
 	std::vector<std::unique_ptr<Camera>> cameras_;
 	std::vector<std::unique_ptr<Light>> lights_;
+	std::shared_ptr<AmbientLight> ambient_light_;
 
 public:
 	int active_camera_idx;
@@ -30,5 +31,6 @@ public:
     std::vector<MeshModel*>  GetModels();
 	std::vector<Camera*> GetCameras();
 	std::vector<Light*> GetLights();
+	AmbientLight* GetAmbientLight();
     Camera* GetActiveCamera() { return cameras_[active_camera_idx].get(); }
 };

@@ -9,6 +9,8 @@ using namespace std;
 Scene::Scene() {
 	// create a default camera
 	cameras_.push_back(std::make_unique<Camera>());
+	lights_.push_back(std::make_unique<PointLight>());
+	ambient_light_ = make_shared<AmbientLight>();
 	active_camera_idx = 0;
 	active_model_idx = 0;
 	active_light_idx = 0;
@@ -56,4 +58,9 @@ std::vector<Light*> Scene::GetLights()
 		lights.push_back(light.get());
 	}
 	return lights;
+}
+
+AmbientLight* Scene::GetAmbientLight()
+{
+	return this->ambient_light_.get();
 }

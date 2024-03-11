@@ -221,13 +221,13 @@ void Renderer::DrawScene(Scene *scene)
 							switch (this->selected_shading_type)
 							{
 							case FLAT:
-								color = frag.ComputeColorFlat(scene_->GetLights());
+								color = frag.ComputeColorFlat(scene_->GetLights(), scene->GetAmbientLight(), scene_->GetActiveCamera());
 								break;
 							case GOURAUD:
-								color = frag.ComputeColorGouraud(scene_->GetLights());
+								color = frag.ComputeColorGouraud(scene_->GetLights(), scene->GetAmbientLight(), scene_->GetActiveCamera());
 								break;
 							case PHONG:
-								color = frag.ComputeColorPhong(scene_->GetLights());
+								color = frag.ComputeColorPhong(scene_->GetLights(), scene->GetAmbientLight(), scene_->GetActiveCamera());
 								break;
 							}
 							MyRGB color256 = MyRGB(color);

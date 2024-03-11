@@ -1,7 +1,8 @@
 #include "Material.h"
 
-Material::Material(float smoothness, float k_ambient)
+Material::Material(unsigned int shininess, float smoothness, float k_ambient)
 {
+	this->shininess = shininess;
 	this->k_ambient = k_ambient;
 	this->setSmoothness(smoothness);
 }
@@ -25,6 +26,11 @@ float Material::getKDiffuse()
 float Material::getKSpecular()
 {
 	return this->k_specular;
+}
+
+unsigned int Material::getShininess()
+{
+	return this->shininess;
 }
 
 void Material::setSmoothness(float smoothness)

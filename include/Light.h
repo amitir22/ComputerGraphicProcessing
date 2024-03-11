@@ -4,7 +4,12 @@
 
 #include "Material.h"
 
-#define MAX_INTENSITY 100
+#define MAX_LIGHT_INTENSITY (1.0)
+
+// default light
+static const vec3 DEFAULT_LIGHT_LOCATION = vec3(-0.5, 1, 2);
+static const vec3 DEFAULT_LIGHT_COLOR = vec3(-0.5, 1, 2);
+static const float DEFAULT_LIGHT_INTENSITY = 0.5;
 
 class Light {
 public:
@@ -12,15 +17,17 @@ public:
 	Vector3f color;
 
 	Light(float intensity, Vector3f color);
-	float getLightIntensityAt(Vector3f fragment);
-	Vector3f getLightDirectionAt(Vector3f fragment);
+	virtual float getLightIntensityAt(Vector3f fragment);
+	virtual Vector3f getLightDirectionAt(Vector3f fragment);
 };
 
 class PointLight : public Light {
 public:
 	Vector3f location; // TODO: maybe some other type?
 
-	PointLight(float intensity, Vector3f color, Vector3f location);
+	PointLight(float intensity = DEFAULT_LIGHT_INTENSITY,
+				Vector3f color = DEFAULT_LIGHT_COLOR, 
+				Vector3f location = DEFAULT_LIGHT_LOCATION);
 	float getLightIntensityAt(Vector3f fragment);
 	Vector3f getLightDirectionAt(Vector3f fragment);
 };
@@ -36,7 +43,7 @@ public:
 
 class AmbientLight : public Light {
 public:
-	AmbientLight(float intensity, Vector3f color);
+	AmbientLight(float intensity=DEFAULT_MATERIAL_AMBIENT_FACTOR, Vector3f color=Vector3f(1,1,1));
 	float getLightIntensityAt(Vector3f fragment);
 	Vector3f getLightDirectionAt(Vector3f fragment);
 };

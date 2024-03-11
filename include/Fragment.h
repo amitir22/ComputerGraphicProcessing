@@ -1,6 +1,8 @@
 // Fragment.h
 #pragma once
+#include <cmath>
 #include "Light.h"
+#include "Camera.h"
 
 class Fragment {
 public:
@@ -37,7 +39,7 @@ public:
 		this->v_center = (v1 + v2 + v3) / 3;
 	}
 
-	vec3 ComputeColorFlat(std::vector<Light*>);
-	vec3 ComputeColorGouraud(std::vector<Light*>);
-	vec3 ComputeColorPhong(std::vector<Light*>);
+	vec3 ComputeColorFlat(std::vector<Light*>, Light* ambient_light, Camera *camera);
+	vec3 ComputeColorGouraud(std::vector<Light*>, Light* ambient_light, Camera *camera);
+	vec3 ComputeColorPhong(std::vector<Light*>, Light* ambient_light, Camera *camera);
 };

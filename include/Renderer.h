@@ -41,12 +41,10 @@ public:
 	void DrawPixel(int x, int y, float z, MyRGB color);
 	void DrawPixel(int x, int y, float z);
 	void DrawPixel(const vec3& v);
-
 	
 	// Utils
 	void ClearBuffers();
 	void HandleWindowReshape(int new_width, int new_height);
-
 
 	// TODO delete
 	float z_near_, z_far_;
