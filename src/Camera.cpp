@@ -206,7 +206,6 @@ void Camera::OrbitRight()
 
 void Camera::TiltAndYaw(float x_offset, float y_offset) // Change at_ but not eye_
 {
-	// For tilt, Compute new at_, based on y_offset that tells us change in pitch. We will rotate around the v axis
 	float pitch = y_offset * 0.001f; // radians
 	// constrain pitch
 	if (pitch_ + pitch > 1.57f) {

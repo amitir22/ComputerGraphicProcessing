@@ -77,7 +77,6 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
     else if (control_state->right_mouse_pressed) {
         std::cout << "x_offset: " << x_offset << " y_offset: " << y_offset << "\n";
         active_camera->TiltAndYaw(-x_offset, y_offset);
-		
     }
 }
 
