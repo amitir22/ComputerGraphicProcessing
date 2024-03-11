@@ -73,8 +73,8 @@ public:
 	void Orbit(float x_offset, float y_offset); // rotate eye circularly around at
 	void GetCanvasShape(float& top, float& right) const;
 	vec3 GetForward() const;
-	/*void OrbitLeft();
-	void OrbitRight();*/
+	void OrbitLeft();
+	void OrbitRight();
 	// Input
 
 private:

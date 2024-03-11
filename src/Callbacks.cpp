@@ -13,13 +13,13 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
     // Handle left control key state update
     if (key == GLFW_KEY_LEFT_CONTROL) {
         control_state->ctrl_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
-        std::cout << "control_state->ctrl_pressed is "  << control_state->ctrl_pressed << std::endl;
+        std::cout << "control_state->ctrl_pressed is " << control_state->ctrl_pressed << std::endl;
     }
     // if key is shift, update the state of the shift key
     if (key == GLFW_KEY_LEFT_SHIFT) {
-		control_state->shift_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
+        control_state->shift_pressed = (action == GLFW_PRESS || action == GLFW_REPEAT);
         std::cout << "control_state->shift_pressed " << control_state->shift_pressed << std::endl;
-	}
+    }
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         switch (key) {
@@ -29,11 +29,16 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         case GLFW_KEY_R:
             active_camera->Reset();
             break;
+        case GLFW_KEY_O:
+            active_camera->OrbitLeft();
+            break;
+        case GLFW_KEY_P:
+            active_camera->OrbitRight();
+            break;
         }
     }
-
-    
 }
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------

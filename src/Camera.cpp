@@ -176,30 +176,30 @@ vec3 Camera::GetForward() const
 	return -(eye_ - at_).normalized(); // points to negative z
 }
 
-//void Camera::OrbitLeft()
-//{
-//	float step_size = 0.1f;
-//	vec3 translate_dir = this->eye.cross(this->up);
-//	float resize_factor = step_size / translate_dir.norm();
-//	float prev_eye_norm = this->eye.norm();
-//
-//	this->eye += resize_factor * translate_dir;
-//	this->forward = -this->eye.normalized();
-//
-//	// resize this->eye
-//	this->eye *= prev_eye_norm / this->eye.norm();
-//}
-//
-//void Camera::OrbitRight()
-//{
-//	float step_size = 0.1f;
-//	vec3 translate_dir = this->eye.cross(this->up);
-//	float resize_factor = step_size / translate_dir.norm();
-//	float prev_eye_norm = this->eye.norm();
-//
-//	this->eye -= resize_factor * translate_dir;
-//	this->forward = -this->eye.normalized();
-//
-//	// resize this->eye
-//	this->eye *= prev_eye_norm / this->eye.norm();
-//}
+void Camera::OrbitLeft()
+{
+	float step_size = 0.1f;
+	vec3 translate_dir = this->eye_.cross(this->up_);
+	float resize_factor = step_size / translate_dir.norm();
+	float prev_eye_norm = this->eye_.norm();
+
+	this->eye_ += resize_factor * translate_dir;
+
+	// resize this->eye
+	this->eye_ *= prev_eye_norm / this->eye_.norm();
+	this->LookAt(this->eye_, this->at_, this->up_);
+}
+
+void Camera::OrbitRight()
+{
+	float step_size = 0.1f;
+	vec3 translate_dir = this->eye_.cross(this->up_);
+	float resize_factor = step_size / translate_dir.norm();
+	float prev_eye_norm = this->eye_.norm();
+
+	this->eye_ -= resize_factor * translate_dir;
+
+	// resize this->eye
+	this->eye_ *= prev_eye_norm / this->eye_.norm();
+	this->LookAt(this->eye_, this->at_, this->up_);
+}

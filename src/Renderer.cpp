@@ -192,10 +192,10 @@ void Renderer::DrawScene(Scene *scene)
 					float w0 = EdgeFunction(v1_raster, v2_raster, pixel);
 					float w1 = EdgeFunction(v2_raster, v0_raster, pixel);
 					float w2 = EdgeFunction(v0_raster, v1_raster, pixel);
-					bool inside_ = (w0 >= 0 && w1 >= 0 && w2 >= 0);
+					bool is_inside = (w0 >= 0 && w1 >= 0 && w2 >= 0);
 					if (area < 0)
-						inside_ = (w0 <= 0 && w1 <= 0 && w2 <= 0);
-					if (inside_) {
+						is_inside = (w0 <= 0 && w1 <= 0 && w2 <= 0);
+					if (is_inside) {
 						w0 /= area;
 						w1 /= area;
 						w2 /= area;
