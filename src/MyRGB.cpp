@@ -8,9 +8,10 @@ MyRGB::MyRGB(unsigned char r, unsigned char g, unsigned char b)
     : r(r), g(g), b(b) // Parameterized constructor definition
 {}
 
-MyRGB::MyRGB(float r, float g, float b)
+MyRGB::MyRGB(vec3 color)
 {
-    this->r = (unsigned char)(unsigned int)(r * 255);
-    this->g = (unsigned char)(unsigned int)(g * 255);
-    this->b = (unsigned char)(unsigned int)(b * 255);
+    color = color.cwiseMin(1.0);
+    this->r = (unsigned char)(unsigned int)(color[0] * 255);
+    this->g = (unsigned char)(unsigned int)(color[1] * 255);
+    this->b = (unsigned char)(unsigned int)(color[2] * 255);
 }

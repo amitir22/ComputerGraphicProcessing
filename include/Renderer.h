@@ -10,10 +10,14 @@
 #include "MyRGB.h"
 #include "Clipper.h"
 
+#define GRAYSCALE_VEC3 vec3(0.2126, 0.7152, 0.0722)
 
 class Renderer
 {
 public:
+	std::unique_ptr<vec3[]> bloom_pre_blur_buffer_;
+	std::unique_ptr<vec3[]> bloom_post_blur_buffer_;
+	std::unique_ptr<GLubyte[]> bloom_blur_byte_buffer_;
 	std::unique_ptr<GLubyte[]> framebuffer_;
 	std::unique_ptr<float[]> z_buffer_;
 	unsigned int width_, height_;
@@ -44,8 +48,8 @@ public:
 	void DrawAxes();
 	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color = WHITE);
 	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color = WHITE);
-	void DrawPixel(int x, int y, float z, MyRGB color = WHITE, bool do_depth_test = true);
-	void DrawPixel(const vec3& v, MyRGB color = WHITE) { DrawPixel(static_cast<int>(v.x()), static_cast<int>(v.y()), v.z(), color); }
+	void DrawPixel(int x, int y, float z, vec3 color = WHITE.getAsVec3(), bool do_depth_test = true);
+	void DrawPixel(const vec3& v, vec3 color = WHITE.getAsVec3()) { DrawPixel(static_cast<int>(v.x()), static_cast<int>(v.y()), v.z(), color); }
 	
 	// Utils
 	void ClearBuffers();

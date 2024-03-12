@@ -18,6 +18,11 @@ Renderer::Renderer() : Renderer(cg::constants::SCR_WIDTH, cg::constants::SCR_HEI
 Renderer::Renderer(int width, int height) : width_(width), height_(height) {
 	framebuffer_ = std::make_unique<GLubyte[]>(width_ * height_ * 3);
 	z_buffer_ = std::make_unique<float[]>(width_ * height_);
+
+	// TODO: maybe put under condition if (draw_bloom_)
+	bloom_blur_byte_buffer_ = make_unique<GLubyte[]>(width_ * height_ * 3);
+	bloom_pre_blur_buffer_ = make_unique<vec3[]>(width_ * height_);
+	bloom_post_blur_buffer_ = make_unique<vec3[]>(width_ * height_);
 	// fill z_buffer with z_far
 	std::fill(z_buffer_.get(), z_buffer_.get() + width_ * height_, z_far_);
 
@@ -97,6 +102,7 @@ void Renderer::DrawScene(Scene *scene)
 
 void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_normals) {
 	if (model == nullptr) { return; }
+
 	// Compute transformations
 	model_transform_ = model->GetModelTransform(); // mat4
 	mat4 modelview_matrix = view_transform_ * model_transform_;
@@ -221,15 +227,14 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		vec3 v0_normal_world = v_normals_world.col(i * 3);
 		vec3 v1_normal_world = v_normals_world.col(i * 3 + 1);
 		vec3 v2_normal_world = v_normals_world.col(i * 3 + 2);
-		MyRGB color_256;
+		vec3 color;
 		Fragment frag;
 		if (this->selected_shading_type == FLAT) {
 			frag = Fragment(model->GetMaterial(), v0_world, v1_world, v2_world, v0_normal_world, v1_normal_world, v2_normal_world, face_normal_world, 0,0,0);
-			vec3 color = frag.ComputeColorFlat(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
-			color_256 = MyRGB(color);
+			color = frag.ComputeColorFlat(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
 		} 
 		else if (this->selected_shading_type == WHITE_SHADING) {
-			color_256 = WHITE;
+			color = WHITE.getAsVec3();
 		}
 		// compute area with an edge function
 		float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
@@ -254,11 +259,11 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 					if (z <= z_buffer_[index_z_compare]) {
 						z_buffer_[index_z_compare] = z;
 						if (this->selected_shading_type == FLAT) {
-							DrawPixel(x, y, z, color_256, false);
+							DrawPixel(x, y, z, color, false);
 							continue;
 						}
 						else if (this->selected_shading_type == WHITE_SHADING) {
-							DrawPixel(x, y, z, color_256, false);
+							DrawPixel(x, y, z, color, false);
 							continue;
 						}
 						vec3 color;
@@ -274,18 +279,43 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 							break;
 						}
 
-						if (!draw_bloom_) {
-							// clipping color values
-							color = color.cwiseMin(1.0);
-						}
-						MyRGB color256 = MyRGB(color);
-
-						DrawPixel(x, y, z, color256, false);
+						DrawPixel(x, y, z, color, false);
 					} // end if depth-buffer test
 				} // end if inside
 			} // end for x
 		} // end for y
 	} // end for each Triangle
+
+	// Handle bloom
+	if (draw_bloom_)
+	{
+		vec3 pixel_color;
+		float pixel_brightness;
+
+		// apply mask to extract brightness > 1
+		for (unsigned int row = 0; row < height_; row++)
+		{
+			for (unsigned int col = 0; col < width_; col++)
+			{
+				pixel_brightness = bloom_pre_blur_buffer_[row * width_ + col].dot(GRAYSCALE_VEC3);
+				
+				if (pixel_brightness <= 1.0) // masking brightness
+				{
+					bloom_pre_blur_buffer_[row * width_ + col] = vec3::Zero();
+				}
+
+			}
+		} // bloom_pre_blur_buffer_ should be masked now so everything is black except bright spots
+
+		// apply blur effect on masked buffer
+		// 1st: horizontal blur
+		// TODO:
+		// 2nd: vertical blur
+		// TODO:
+
+		// combine bloom_post_blur_buffer_ onto framebuffer_
+		// TODO:
+	}
 }
 
 void Renderer::DrawLine(const vec3& v0, const vec3& v1, MyRGB color) {
@@ -316,10 +346,10 @@ void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRG
 	float z = z0; // Start z-value
 	for (int x = x0; x <= x1; x++) {
 		if (steep) {
-			DrawPixel(y, x, z, color);
+			DrawPixel(y, x, z, color.getAsVec3());
 		}
 		else {
-			DrawPixel(x, y, z, color);
+			DrawPixel(x, y, z, color.getAsVec3());
 		}
 		if (D > 0) { // If D > 0, we should move one step in the y direction
 			y += ystep;
@@ -332,7 +362,7 @@ void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRG
 	z += z_step;
 }
 
-void Renderer::DrawPixel(int x, int y, float z, MyRGB color, bool do_depth_test) {
+void Renderer::DrawPixel(int x, int y, float z, vec3 color, bool do_depth_test) {
 	if (x < 0 || x >= width_ || y < 0 || y >= height_) {
 		return;
 	}
@@ -342,11 +372,15 @@ void Renderer::DrawPixel(int x, int y, float z, MyRGB color, bool do_depth_test)
 		return;
 	} 
 	else {
+		MyRGB color_256 = MyRGB(color);
+
 		z_buffer_[index_z_compare] = z;
 		int index_r = INDEX(width_, x, y, 0);
-		framebuffer_[index_r] = color.r;
-		framebuffer_[index_r+1] = color.g;
-		framebuffer_[index_r+2] = color.b;
+		framebuffer_[index_r] = color_256.r;
+		framebuffer_[index_r+1] = color_256.g;
+		framebuffer_[index_r+2] = color_256.b;
+		bloom_pre_blur_buffer_[y * width_ + x] = color;
+		
 		return;
 	}
 }

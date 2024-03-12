@@ -9,8 +9,9 @@ public:
 
     MyRGB(); // Default constructor declaration
     MyRGB(unsigned char r, unsigned char g, unsigned char b); // Parameterized constructor declaration
-    MyRGB(float r, float g, float b); // Parameterized constructor declaration
-    MyRGB(vec3 color) : MyRGB(color.x(), color.y(), color.z()) {} // Parameterized constructor declaration
+    MyRGB(vec3 color); // Parameterized constructor declaration
+    MyRGB(float r, float g, float b) : MyRGB(vec3(r, g, b)) {} // Parameterized constructor declaration
+    vec3 getAsVec3() const { return vec3(r / 255.0F, g / 255.0F, b / 256.0F); }
 };
 
 // define a few colors
