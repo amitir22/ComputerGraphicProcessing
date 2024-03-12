@@ -50,6 +50,14 @@ MeshModel* Scene::GetModel(int idx)
 	return nullptr;
 }
 
+Light* Scene::GetLight(int idx)
+{
+	if (idx >= 0 && idx < lights_.size()) {
+		return lights_[idx].get();
+	}
+	return nullptr;
+}
+
 std::vector<std::string> Scene::GetModelsNames()
 {
 	std::vector<std::string> model_names;
@@ -57,6 +65,20 @@ std::vector<std::string> Scene::GetModelsNames()
 		model_names.push_back(model->GetModelName());
 	}
 	return model_names;
+}
+
+void Scene::DeleteLight(int idx) {
+	if (lights_.size() == 0) {
+		return;
+	}
+	lights_.erase(lights_.begin() + idx);
+	// update active light index accordingly. If deleted light was the active one, set active_light_idx to be new size minus 1
+	if (active_light_idx == idx) {
+		active_light_idx = lights_.size() - 1;
+	}
+	else if (active_light_idx > idx) {
+		active_light_idx--;
+	}
 }
 
 void Scene::DeleteMeshModel(int idx)
@@ -96,6 +118,12 @@ std::vector<Light*> Scene::GetLights()
 AmbientLight* Scene::GetAmbientLight()
 {
 	return this->ambient_light_.get();
+}
+
+void Scene::AddPointLight(vec3 translation)
+{
+	lights_.push_back(std::make_unique<PointLight>(DEFAULT_LIGHT_INTENSITY, DEFAULT_LIGHT_COLOR, translation));
+	active_light_idx = lights_.size() - 1;
 }
 
 MeshModel* Scene::GetActiveModel()

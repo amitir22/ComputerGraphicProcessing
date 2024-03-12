@@ -18,6 +18,12 @@ enum ShadingType {
 	PHONG
 };
 
+enum LightType {
+	POINT_LIGHT,
+	PARALLEL_LIGHT,
+	AMBIENT_LIGHT
+};
+
 namespace cg {
 	namespace constants {
 		// default width and height values

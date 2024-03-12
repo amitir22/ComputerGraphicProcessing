@@ -1,7 +1,7 @@
 // Light.h
 #pragma once
 #include <vector>
-
+#include "Constants.h"
 #include "Material.h"
 #include "MeshModel.h"
 
@@ -12,11 +12,6 @@ static const vec3 DEFAULT_LIGHT_LOCATION = vec3(-0.5, 1, 2);
 static const vec3 DEFAULT_LIGHT_COLOR = vec3(1, 1, 1);
 static const float DEFAULT_LIGHT_INTENSITY = 0.5;
 
-enum LightType {
-	POINT_LIGHT,
-	PARALLEL_LIGHT,
-	AMBIENT_LIGHT
-};
 
 class Light {
 public:
@@ -25,23 +20,30 @@ public:
 	LightType type;
 
 	Light(float intensity, vec3 color);
+	vec3 GetColor() const { return this->color; }
+	void SetColor(vec3 color) { this->color = color; }
 	virtual float getLightIntensityAt(vec3 fragment);
 	virtual vec3 getLightDirectionAt(vec3 fragment);
-	LightType GetType() { return type; }
+	LightType GetType() const { return type; }
+	void SetIntensity(float intensity) { this->intensity = intensity; }
+	float GetIntensity() { return this->intensity; }
 };
 
 class PointLight : public Light {
 public:
-	vec3 location;
+	vec3 translation;
 	MeshModel light_cube_model_;
 
 	PointLight(float intensity = DEFAULT_LIGHT_INTENSITY,
 				vec3 color = DEFAULT_LIGHT_COLOR, 
-				vec3 location = DEFAULT_LIGHT_LOCATION);
+				vec3 translation = DEFAULT_LIGHT_LOCATION);
 	float getLightIntensityAt(vec3 fragment);
 	vec3 getLightDirectionAt(vec3 fragment);
 
 	MeshModel* GetLightCubeModel() { return &light_cube_model_; }
+	void SetTranslation(vec3 translation);
+	vec3 GetTranslation() { return translation; }
+
 };
 
 class ParallelLight : public Light {

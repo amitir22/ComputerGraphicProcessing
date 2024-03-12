@@ -94,8 +94,8 @@ void Renderer::DrawScene(Scene *scene)
 		std::vector<Light*> lights = scene->GetLights();
 		for (const auto& light : lights) {
 			if (light->GetType() == LightType::POINT_LIGHT) {
-				MeshModel* model = ((PointLight*)light)->GetLightCubeModel();
-				DrawLightCube(model);
+				//MeshModel* model = ((PointLight*)light)->GetLightCubeModel();
+				DrawLightCube(light);
 			}
 		}
 	}
@@ -115,6 +115,8 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 	// Get vertices 
 	matxf vertices_local = model->GetVerticesLocal(); // (4, 3N)
 	matxf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
+	matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
+	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
 	// Clipping entire model
 	if (is_clipping_) {
 		vec3 center_of_mass_camera;
@@ -123,6 +125,43 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		if (frustum_clipper_.IsSphereCompletelyOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
 			return;
 		}
+		//std::vector<HalfPlane*> planes = frustum_clipper_.GetPlanes();
+		//// Iterate over planes, and clip with respect to each plane
+		//for (auto& plane : planes) {
+		//	// Iterate over faces and clip them
+		//	for (int i = 0; i < f_normals_local.cols(); i++) {
+		//		CLIP_STATUS status = CLIP_STATUS::INSIDE;
+		//		// Extract v0, v1,v2 from vertices_camera
+		//		vec3 v0 = vertices_camera.col(i * 3);
+		//		vec3 v1 = vertices_camera.col(i * 3 + 1);
+		//		vec3 v2 = vertices_camera.col(i * 3 + 2);
+		//		// Clip with respect to plane
+		//		Clipper::ClipTriangleWithPlane(v0, v1, v2, *plane, status);
+		//		// If triangle is completely outside, continue
+		//		if (status == CLIP_STATUS::OUTSIDE) {
+		//			continue;
+		//		}
+		//		// If triangle is completely inside, continue
+		//		if (status == CLIP_STATUS::INSIDE) {
+		//			continue;
+		//		}
+		//		// If triangle is intersecting, continue
+		//		if (status == CLIP_STATUS::INTERSECT) {
+		//			// Clip triangle with respect to each plane
+		//			Clipper::ClipTriangleWithPlane(v0, v1, v2, *plane, status);
+		//			// If triangle is completely outside, continue
+		//			if (status == CLIP_STATUS::OUTSIDE) {
+		//				continue;
+		//			}
+		//			// If triangle is completely inside, continue
+		//			if (status == CLIP_STATUS::INSIDE) {
+		//				continue;
+		//			}
+		//		}
+		//	}
+
+		//}
+	
 	}
 	// Compute transformations
 	mvp_ = projection_transform_ * modelview_matrix;
@@ -135,8 +174,6 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 	if (draw_normals && (this->draw_face_normals_ || this->draw_vertex_normals_)) {
 		normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
 	}
-	matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
-	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
 	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
 	matxf f_normals_end_vertices_raster; // face normals end points in raster space
 
@@ -151,6 +188,15 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 	if (draw_normals && this->draw_face_normals_) {
 		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
 		matxf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
+		// Compute faces midpoints in camera space from vertices_camera
+		matxf faces_midpoints_camera; faces_midpoints_camera.resize(4, f_normals_local.cols());
+		for (int i = 0; i < f_normals_local.cols(); i++) {
+			vec3 v0 = vertices_camera.col(i * 3);
+			vec3 v1 = vertices_camera.col(i * 3 + 1);
+			vec3 v2 = vertices_camera.col(i * 3 + 2);
+			vec3 face_midpoint = (v0 + v1 + v2) / 3.0f;
+			faces_midpoints_camera.col(i) = vec4(face_midpoint.x(), face_midpoint.y(), face_midpoint.z(), 1);
+		}
 		matxf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
 		matxf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
 		f_normals_end_vertices_camera.topRows(3) += f_normals_camera; // (4, N)
@@ -170,7 +216,9 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 	}
 	// RenderTriangle For each face
 	vec3 forward = scene_->GetActiveCamera()->GetForward();
-	for (int i = 0; i < f_normals_local.cols(); i++) {
+	// Iterate over faces
+	for (int i = 0; i < f_normals_local.cols(); i++) 
+	{
 		// Backface culling
 		if (this->is_backface_culling_) {
 			vec3 face_normal_local = f_normals_local.col(i);
@@ -327,9 +375,10 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 }
 
 
-void Renderer::DrawLightCube(MeshModel* model) {
-	if (model == nullptr) { return; }
-	vec3 color = WHITE.getAsVec3();
+void Renderer::DrawLightCube(Light* light) {
+	if (light == nullptr) { return; }
+	MeshModel* model = ((PointLight*)light)->GetLightCubeModel();
+	vec3 color = light->GetColor() * light->GetIntensity();
 	mat4 mvp = projection_transform_ * view_transform_ * model->GetModelTransform();
 
 	matxf vertices_clip  = mvp * model->GetVerticesLocal(); // (4, 3N)

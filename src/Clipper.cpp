@@ -1,6 +1,17 @@
 #include "Clipper.h"
 
 
+std::vector<HalfPlane*> FrustumClipper::GetPlanes() {
+	std::vector<HalfPlane*> planes;
+	planes.push_back(&near_plane_);
+	planes.push_back(&far_plane_);
+	planes.push_back(&left_plane_);
+	planes.push_back(&right_plane_);
+	planes.push_back(&bottom_plane_);
+	planes.push_back(&top_plane_);
+	return planes;
+}
+
 FrustumClipper::FrustumClipper(vec3 n, vec3 f, vec3 r, vec3 l, vec3 t, vec3 b, float z_near, float z_far)
 {
 	// z_near, z_far are positive
@@ -88,5 +99,10 @@ bool FrustumClipper::IsSphereCompletelyInside(const vec3& center, float radius)
 bool FrustumClipper::IsSphereCompletelyOutside(const vec3& center, float radius)
 {
 	return !this->IsInside(center) && (this->GetMinDistance(center) < -radius);
+}
+
+std::vector<vec3> FrustumClipper::ClipTriangle(const std::vector<vec3>& vertices_camera, const HalfPlane& plane)
+{
+	return std::vector<vec3>();
 }
 

@@ -38,7 +38,7 @@ public:
 	// Draw functions
 	void DrawScene(Scene* scene);
 	void DrawMeshModel(MeshModel* model, bool draw_wireframe, bool draw_normals = false);
-	void DrawLightCube(MeshModel* model);
+	void DrawLightCube(Light* light);
 	MyRGB ComputeColor();
 	//vec3 ProjectPoint(const vec3& v_world);
 	vec3 ProjectPoint(const vec4& v_world);

@@ -24,6 +24,8 @@ public:
 	
 	// Default constructor
 	FrustumClipper() {}
+
+	std::vector<HalfPlane*> GetPlanes();
 	
 	// n, f, r, l, t, b are unit vectors
 	FrustumClipper(vec3 n, vec3 f, vec3 r, vec3 l, vec3 t, vec3 b, float z_near, float z_far);
@@ -38,4 +40,6 @@ public:
 
 	bool IsSphereCompletelyInside(const vec3& center, float radius);
 	bool IsSphereCompletelyOutside(const vec3& center, float radius);
+
+	static std::vector<vec3> ClipTriangle(const std::vector<vec3>& vertices_camera, const HalfPlane& plane);
 };

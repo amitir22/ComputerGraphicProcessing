@@ -64,10 +64,45 @@ void UI::ShowUI()
         }
         ImGui::EndMenu();
     }
-    
+    if (ImGui::BeginMenu("Lights"))
+    {
+        if (ImGui::MenuItem("Add Point Light")){ 
+            openAddPointLightModal = true;
+		}
+        ImGui::EndMenu();
+	}
+
     ImGui::EndMainMenuBar();
+
+    if (openAddPointLightModal)
+    {
+        ImGui::OpenPopup("Add Point Light");
+        openAddPointLightModal = false; // Prevent reopening until the next click
+    }
+
+    // Modal window code
+    if (ImGui::BeginPopupModal("Add Point Light", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        static float position[3] = { 0.0f, 0.0f, 0.0f };
+        ImGui::InputFloat3("Position", position);
+
+        // OK and Cancel buttons
+        if (ImGui::Button("OK"))
+        {
+            scene_->AddPointLight(vec3(position[0], position[1], position[2]));
+            ImGui::CloseCurrentPopup(); // Close the modal
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup(); // Close the modal without adding a light
+        }
+
+        ImGui::EndPopup();
+    }
     
     ShowModelListWindow();
+    ShowLightListWindow();
 }
 
 void UI::ShowModelListWindow() {
@@ -121,9 +156,9 @@ void UI::ShowModelListWindow() {
             ImGui::SameLine();
 
             if (ImGui::Button("Color")) {
-                show_color_picker_ = true; // Toggle visibility instead of directly opening the picker
+                show_color_picker_models = true; // Toggle visibility instead of directly opening the picker
             }
-            if (show_color_picker_) 
+            if (show_color_picker_models) 
             {   
                 ImVec4 current_color = ImVec4(0, 0, 0, 1);
                 // Convert your vec3 color to ImVec4, ImGui uses ImVec4 for colors
@@ -132,10 +167,101 @@ void UI::ShowModelListWindow() {
                 current_color.y = color_vec.y(); // G
                 current_color.z = color_vec.z(); // B
 
-                if (ImGui::Begin("Color Picker", &show_color_picker_)) {
+                if (ImGui::Begin("Color Picker", &show_color_picker_models)) {
                     if (ImGui::ColorPicker3("Material Color", (float*)&current_color)) {
                         // When the color is picked, set the new color
                         this->scene_->GetActiveModel()->SetUniformMaterialColor(vec3(current_color.x, current_color.y, current_color.z));
+                    }
+                    ImGui::End();
+                }
+            }
+
+            ImGui::PopID();
+        } // End of for loop
+    } // End of window
+    ImGui::End();
+}
+
+void UI::ShowLightListWindow() {
+    if (ImGui::Begin("Light List", &is_ligth_list_window_open_)) {
+        
+        auto lights = scene_->GetLights();
+        // create a lists of lights names by their index 
+        std::vector<std::string> lights_names;
+        for (int i = 0; i < lights.size(); i++) {
+			lights_names.push_back("Light " + std::to_string(i));
+		}
+
+        for (int i = 0; i < lights.size(); ++i) 
+        {
+            if (lights[i]->GetType() != POINT_LIGHT) {
+				continue;
+			}
+            PointLight* point_light = (PointLight*)(scene_->GetLight(i));
+            ImGui::PushID(i); // Ensure unique ID for buttons within the loop
+            // Start row for model name and buttons
+            ImGui::BeginGroup();
+            bool is_selected = (scene_->active_light_idx == i);
+            if (ImGui::Selectable(lights_names[i].c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick)) {
+                scene_->active_light_idx = is_selected ? -1 : i;
+            }
+            ImGui::EndGroup();
+
+            ImGui::SameLine();
+
+            // 'X' button for deleting the model
+            if (ImGui::Button("X")) {
+                scene_->DeleteLight(i);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("M")) {
+                // Open a new window for model transformation
+                ImGui::OpenPopup("Light Transformation");
+                scene_->active_light_idx = i; // Assume this is an integer in your UI class indicating which model is being edited
+            }
+
+            if (ImGui::BeginPopup("Light Transformation")) {
+                
+                MeshModel* model = point_light->GetLightCubeModel();
+                if (model) {
+                    vec3 translation = point_light->GetTranslation();
+                    vec3 scale = model->GetScale();
+                    float scale_factor = scale.x();
+
+                    if (ImGui::InputFloat3("Translation", translation.data())) {
+                        point_light->SetTranslation(translation);
+                    }
+                    if (ImGui::InputFloat("Scale", &scale_factor)) {
+						model->SetScale(vec3(scale_factor, scale_factor, scale_factor));
+					}
+                    // Take slider  float between 0 and 1 for light_intensity
+                    float light_intensity = point_light->GetIntensity();
+                    if (ImGui::SliderFloat("Intensity", &light_intensity, 0.0f, 1.0f)) {
+						point_light->SetIntensity(light_intensity);
+					}
+                }
+                ImGui::EndPopup();
+            }
+            ImGui::SameLine();
+
+            if (ImGui::Button("Color")) {
+                show_color_picker_lights = true; // Toggle visibility instead of directly opening the picker
+            }
+            if (show_color_picker_lights)
+            {
+                ImVec4 current_color = ImVec4(0, 0, 0, 1);
+                // Convert your vec3 color to ImVec4, ImGui uses ImVec4 for colors
+                vec3 color_vec = point_light->GetColor();
+                current_color.x = color_vec.x(); // R
+                current_color.y = color_vec.y(); // G
+                current_color.z = color_vec.z(); // B
+
+                if (ImGui::Begin("Color Picker", &show_color_picker_lights)) {
+                    if (ImGui::ColorPicker3("Material Color", (float*)&current_color)) {
+                        // When the color is picked, set the new color
+                        point_light->SetColor(vec3(current_color.x, current_color.y, current_color.z));
                     }
                     ImGui::End();
                 }

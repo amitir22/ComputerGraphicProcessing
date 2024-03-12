@@ -20,22 +20,28 @@ vec3 Light::getLightDirectionAt(vec3 fragment)
 }
 
 PointLight::PointLight(float intensity, vec3 color,
-	vec3 location) : Light(intensity, color)
+	vec3 translation) : Light(intensity, color)
 {
-	this->location = location;
+	this->translation = translation;
 	type = POINT_LIGHT;
-	this->light_cube_model_ = MeshModel(location);
+	this->light_cube_model_ = MeshModel(translation);
 }
 
 float PointLight::getLightIntensityAt(vec3 fragment)
 {
-	vec3 r = (fragment - this->location);
+	vec3 r = (fragment - this->translation);
 	return geometry::FastQuake3InverseSqrt(this->intensity * r.size());
 }
 
 vec3 PointLight::getLightDirectionAt(vec3 fragment)
 {
-	return fragment - this->location;
+	return fragment - this->translation;
+}
+
+void PointLight::SetTranslation(vec3 translation)
+{
+	this->translation = translation;
+	this->light_cube_model_.SetTranslation(translation);
 }
 
 ParallelLight::ParallelLight(float intensity, vec3 color,

@@ -26,15 +26,20 @@ public:
 
 	// Constructors
 	Scene();
-
+	// Model
 	void LoadOBJModel(std::string file_name);
     std::vector<MeshModel*>  GetModels();
 	MeshModel* GetModel(int idx);
 	std::vector<std::string> GetModelsNames();
 	void DeleteMeshModel(int idx);
-	std::vector<Camera*> GetCameras();
+	MeshModel* GetActiveModel();
+	// Light
+	Light* GetLight(int idx);
+	void DeleteLight(int idx);
 	std::vector<Light*> GetLights();
 	AmbientLight* GetAmbientLight();
+	void AddPointLight(vec3 translation);
+	// Camera
+	std::vector<Camera*> GetCameras();
     Camera* GetActiveCamera() { return cameras_[active_camera_idx_].get(); }
-	MeshModel* GetActiveModel();
 };
