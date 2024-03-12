@@ -11,7 +11,6 @@ Vector3f Material::getColorFor(Eigen::Vector3f vertex)
 {
 	assert(false, "Material is an abstract class");
 	return Vector3f();
-	// TODO: maybe change default? it should never be called thou... maybe replace with assert(false)?
 }
 
 float Material::getKAmbient()
@@ -32,6 +31,11 @@ float Material::getKSpecular()
 unsigned int Material::getShininess()
 {
 	return this->shininess;
+}
+
+void Material::setShininess(unsigned int shininess)
+{
+	this->shininess = shininess;
 }
 
 void Material::setSmoothness(float smoothness)

@@ -95,4 +95,7 @@ public:
 
 	void SetMaterial(Material material) { this->material = material; }
 	Material GetMaterial() { return this->material; }
+	void SetColor(vec3 color) { this->material = UniformMaterial(color); }
+	void SetSmoothness(float smoothness) { this->material.setSmoothness(smoothness); }
+	void SetShininess(unsigned int shininess) { this->material.setShininess(shininess); }
 };

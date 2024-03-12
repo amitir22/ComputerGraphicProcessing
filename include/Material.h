@@ -26,6 +26,7 @@ public:
 	float getKDiffuse();
 	float getKSpecular();
 	unsigned int getShininess();
+	void setShininess(unsigned int shininess);
 	void setSmoothness(float smoothness);
 };
 
