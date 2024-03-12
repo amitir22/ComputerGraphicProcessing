@@ -35,4 +35,5 @@ public:
 	std::vector<Light*> GetLights();
 	AmbientLight* GetAmbientLight();
     Camera* GetActiveCamera() { return cameras_[active_camera_idx_].get(); }
+	MeshModel* GetActiveModel();
 };

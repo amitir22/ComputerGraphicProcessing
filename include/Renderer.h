@@ -8,6 +8,7 @@
 #include "Geometry.h" // For viewport transformation
 #include "Scene.h"
 #include "MyRGB.h"
+#include "Clipper.h"
 
 
 class Renderer
@@ -25,9 +26,7 @@ public:
 	bool is_perspective_; 
 	mat4 viewport_transform_; 
 	mat3 normal_transform_; 
-	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
-	matxf f_normals_end_vertices_raster; // face normals end points in raster space
-	matxf faces_midpoints_raster; // face midpoints in raster space
+	FrustumClipper frustum_clipper_;
 	// Constructors
 	Renderer();
 	Renderer(int width, int height);
@@ -60,12 +59,14 @@ public:
 	bool show_face_normals_ = false;
 	bool show_cameras_ = false;
 	bool show_bounding_box_ = false;
-	bool show_wireframe_ = false;
+	bool show_wireframe_ = true;
 	bool show_lights_ = false;
 	bool is_backface_culling_ = false;
 	bool is_clipping_ = true;
 	bool show_axes_ = true;
 	ShadingType selected_shading_type = WHITE_SHADING;
+
+	vec3 center_of_mass_camera_debug = vec3(0, 0, 0); // delete
 	
 private:
 	Scene* scene_;

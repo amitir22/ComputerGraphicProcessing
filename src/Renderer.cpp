@@ -88,11 +88,18 @@ void Renderer::DrawScene(Scene *scene)
 	if (this->show_lights_){// TODO:
 	}
 
+	if (this->is_clipping_) {
+		//frustum_clipper_ = FrustumClipper(scene->GetActiveCamera());
+		frustum_clipper_.SetCamera(scene->GetActiveCamera());
+	}
 	for (const auto& mesh_model : mesh_models) {
 		DrawMeshModel(mesh_model);
 	}
 }
 void Renderer::DrawMeshModel(MeshModel* model) {
+	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
+	matxf f_normals_end_vertices_raster; // face normals end points in raster space
+	matxf faces_midpoints_raster; // face midpoints in raster space
 	// set transforms
 	model_transform_ = model->GetModelTransform(); // mat4
 	// Compute transformations
@@ -114,13 +121,31 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 	matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
 	// Clipping entire model
 	if (is_clipping_) {
-		vec4 center_of_mass_local = model->center_of_mass_.homogeneous();
-		float radius = model->radius_bounding_sphere_;
-		matxf circle_xz = geometry::GetXZCircle(center_of_mass_local, radius, 30);
-		matxf circle_xy = geometry::GetXYCircle(center_of_mass_local, radius, 30);
-		// Draw circles
-		Draw_GL_LINE_LOOP(circle_xz, GREEN);
-		Draw_GL_LINE_LOOP(circle_xy, LIGHT_GRAY);
+		//vec4 center_of_mass_local = model->center_of_mass_.homogeneous();
+		//float radius = model->radius_bounding_sphere_;
+		//matxf circle_xz = geometry::GetXZCircle(center_of_mass_local, radius, 30);
+		//matxf circle_xy = geometry::GetXYCircle(center_of_mass_local, radius, 30);
+		//// Draw circles
+		//Draw_GL_LINE_LOOP(circle_xz, GREEN);
+		//Draw_GL_LINE_LOOP(circle_xy, LIGHT_GRAY);
+		vec3 center_of_mass_camera; 
+		float radius_bounding_sphere_camera;
+		geometry::GetBoundingSphere(vertices_camera, center_of_mass_camera, radius_bounding_sphere_camera);
+		bool is_center_inside = frustum_clipper_.IsInside(center_of_mass_camera);
+		float min_distance = frustum_clipper_.GetMinDistance(center_of_mass_camera);
+		if (!center_of_mass_camera_debug.isApprox(center_of_mass_camera)) {
+			center_of_mass_camera_debug = center_of_mass_camera;
+			std::cout << "Center of mass: " << center_of_mass_camera.transpose() << " Radius: " << radius_bounding_sphere_camera << std::endl;
+			if (is_center_inside)
+				std::cout << "Center of mass inside. Min distance of center: " << min_distance << std::endl;
+			else
+				std::cout << "Center of mass outside. Min distance of center: " << min_distance << std::endl;
+		}
+
+		if (frustum_clipper_.IsSphereOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
+			std::cout << "Model is outside frustum" << std::endl;
+			return;
+		}
 	}
 	// clip,ndc,raster space
 	matxf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
@@ -132,7 +157,7 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
 		matxf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
 		matxf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
-		v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
+		matxf v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 	}
 	if (this->show_face_normals_) {
 		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)

@@ -64,6 +64,7 @@ mat4 geometry::GetOrthoProjection(float aspect, float fovy, float z_near, float 
 mat4 geometry::GetPerspectiveProjection(float left, float right, float bottom, float top,
 										float z_near, float z_far)
 {
+	// https://stackoverflow.com/a/58615395/4399305
 	// P maps the perspective viewing volume (called frustum) to the orthographical viewing volume
 	mat4 P{
 		{z_near, 0, 0, 0},
@@ -247,6 +248,11 @@ vec3 geometry::GetCenterOfMass(matxf vertices) {
 
 float geometry::GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass) {
 	return (vertices.block(0, 0, 3, vertices.cols()).colwise() - center_of_mass).colwise().norm().maxCoeff();
+}
+
+void geometry::GetBoundingSphere(matxf vertices, vec3& center, float& radius) {
+	center = GetCenterOfMass(vertices);
+	radius = GetRadiusBoundingSphere(vertices, center);
 }
 
 

@@ -20,6 +20,8 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
     }
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        MeshModel* model = scene->GetActiveModel();
+
         switch (key) {
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
@@ -33,8 +35,38 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         case GLFW_KEY_P:
             active_camera->OrbitRight();
             break;
-        }
-    }
+        case GLFW_KEY_W:
+            if (model != nullptr) {
+				model->Translate(vec3(0, 0, -0.1));
+			}
+            break;
+        case GLFW_KEY_S:
+            if (model != nullptr) {
+                model->Translate(vec3(0, 0, 0.1));
+            }
+            break;
+        case GLFW_KEY_A:
+            if (model != nullptr) {
+				model->Translate(vec3(-0.1, 0, 0));
+			}
+			break;
+        case GLFW_KEY_D:
+            if (model != nullptr) {
+                model->Translate(vec3(0.1, 0, 0));
+            }
+            break;
+        case GLFW_KEY_Q:
+            if (model != nullptr) {
+				model->Translate(vec3(0, 0.1, 0));
+			}
+			break;
+        case GLFW_KEY_E:
+            if (model != nullptr) {
+			model->Translate(vec3(0, -0.1, 0));
+		}
+		break;
+        } // end switch
+    } // end if press or repeat
 }
 
 
@@ -42,9 +74,7 @@ void KeyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 // ---------------------------------------------------------------------------------------------
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    width = height * 4.0 / 3.0;
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
+    width = height * (cg::constants::SCR_WIDTH / cg::constants::SCR_HEIGHT);
     renderer->HandleWindowReshape(width, height);
     glViewport(0, 0, width, height);
 }
@@ -68,7 +98,6 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
     Camera* active_camera = scene->GetActiveCamera();
     if (control_state->left_mouse_pressed) {
         if (control_state->ctrl_pressed) {
-            std::cout << "x_offset: " << x_offset << " y_offset: " << y_offset << "\n";
             active_camera->Pan(x_offset, -y_offset);
         }
         else {
@@ -76,7 +105,6 @@ void MousePosCallback(GLFWwindow* window, double x_pos_in, double y_pos_in)
         }
 	}
     else if (control_state->right_mouse_pressed) {
-        std::cout << "x_offset: " << x_offset << " y_offset: " << y_offset << "\n";
         active_camera->TiltAndYaw(-x_offset, y_offset);
     }
 }

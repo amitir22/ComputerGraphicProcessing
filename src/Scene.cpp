@@ -12,16 +12,16 @@ Scene::Scene() {
 	lights_.push_back(std::make_unique<ParallelLight>(DEFAULT_LIGHT_INTENSITY, DEFAULT_LIGHT_COLOR, vec3(0, -1, 0)));
 	ambient_light_ = make_shared<AmbientLight>();
 	active_camera_idx_ = 0;
-	active_model_idx_ = 0;
+	active_model_idx_ = -1;
 	active_light_idx = 0;
 	// TODO delete, load from menu
-	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
+	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/bunny.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/banana.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/cow.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/triangle_tilt_flipped.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/two_triangles.obj");
-	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/trig_pyramid.obj");
+	LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/trig_pyramid.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/cube.obj");
 	//LoadOBJModel(std::string(RESOURCES_DIR) + "/obj_examples/solids.obj");
 }
@@ -88,4 +88,11 @@ std::vector<Light*> Scene::GetLights()
 AmbientLight* Scene::GetAmbientLight()
 {
 	return this->ambient_light_.get();
+}
+
+MeshModel* Scene::GetActiveModel()
+{
+	if (active_model_idx_ >= 0 && active_model_idx_ < models_.size())
+		return models_[active_model_idx_].get();
+	return nullptr;
 }

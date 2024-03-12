@@ -78,6 +78,7 @@ namespace geometry {
 	Box GetBoundingBox(matxf vertices);
 	vec3 GetCenterOfMass(matxf vertices);
 	float GetRadiusBoundingSphere(matxf vertices, vec3 center_of_mass);
+	void GetBoundingSphere(matxf vertices, vec3& center, float& radius);
 	float FastQuake3InverseSqrt(float num);
 
 	matxf GetXZCircle(const vec4& center, float radius, int num_of_points = 10);

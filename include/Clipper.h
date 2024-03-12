@@ -1,6 +1,8 @@
 // Clipper.h
-#pragma
+#pragma once
+#include "Camera.h"
 #include "Geometry.h"
+
 using namespace geometry;
 class FrustumClipper { // Clipper in view space, camera facing to the negative z-axis
 public:
@@ -11,16 +13,23 @@ public:
 	HalfPlane right_plane_;
 	HalfPlane near_plane_;
 	HalfPlane far_plane_;
+
+	vec3 current_point = vec3(0,0,0);
+	
+	// Default constructor
+	FrustumClipper() {}
+	
 	// n, f, r, l, t, b are unit vectors
 	FrustumClipper(vec3 n, vec3 f, vec3 r, vec3 l, vec3 t, vec3 b, float z_near, float z_far);
 
-	bool IsInside(const vec3& point) const {
-		return near_plane_.IsInside(point) && far_plane_.IsInside(point) &&
-			left_plane_.IsInside(point) && right_plane_.IsInside(point) &&
-			bottom_plane_.IsInside(point) && top_plane_.IsInside(point);
-	}
+	FrustumClipper(Camera* camera);
+
+	void SetCamera(Camera* camera);
+
+	bool IsInside(const vec3& point);
 
 	float GetMinDistance(const vec3& point);
 
 	bool IsSphereInside(const vec3& center, float radius);
+	bool IsSphereOutside(const vec3& center, float radius);
 };

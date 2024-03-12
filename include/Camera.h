@@ -44,7 +44,7 @@ public:
 	// Intrinsic
 	
 	float aspect_;
-	float fovy_;
+	float fovy_; // radians
 	float z_near_;
 	float z_far_;
 
@@ -77,6 +77,11 @@ public:
 	void TiltAndYaw(float x_offset, float y_offset); // Change at_ but not eye_
 	// Input
 	void HandleWindowReshape(int new_width, int new_height);
+	// Getters
+	float GetAspect() const { return aspect_; }
+	float GetFovy() const { return fovy_; }
+	float GetZNear() const { return z_near_; }
+	float GetZFar() const { return z_far_; }
 
 private:
 	bool is_perspective_;
