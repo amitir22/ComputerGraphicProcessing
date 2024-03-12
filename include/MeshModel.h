@@ -9,6 +9,7 @@
 
 #include "Geometry.h"
 #include "Material.h"
+#include "Camera.h"
 
 
 using namespace std;
@@ -62,6 +63,7 @@ struct FaceIdcs
 class MeshModel
 {
 public:
+	shared_ptr<Camera> personal_camera;
 	string model_name_;
 	Material material;
 	matxf vertices_local_;
@@ -95,6 +97,7 @@ public:
 
 	void SetMaterial(Material material) { this->material = material; }
 	Material GetMaterial() { return this->material; }
+	Camera* GetModelCamera() { return this->personal_camera.get(); }
 	void SetColor(vec3 color) { this->material = UniformMaterial(color); }
 	void SetSmoothness(float smoothness) { this->material.setSmoothness(smoothness); }
 	void SetShininess(unsigned int shininess) { this->material.setShininess(shininess); }
