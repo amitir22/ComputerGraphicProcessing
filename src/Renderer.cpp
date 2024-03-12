@@ -87,6 +87,12 @@ void Renderer::DrawScene(Scene *scene)
 
 	if (this->draw_lights_){// TODO:
 		std::vector<Light*> lights = scene->GetLights();
+		for (const auto& light : lights) {
+			if (light->GetType() == LightType::POINT_LIGHT) {
+				MeshModel* model = ((PointLight*)light)->GetLightCubeModel();
+				DrawLightCube(model);
+			}
+		}
 	}
 	// Draw Models
 	std::vector<MeshModel*> mesh_models = scene->GetModels();
@@ -233,9 +239,12 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		}
 		// compute area with an edge function
 		float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
-		for (uint32_t y = y0; y <= y1; ++y)
+		int dx = x1 - x0;
+		for (uint32_t y = y0, index_z_compare = y0 * width_ + x0; y <= y1; ++y, index_z_compare += (width_ - (dx + 1)))
 		{
-			for (uint32_t x = x0; x <= x1; ++x) {
+			for (uint32_t x = x0; x <= x1; ++x, index_z_compare++)
+			{
+
 				vec3 pixel(x + 0.5, y + 0.5, 0);
 				float w0 = EdgeFunction(v1_raster, v2_raster, pixel);
 				float w1 = EdgeFunction(v2_raster, v0_raster, pixel);
@@ -250,7 +259,6 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 					float one_over_Z = v0_raster.z() * w0 + v1_raster.z() * w1 + v2_raster.z() * w2;
 					float z = 1 / one_over_Z;
 					// Depth-buffer test
-					int index_z_compare = y * width_ + x;
 					if (z <= z_buffer_[index_z_compare]) {
 						z_buffer_[index_z_compare] = z;
 						if (this->selected_shading_type == FLAT) {
@@ -282,6 +290,73 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		} // end for y
 	} // end for each Triangle
 }
+
+
+void Renderer::DrawLightCube(MeshModel* model) {
+	if (model == nullptr) { return; }
+	mat4 mvp = projection_transform_ * view_transform_ * model->GetModelTransform();
+
+	matxf vertices_clip  = mvp * model->GetVerticesLocal(); // (4, 3N)
+	matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
+	matxf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
+	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+	// RenderTriangle For each face
+	vec3 forward = scene_->GetActiveCamera()->GetForward();
+	for (int i = 0; i < f_normals_local.cols(); i++) {
+		// Backface culling
+		if (this->is_backface_culling_ && forward.dot(f_normals_local.col(i)) >= 0) {
+				continue;
+		}
+		// extract v0, v1,v2 from vertices_ndc
+		vec3 v0_raster = vertices_raster.col(i * 3);
+		vec3 v1_raster = vertices_raster.col(i * 3 + 1);
+		vec3 v2_raster = vertices_raster.col(i * 3 + 2);
+		// if all vertices share same y value - continue
+		if (v0_raster.y() == v1_raster.y() && v0_raster.y() == v2_raster.y()) continue;
+		// Compute bounding box
+		int min_x, max_x, min_y, max_y;
+		GetBoundingBox(v0_raster, v1_raster, v2_raster, min_x, max_x, min_y, max_y);
+		// Check if triangle is out of screen
+		if (max_x < 0 || min_x > width_ || max_y < 0 || min_y > height_)
+			continue;
+		// Clip bounding box to screen
+		uint32_t x0 = std::max(int32_t(0), (int32_t)(std::floor(min_x)));
+		uint32_t x1 = std::min(int32_t(width_) - 1, (int32_t)(std::floor(max_x)));
+		uint32_t y0 = std::max(int32_t(0), (int32_t)(std::floor(min_y)));
+		uint32_t y1 = std::min(int32_t(height_) - 1, (int32_t)(std::floor(max_y)));
+
+		MyRGB color_256 = WHITE;
+		// compute area with an edge function
+		float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
+		int dx = x1 - x0;
+		for (uint32_t y = y0, index_z_compare = y0 * width_ + x0; y <= y1; ++y, index_z_compare += (width_-(dx+1)))
+		{
+			for (uint32_t x = x0; x <= x1; ++x, index_z_compare++)
+			{
+				vec3 pixel(x + 0.5, y + 0.5, 0);
+				float w0 = EdgeFunction(v1_raster, v2_raster, pixel);
+				float w1 = EdgeFunction(v2_raster, v0_raster, pixel);
+				float w2 = EdgeFunction(v0_raster, v1_raster, pixel);
+				bool is_inside = (w0 >= 0 && w1 >= 0 && w2 >= 0);
+				if (area < 0)
+					is_inside = (w0 <= 0 && w1 <= 0 && w2 <= 0);
+				if (is_inside) {
+					w0 /= area;
+					w1 /= area;
+					w2 /= area;
+					float one_over_Z = v0_raster.z() * w0 + v1_raster.z() * w1 + v2_raster.z() * w2;
+					float z = 1 / one_over_Z;
+					// Depth-buffer test
+					if (z <= z_buffer_[index_z_compare]) {
+						z_buffer_[index_z_compare] = z;
+						DrawPixel(x, y, z, color_256, false);
+					} // end if depth-buffer test
+				} // end if inside
+			} // end for x
+		} // end for y
+	} // end for each Triangle
+}
+
 
 void Renderer::DrawLine(const vec3& v0, const vec3& v1, MyRGB color) {
 		DrawLine(static_cast<int>(v0.x()), static_cast<int>(v0.y()), v0.z(), static_cast<int>(v1.x()), static_cast<int>(v1.y()), v1.z(), color);

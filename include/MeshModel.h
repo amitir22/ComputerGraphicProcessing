@@ -38,6 +38,8 @@ public:
 
 	MeshModel() noexcept;
 
+	explicit MeshModel(vec3 cube_center); // create a cube with center at cube_center
+
 	explicit MeshModel(string fileName);
 	void SetModelName(string file_name);
 	std::string GetModelName() const { return model_name_; }
@@ -72,3 +74,4 @@ public:
 	vec3 GetRotation() const { return model_pitch_yaw_roll_;}
 	vec3 GetScale() const { return model_scale_; }
 };
+
