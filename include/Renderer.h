@@ -43,7 +43,7 @@ public:
 	void DrawMeshModel(MeshModel* model);
 	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color = WHITE);
 	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color = WHITE);
-	void DrawPixel(int x, int y, float z, MyRGB color = WHITE);
+	void DrawPixel(int x, int y, float z, MyRGB color = WHITE, bool do_depth_test = true);
 	void DrawPixel(const vec3& v, MyRGB color = WHITE) { DrawPixel(static_cast<int>(v.x()), static_cast<int>(v.y()), v.z(), color); }
 	
 	// Utils
@@ -62,7 +62,7 @@ public:
 	bool show_wireframe_ = true;
 	bool show_lights_ = false;
 	bool is_backface_culling_ = false;
-	bool is_clipping_ = true;
+	bool is_clipping_ = false;
 	bool show_axes_ = true;
 	ShadingType selected_shading_type = WHITE_SHADING;
 

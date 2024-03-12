@@ -138,13 +138,13 @@ void Camera::Orbit(float x_offset, float y_offset)
 	float yaw = x_offset * sensitivity_; // radians
 	float pitch = y_offset * sensitivity_; // radians
 	// constrain pitch
-	if (pitch_ + pitch > 1.57f) {
-		pitch_ = 1.57f;
+	if (pitch_ + pitch > 1.56f) {
+		pitch_ = 1.56f;
 		pitch = 0;
 	}
 		
-	else if (pitch_ + pitch < -1.57f) {
-		pitch_ = -1.57f;
+	else if (pitch_ + pitch < -1.56f) {
+		pitch_ = -1.56f;
 		pitch = 0;
 	}
 	else
@@ -164,6 +164,7 @@ void Camera::Orbit(float x_offset, float y_offset)
 	LookAt(new_eye, at_, up_);
 }
 
+// view/camera coordinate-space
 void Camera::GetCanvasShape(float& top, float& right) const {
 	
 	if (is_perspective_)

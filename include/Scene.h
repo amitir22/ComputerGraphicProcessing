@@ -29,6 +29,7 @@ public:
 
 	void LoadOBJModel(std::string file_name);
     std::vector<MeshModel*>  GetModels();
+	MeshModel* GetModel(int idx);
 	std::vector<std::string> GetModelsNames();
 	void DeleteMeshModel(int idx);
 	std::vector<Camera*> GetCameras();

@@ -45,8 +45,8 @@ public:
 	
 	float aspect_;
 	float fovy_; // radians
-	float z_near_;
-	float z_far_;
+	float z_near_; // view/camera coordinate-space
+	float z_far_; // view/camera coordinate-space
 
 	// Options
 	float movement_speed;
@@ -70,7 +70,7 @@ public:
 	void Zoom(float offset); // change y-field of view
 	void Dolly(float offset); // move eye and at along n
 	void Orbit(float x_offset, float y_offset); // rotate eye circularly around at
-	void GetCanvasShape(float& top, float& right) const;
+	void GetCanvasShape(float& top, float& right) const; // view/camera coordinate-space
 	vec3 GetForward() const;
 	void OrbitLeft();
 	void OrbitRight();
@@ -80,8 +80,8 @@ public:
 	// Getters
 	float GetAspect() const { return aspect_; }
 	float GetFovy() const { return fovy_; }
-	float GetZNear() const { return z_near_; }
-	float GetZFar() const { return z_far_; }
+	float GetZNear() const { return z_near_; } 
+	float GetZFar() const { return z_far_; } 
 
 private:
 	bool is_perspective_;

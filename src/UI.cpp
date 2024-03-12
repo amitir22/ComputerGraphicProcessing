@@ -76,25 +76,47 @@ void UI::ShowModelListWindow() {
 
         for (int i = 0; i < models_names.size(); ++i) {
             ImGui::PushID(i); // Ensure unique ID for buttons within the loop
-            // Check if this model is currently selected
+            // Start row for model name and buttons
+            ImGui::BeginGroup();
             bool is_selected = (scene_->active_model_idx_ == i);
-            // Selectable row for each model. When clicked, it selects the model.
-            if (ImGui::Selectable(models_names[i].c_str(), is_selected)) {
-                if (is_selected) {
-                    // If the model was already selected, deselect it
-                    scene_->active_model_idx_ = -1;
-                }
-                else {
-                    // If the model was not already selected, select it
-                    scene_->active_model_idx_ = i;
-                }
+            if (ImGui::Selectable(models_names[i].c_str(), is_selected, ImGuiSelectableFlags_AllowDoubleClick)) {
+                scene_->active_model_idx_ = is_selected ? -1 : i;
             }
+            ImGui::EndGroup();
 
             ImGui::SameLine();
 
             // 'X' button for deleting the model
             if (ImGui::Button("X")) {
                 scene_->DeleteMeshModel(i);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("M")) {
+                // Open a new window for model transformation
+                ImGui::OpenPopup("Model Transformation");
+                scene_->active_model_idx_ = i; // Assume this is an integer in your UI class indicating which model is being edited
+            }
+
+            if (ImGui::BeginPopup("Model Transformation")) {
+                MeshModel* model = scene_->GetModel(scene_->active_model_idx_);
+                if (model) {
+                    vec3 translation = model->GetTranslation();
+                    vec3 rotation = model->GetRotation();
+                    vec3 scale = model->GetScale();
+
+                    if (ImGui::InputFloat3("Translation", translation.data())) {
+                        model->SetTranslation(translation);
+                    }
+                    if (ImGui::InputFloat3("Scale", scale.data())) {
+                        model->SetScale(scale);
+                    }
+                    if (ImGui::InputFloat3("Rotation", rotation.data())) {
+                        model->SetRotation(rotation); // Assuming pitch, yaw, roll order
+                    }
+                }
+                ImGui::EndPopup();
             }
 
             ImGui::PopID();

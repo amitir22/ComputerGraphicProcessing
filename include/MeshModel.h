@@ -9,55 +9,11 @@
 
 #include "Geometry.h"
 #include "Material.h"
+#include "MeshUtils.h"
 #include "Camera.h"
 
 
 using namespace std;
-
-
-struct FaceIdcs
-{
-	unsigned short v[4];
-	unsigned short vn[4];
-	unsigned short vt[4];
-
-	FaceIdcs()
-	{
-		for (int i = 0; i < 4; i++)
-			v[i] = vn[i] = vt[i] = 0;
-	}
-
-	FaceIdcs(std::istream& a_stream)
-	{
-		for (int i = 0; i < 4; ++i)
-			v[i] = vn[i] = vt[i] = 0;
-
-		char c; // For reading the '/' delimiter
-		for (int i = 0; i < 3; ++i)
-		{
-			a_stream >> std::ws >> v[i]; // Read vertex index
-
-			if (a_stream.peek() == '/')
-			{
-				a_stream >> c; // Consume '/'
-
-				if (a_stream.peek() == '/') // Case: v//vn
-				{
-					a_stream >> c >> vn[i]; // Consume second '/' and read vn
-				}
-				else // Case: v/vt or v/vt/vn
-				{
-					a_stream >> vt[i]; // Read vt
-
-					if (a_stream.peek() == '/')
-					{
-						a_stream >> c >> vn[i]; // Consume '/' and read vn
-					}
-				}
-			}
-		}
-	}
-};
 
 
 class MeshModel
@@ -76,6 +32,9 @@ public:
 	float radius_bounding_sphere_; // radius from center of mass to the farthest vertex 
 
 	mat4 model_transform_; // also known as model transform
+	vec3 model_translation_ = vec3(0, 0, 0);
+	vec3 model_pitch_yaw_roll_ = vec3(0, 0, 0);
+	vec3 model_scale_ = vec3(1,1,1);
 
 	MeshModel() noexcept;
 
@@ -86,19 +45,30 @@ public:
 
 	// Model Transformations
 	void Translate(vec3 translation);
+	void SetTranslation(vec3 translation);
+	void UpdateTransformation();
+	void Rotate(vec3 pitch_yaw_roll);
+	void Rotate(float pitch, float yaw, float roll){ this->Rotate(vec3(pitch, yaw, roll)); }
 	void Rotate(vec3 axis, float angle);
-	void Scale(vec3 scale);
+	void SetScale(vec3 scale);
+	void SetRotation(vec3 pitch_yaw_roll);
 	mat4 GetModelTransform() const {return model_transform_;}
 	// Model Data
+		// Vertices
 	const matxf& GetVerticesLocal() const { return vertices_local_; }
 	const matxf& GetNormalsLocal() const { return v_normals_local_; }
 	const matxf& GetFaceNormalsLocal() const { return face_normals_local_; }
 	const matxf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
-
+		// Material
 	void SetMaterial(Material material) { this->material = material; }
 	Material GetMaterial() { return this->material; }
 	Camera* GetModelCamera() { return this->personal_camera.get(); }
 	void SetColor(vec3 color) { this->material = UniformMaterial(color); }
 	void SetSmoothness(float smoothness) { this->material.setSmoothness(smoothness); }
 	void SetShininess(unsigned int shininess) { this->material.setShininess(shininess); }
+
+		// Translation, Rotation, Scale
+	vec3 GetTranslation() const { return model_translation_; }
+	vec3 GetRotation() const { return model_pitch_yaw_roll_;}
+	vec3 GetScale() const { return model_scale_; }
 };

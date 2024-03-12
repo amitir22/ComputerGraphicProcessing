@@ -12,6 +12,7 @@ public:
 	Renderer* renderer_;
 	ImGui::FileBrowser file_dialog_;
 	bool is_model_list_window_open_ = true;
+	std::vector<bool> model_edit_states_;
 
 	UI(Scene* scene, Renderer* renderer);
 	void ShowFileMenu();

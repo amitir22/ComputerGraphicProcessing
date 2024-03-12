@@ -42,6 +42,14 @@ std::vector<MeshModel*> Scene::GetModels() {
 	return models;
 }
 
+MeshModel* Scene::GetModel(int idx)
+{
+	if (idx >= 0 && idx < models_.size()) {
+		return models_[idx].get();
+	}
+	return nullptr;
+}
+
 std::vector<std::string> Scene::GetModelsNames()
 {
 	std::vector<std::string> model_names;

@@ -12,7 +12,6 @@ FrustumClipper::FrustumClipper(vec3 n, vec3 f, vec3 r, vec3 l, vec3 t, vec3 b, f
 	top_plane_ = HalfPlane(t, 0);
 }
 
-
 FrustumClipper::FrustumClipper(Camera* camera)
 {
 	float z_near = camera->GetZNear();
@@ -51,8 +50,6 @@ void FrustumClipper::SetCamera(Camera* camera)
 	top_plane_ = HalfPlane(t, 0);
 }
 
-
-
 bool FrustumClipper::IsInside(const vec3& point)
 {
 	if (!current_point.isApprox(point)) {
@@ -83,12 +80,12 @@ float FrustumClipper::GetMinDistance(const vec3& point)
 	return min_distance;
 }
 
-bool FrustumClipper::IsSphereInside(const vec3& center, float radius)
+bool FrustumClipper::IsSphereCompletelyInside(const vec3& center, float radius)
 {
 	return this->IsInside(center) && (radius < this->GetMinDistance(center) );
 }
 
-bool FrustumClipper::IsSphereOutside(const vec3& center, float radius)
+bool FrustumClipper::IsSphereCompletelyOutside(const vec3& center, float radius)
 {
 	return !this->IsInside(center) && (this->GetMinDistance(center) < -radius);
 }

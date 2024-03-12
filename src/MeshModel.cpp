@@ -133,19 +133,48 @@ void MeshModel::LoadFile(string file_name)
 }
 
 ////////////////////////////////////////
-// 		Transformation functions	  //
+// 		Model Transformations	  //
 ////////////////////////////////////////
+void MeshModel::UpdateTransformation()
+{
+	mat4 translation_matrix = geometry::GetTranslationMatrix(model_translation_);
+	mat4 rotation_matrix = geometry::GetRotationMatrix(model_pitch_yaw_roll_.x(), model_pitch_yaw_roll_.y(), model_pitch_yaw_roll_.z());
+	mat4 scale_matrix = geometry::GetScaleMatrix(model_scale_);
+	model_transform_ = translation_matrix * rotation_matrix * scale_matrix;
+}
+
+
 void MeshModel::Translate(vec3 translation)
 {
+	model_translation_ += translation;
 	model_transform_ = geometry::GetTranslationMatrix(translation) * model_transform_;
 }
 
-void MeshModel::Rotate(vec3 axis, float angle)
+void MeshModel::SetTranslation(vec3 translation)
 {
-	model_transform_ = geometry::GetRotationMatrix(axis, angle) * model_transform_;
+	model_translation_ = translation;
+	UpdateTransformation();
 }
 
-void MeshModel::Scale(vec3 scale)
+void MeshModel::Rotate(vec3 pitch_yaw_roll)
 {
-	model_transform_ = geometry::GetScaleMatrix(scale) * model_transform_;
+	model_pitch_yaw_roll_ += pitch_yaw_roll;
+	model_transform_ = geometry::GetRotationMatrix(pitch_yaw_roll.x(), pitch_yaw_roll.y(), pitch_yaw_roll.z()) * model_transform_;
+}
+
+void MeshModel::SetRotation(vec3 pitch_yaw_roll)
+{
+	model_pitch_yaw_roll_ = pitch_yaw_roll;
+	UpdateTransformation();
+}
+
+
+void MeshModel::Rotate(vec3 axis, float angle) {
+		model_transform_ = geometry::GetRotationMatrix(axis, angle) * model_transform_;
+}
+
+void MeshModel::SetScale(vec3 scale)
+{
+	model_scale_ = scale;
+	UpdateTransformation();
 }

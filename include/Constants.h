@@ -21,7 +21,7 @@ enum ShadingType {
 namespace cg {
 	namespace constants {
 		// default width and height values
-		constexpr unsigned int SCR_WIDTH = 800;
-		constexpr unsigned int SCR_HEIGHT = 600;
+		constexpr unsigned int SCR_WIDTH = 1200;
+		constexpr unsigned int SCR_HEIGHT = 900;
 	} // namespace constants
 } // namespace cg

@@ -103,10 +103,6 @@ namespace geometry {
 		bool IsOutside(const vec3& point) const {
 			return Distance(point) < 0;
 		}
-
-		bool IsOnPlane(const vec3& point) const {
-			return Distance(point) == 0;
-		}
 	};
 
 } // namespace geometry

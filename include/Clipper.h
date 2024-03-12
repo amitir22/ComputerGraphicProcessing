@@ -3,6 +3,12 @@
 #include "Camera.h"
 #include "Geometry.h"
 
+enum CLIP_STATUS{
+	INSIDE,
+	OUTSIDE,
+	INTERSECT
+};
+
 using namespace geometry;
 class FrustumClipper { // Clipper in view space, camera facing to the negative z-axis
 public:
@@ -30,6 +36,6 @@ public:
 
 	float GetMinDistance(const vec3& point);
 
-	bool IsSphereInside(const vec3& center, float radius);
-	bool IsSphereOutside(const vec3& center, float radius);
+	bool IsSphereCompletelyInside(const vec3& center, float radius);
+	bool IsSphereCompletelyOutside(const vec3& center, float radius);
 };

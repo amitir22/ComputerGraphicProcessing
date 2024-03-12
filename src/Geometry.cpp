@@ -76,10 +76,10 @@ mat4 geometry::GetPerspectiveProjection(float left, float right, float bottom, f
 	return ortho * P;
 }
 
-void geometry::GetTopAndRight(float aspect, float fovy, float z_near, float &top, float &right)
-{
+void geometry::GetTopAndRight(float aspect, float fovy, float z_near, float &top, float &right) {
 	// fovy is the field of view in the y direction, in degrees
 	// aspect is the ratio of the width to the height of the viewing volume
+	// right, top are in view/camera coordinate-space
 	top = z_near * tan(Radians(fovy/2));
 	right = top * aspect;
 }

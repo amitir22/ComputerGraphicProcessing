@@ -59,10 +59,10 @@ void Renderer::SetScene(Scene *scene)
 	is_perspective_ = scene->GetActiveCamera()->IsPerspectiveProjection();
 
 	// TODO get light
-
-	z_near_ = scene->GetActiveCamera()->z_near_;
-	z_far_ = scene->GetActiveCamera()->z_far_;
-	scene->GetActiveCamera()->GetCanvasShape(canvas_top_, canvas_right_);
+	Camera* camera = scene->GetActiveCamera();
+	z_near_ = camera->GetZNear();
+	z_far_ = camera->GetZFar();
+	camera->GetCanvasShape(canvas_top_, canvas_right_);
 }
 
 /////////////////////////////////////////////////////
@@ -99,7 +99,6 @@ void Renderer::DrawScene(Scene *scene)
 void Renderer::DrawMeshModel(MeshModel* model) {
 	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
 	matxf f_normals_end_vertices_raster; // face normals end points in raster space
-	matxf faces_midpoints_raster; // face midpoints in raster space
 	// set transforms
 	model_transform_ = model->GetModelTransform(); // mat4
 	// Compute transformations
@@ -121,17 +120,10 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 	matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
 	// Clipping entire model
 	if (is_clipping_) {
-		//vec4 center_of_mass_local = model->center_of_mass_.homogeneous();
-		//float radius = model->radius_bounding_sphere_;
-		//matxf circle_xz = geometry::GetXZCircle(center_of_mass_local, radius, 30);
-		//matxf circle_xy = geometry::GetXYCircle(center_of_mass_local, radius, 30);
-		//// Draw circles
-		//Draw_GL_LINE_LOOP(circle_xz, GREEN);
-		//Draw_GL_LINE_LOOP(circle_xy, LIGHT_GRAY);
 		vec3 center_of_mass_camera; 
 		float radius_bounding_sphere_camera;
 		geometry::GetBoundingSphere(vertices_camera, center_of_mass_camera, radius_bounding_sphere_camera);
-		bool is_center_inside = frustum_clipper_.IsInside(center_of_mass_camera);
+		/*bool is_center_inside = frustum_clipper_.IsInside(center_of_mass_camera);
 		float min_distance = frustum_clipper_.GetMinDistance(center_of_mass_camera);
 		if (!center_of_mass_camera_debug.isApprox(center_of_mass_camera)) {
 			center_of_mass_camera_debug = center_of_mass_camera;
@@ -140,10 +132,9 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 				std::cout << "Center of mass inside. Min distance of center: " << min_distance << std::endl;
 			else
 				std::cout << "Center of mass outside. Min distance of center: " << min_distance << std::endl;
-		}
-
-		if (frustum_clipper_.IsSphereOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
-			std::cout << "Model is outside frustum" << std::endl;
+		}*/
+		if (frustum_clipper_.IsSphereCompletelyOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
+			//std::cout << "Model is outside frustum" << std::endl;
 			return;
 		}
 	}
@@ -157,7 +148,7 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
 		matxf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
 		matxf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
-		matxf v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
+		v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 	}
 	if (this->show_face_normals_) {
 		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
@@ -248,8 +239,9 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 					float one_over_Z = v0_raster.z() * w0 + v1_raster.z() * w1 + v2_raster.z() * w2;
 					float z = 1 / one_over_Z;
 					// Depth-buffer test
-					if (z <= z_buffer_[y * width_ + x]) {
-						z_buffer_[y * width_ + x] = z;
+					int index_z_compare = y * width_ + x;
+					if (z <= z_buffer_[index_z_compare]) {
+						z_buffer_[index_z_compare] = z;
 						// TODO fragment shader - compute color, according to selected lighting method
 						// TODO: create fragment and pass color
 						// Get Face Normal world
@@ -281,7 +273,7 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 						}
 						MyRGB color256 = MyRGB(color);
 
-						DrawPixel(x, y, z, color256);
+						DrawPixel(x, y, z, color256, false);
 					} // end if depth-buffer test
 				} // end if inside
 			} // end for x
@@ -333,16 +325,22 @@ void Renderer::DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRG
 	z += z_step;
 }
 
-void Renderer::DrawPixel(int x, int y, float z, MyRGB color) {
+void Renderer::DrawPixel(int x, int y, float z, MyRGB color, bool do_depth_test) {
 	if (x < 0 || x >= width_ || y < 0 || y >= height_) {
 		return;
 	}
 	// do z-buffer test
-	if (z <= z_buffer_[y * width_ + x]) {
-		z_buffer_[y * width_ + x] = z;
-		framebuffer_[INDEX(width_, x, y, 0)] = color.r;
-		framebuffer_[INDEX(width_, x, y, 1)] = color.g;
-		framebuffer_[INDEX(width_, x, y, 2)] = color.b;
+	int index_z_compare = y * width_ + x;
+	if (do_depth_test && z > z_buffer_[index_z_compare]) {
+		return;
+	} 
+	else {
+		z_buffer_[index_z_compare] = z;
+		int index_r = INDEX(width_, x, y, 0);
+		framebuffer_[index_r] = color.r;
+		framebuffer_[index_r+1] = color.g;
+		framebuffer_[index_r+2] = color.b;
+		return;
 	}
 }
 
