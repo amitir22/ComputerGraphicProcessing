@@ -24,6 +24,7 @@ PointLight::PointLight(float intensity, vec3 color,
 {
 	this->location = location;
 	type = POINT_LIGHT;
+	this->light_cube_model_ = MeshModel(location);
 }
 
 float PointLight::getLightIntensityAt(vec3 fragment)

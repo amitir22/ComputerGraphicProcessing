@@ -38,6 +38,7 @@ public:
 	// Draw functions
 	void DrawScene(Scene* scene);
 	void DrawMeshModel(MeshModel* model, bool draw_wireframe, bool draw_normals = false);
+	void DrawLightCube(MeshModel* model);
 	MyRGB ComputeColor();
 	//vec3 ProjectPoint(const vec3& v_world);
 	vec3 ProjectPoint(const vec4& v_world);
@@ -65,7 +66,7 @@ public:
 	bool draw_cameras_ = false;
 	bool draw_bounding_box_ = false;
 	bool draw_wireframe_ = false;
-	bool draw_lights_ = false;
+	bool draw_lights_ = true;
 	bool is_backface_culling_ = false;
 	bool is_clipping_ = false;
 	bool show_axes_ = true;

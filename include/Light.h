@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Material.h"
+#include "MeshModel.h"
 
 #define MAX_LIGHT_INTENSITY (1.0)
 
@@ -26,17 +27,21 @@ public:
 	Light(float intensity, vec3 color);
 	virtual float getLightIntensityAt(vec3 fragment);
 	virtual vec3 getLightDirectionAt(vec3 fragment);
+	LightType GetType() { return type; }
 };
 
 class PointLight : public Light {
 public:
-	vec3 location; // TODO: maybe some other type?
+	vec3 location;
+	MeshModel light_cube_model_;
 
 	PointLight(float intensity = DEFAULT_LIGHT_INTENSITY,
 				vec3 color = DEFAULT_LIGHT_COLOR, 
 				vec3 location = DEFAULT_LIGHT_LOCATION);
 	float getLightIntensityAt(vec3 fragment);
 	vec3 getLightDirectionAt(vec3 fragment);
+
+	MeshModel* GetLightCubeModel() { return &light_cube_model_; }
 };
 
 class ParallelLight : public Light {
