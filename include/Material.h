@@ -6,9 +6,7 @@
 #define DEFAULT_MATERIAL_SMOOTHNESS (0.5)
 #define DEFAULT_MATERIAL_SHININESS (32)
 
-using Eigen::Vector3f;
-
-typedef Vector3f(*colorFunction)(float, float, float);
+typedef vec3(*colorFunction)(float, float, float);
 
 class Material
 {
@@ -21,7 +19,7 @@ public:
 	Material(unsigned int shininess = DEFAULT_MATERIAL_SHININESS,
 			 float smoothness = DEFAULT_MATERIAL_SMOOTHNESS, 
 			 float k_ambient = DEFAULT_MATERIAL_AMBIENT_FACTOR);
-	virtual Vector3f getColorFor(Vector3f vertex);
+	virtual vec3 getColorFor(vec3 vertex);
 	float getKAmbient();
 	float getKDiffuse();
 	float getKSpecular();
@@ -32,15 +30,15 @@ public:
 
 class UniformMaterial : public Material
 {
-	Vector3f color;
+	vec3 color;
 
 public:
 	UniformMaterial();
-	UniformMaterial(Vector3f color);
-	Vector3f getColorFor(Vector3f vertex);
+	UniformMaterial(vec3 color);
+	vec3 getColorFor(vec3 vertex);
 };
 
-Vector3f someLinearColoring(float x, float y, float z);
+vec3 someLinearColoring(float x, float y, float z);
 
 class VarMaterial : public Material
 {
@@ -48,5 +46,5 @@ class VarMaterial : public Material
 
 public:
 	VarMaterial(colorFunction color_function = someLinearColoring);
-	Vector3f getColorFor(Vector3f vertex);
+	vec3 getColorFor(vec3 vertex);
 };

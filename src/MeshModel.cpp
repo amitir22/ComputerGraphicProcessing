@@ -13,8 +13,7 @@
 MeshModel::MeshModel() noexcept
 {
 	model_transform_ = mat4::Identity();
-	material = UniformMaterial(vec3::Random().cwiseMax(0).cwiseMin(1));
-	//material = UniformMaterial(vec3(1, 0, 0)); // i tested with this one and still got green/bluish color
+	material_ = std::make_unique<UniformMaterial>(vec3::Random().cwiseMax(0).cwiseMin(1));
 }
 
 MeshModel::MeshModel(string file_name) : MeshModel()
@@ -142,7 +141,6 @@ void MeshModel::UpdateTransformation()
 	mat4 scale_matrix = geometry::GetScaleMatrix(model_scale_);
 	model_transform_ = translation_matrix * rotation_matrix * scale_matrix;
 }
-
 
 void MeshModel::Translate(vec3 translation)
 {

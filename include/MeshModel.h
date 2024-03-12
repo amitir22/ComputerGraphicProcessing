@@ -21,10 +21,10 @@ class MeshModel
 public:
 	shared_ptr<Camera> personal_camera;
 	string model_name_;
-	Material material;
+	std::unique_ptr<Material> material_;
 	matxf vertices_local_;
-	matxf v_normals_local_;
-	matxf face_normals_local_;
+	matxf v_normals_local_; // Normalized
+	matxf face_normals_local_; // Normalized
 	matxf faces_midpoints_local_;
 	// Bounding Box
 	geometry::Box bounding_box_;
@@ -56,16 +56,13 @@ public:
 	// Model Data
 		// Vertices
 	const matxf& GetVerticesLocal() const { return vertices_local_; }
-	const matxf& GetNormalsLocal() const { return v_normals_local_; }
-	const matxf& GetFaceNormalsLocal() const { return face_normals_local_; }
+	const matxf& GetNormalsLocal() const { return v_normals_local_; } // Normalized
+	const matxf& GetFaceNormalsLocal() const { return face_normals_local_; } // Normalized
 	const matxf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
 		// Material
-	void SetMaterial(Material material) { this->material = material; }
-	Material GetMaterial() { return this->material; }
+	void SetMaterial(std::unique_ptr<Material> newMaterial) { material_ = std::move(newMaterial);};
+	Material* GetMaterial() {return material_.get();}
 	Camera* GetModelCamera() { return this->personal_camera.get(); }
-	void SetColor(vec3 color) { this->material = UniformMaterial(color); }
-	void SetSmoothness(float smoothness) { this->material.setSmoothness(smoothness); }
-	void SetShininess(unsigned int shininess) { this->material.setShininess(shininess); }
 
 		// Translation, Rotation, Scale
 	vec3 GetTranslation() const { return model_translation_; }

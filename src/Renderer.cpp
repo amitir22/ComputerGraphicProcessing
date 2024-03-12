@@ -54,15 +54,19 @@ void Renderer::ClearBuffers()
 void Renderer::SetScene(Scene *scene)
 {
 	this->scene_ = scene;
-	view_transform_ = scene->GetActiveCamera()->GetViewTransform();
-	projection_transform_ = scene->GetActiveCamera()->GetProjectionTransform();
-	is_perspective_ = scene->GetActiveCamera()->IsPerspectiveProjection();
+	Camera* camera = scene->GetActiveCamera();
+	view_transform_ = camera->GetViewTransform();
+	projection_transform_ = camera->GetProjectionTransform();
+	is_perspective_ = camera->IsPerspectiveProjection();
 
 	// TODO get light
-	Camera* camera = scene->GetActiveCamera();
 	z_near_ = camera->GetZNear();
 	z_far_ = camera->GetZFar();
 	camera->GetCanvasShape(canvas_top_, canvas_right_);
+
+	if (this->is_clipping_) {
+		frustum_clipper_.SetCamera(camera);
+	}
 }
 
 /////////////////////////////////////////////////////
@@ -75,82 +79,65 @@ void Renderer::DrawScene(Scene *scene)
 	// Set scene and transformations
 	SetScene(scene); 
 
-	// Draw axes
-	if (this->show_axes_) {
-		DrawAxes();
+
+	// Draw // 
+	if (this->show_axes_) { DrawAxes(); }
+
+	if (this->draw_cameras_){// TODO:
 	}
-	// Draw models
+
+	if (this->draw_lights_){// TODO:
+		std::vector<Light*> lights = scene->GetLights();
+	}
+	// Draw Models
 	std::vector<MeshModel*> mesh_models = scene->GetModels();
-
-	if (this->show_cameras_){// TODO:
-	}
-
-	if (this->show_lights_){// TODO:
-	}
-
-	if (this->is_clipping_) {
-		//frustum_clipper_ = FrustumClipper(scene->GetActiveCamera());
-		frustum_clipper_.SetCamera(scene->GetActiveCamera());
-	}
 	for (const auto& mesh_model : mesh_models) {
-		DrawMeshModel(mesh_model);
+		DrawMeshModel(mesh_model, this->draw_wireframe_, true);
 	}
 }
-void Renderer::DrawMeshModel(MeshModel* model) {
-	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
-	matxf f_normals_end_vertices_raster; // face normals end points in raster space
-	// set transforms
-	model_transform_ = model->GetModelTransform(); // mat4
+
+void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_normals) {
+	if (model == nullptr) { return; }
 	// Compute transformations
+	model_transform_ = model->GetModelTransform(); // mat4
 	mat4 modelview_matrix = view_transform_ * model_transform_;
-	normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
-	mvp_ = projection_transform_ * modelview_matrix;
-	// Get model data
+	// Get vertices 
 	matxf vertices_local = model->GetVerticesLocal(); // (4, 3N)
-	matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
-	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
-	unsigned int num_faces = f_normals_local.cols(); // N
-	// Transform model data
-	matxf vertices_world = model_transform_ * vertices_local; // (4, 3N)
-	mat3 world_normal_transform = geometry::GetWorldNormalTransform(model_transform_);
-	matxf v_normals_world = world_normal_transform * v_normals_local; // (3, 3N)
-	matxf f_normals_world = world_normal_transform * f_normals_local; // (3, 3N)
-	// camera space
 	matxf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
-	matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
 	// Clipping entire model
 	if (is_clipping_) {
-		vec3 center_of_mass_camera; 
+		vec3 center_of_mass_camera;
 		float radius_bounding_sphere_camera;
 		geometry::GetBoundingSphere(vertices_camera, center_of_mass_camera, radius_bounding_sphere_camera);
-		/*bool is_center_inside = frustum_clipper_.IsInside(center_of_mass_camera);
-		float min_distance = frustum_clipper_.GetMinDistance(center_of_mass_camera);
-		if (!center_of_mass_camera_debug.isApprox(center_of_mass_camera)) {
-			center_of_mass_camera_debug = center_of_mass_camera;
-			std::cout << "Center of mass: " << center_of_mass_camera.transpose() << " Radius: " << radius_bounding_sphere_camera << std::endl;
-			if (is_center_inside)
-				std::cout << "Center of mass inside. Min distance of center: " << min_distance << std::endl;
-			else
-				std::cout << "Center of mass outside. Min distance of center: " << min_distance << std::endl;
-		}*/
 		if (frustum_clipper_.IsSphereCompletelyOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
-			//std::cout << "Model is outside frustum" << std::endl;
 			return;
 		}
 	}
-	// clip,ndc,raster space
+	// Compute transformations
+	mvp_ = projection_transform_ * modelview_matrix;
+	// Compute vertices 
 	matxf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
 	matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
 	matxf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
 
-	if (this->show_vertex_normals_) {
+	// Get Normals
+	if (draw_normals && (this->draw_face_normals_ || this->draw_vertex_normals_)) {
+		normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
+	}
+	matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
+	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
+	matxf f_normals_end_vertices_raster; // face normals end points in raster space
+
+	if (draw_normals && this->draw_vertex_normals_) {
+		matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
 		matxf v_normals_end_vertices_camera = vertices_camera; // (4, 3N)
 		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
 		matxf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
 		matxf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
 		v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 	}
-	if (this->show_face_normals_) {
+	if (draw_normals && this->draw_face_normals_) {
 		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
 		matxf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
 		matxf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
@@ -161,13 +148,20 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 		matxf f_normals_end_vertices_ndc = f_normals_end_vertices_clip.array().rowwise() / f_normals_end_vertices_clip.row(3).array(); // (4, N)
 		f_normals_end_vertices_raster = (viewport_transform_ * f_normals_end_vertices_ndc).topRows(3); // (3, N)
 	}
+	matxf vertices_world; 
+	matxf v_normals_world;
+	matxf f_normals_world;
+	if (!is_wireframe) {
+		vertices_world = model_transform_ * vertices_local; // (4, 3N)
+		mat3 world_normal_transform = geometry::GetWorldNormalTransform(model_transform_);
+		v_normals_world = world_normal_transform * v_normals_local; // (3, 3N)
+		f_normals_world = world_normal_transform * f_normals_local; // (3, 3N)
+	}
 	// RenderTriangle For each face
 	vec3 forward = scene_->GetActiveCamera()->GetForward();
-	for (int i = 0; i < num_faces; i++)
-	{
+	for (int i = 0; i < f_normals_local.cols(); i++) {
 		// Backface culling
 		if (this->is_backface_culling_) {
-
 			vec3 face_normal_local = f_normals_local.col(i);
 			float z_dot = forward.dot(face_normal_local);
 			if (z_dot >= 0)
@@ -186,7 +180,7 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 		if (max_x < 0 || min_x > width_ || max_y < 0 || min_y > height_)
 			continue;
 		// Draw Face normal
-		if (this->show_face_normals_) {
+		if (draw_normals && this->draw_face_normals_) {
 			// Compute midpoint in raster space, using v0_raster, v1_raster, v2_raster
 			vec3 face_midpoint_raster = (v0_raster + v1_raster + v2_raster) / 3.0f;
 			DrawLine(face_midpoint_raster.x(), face_midpoint_raster.y(), face_midpoint_raster.z(), f_normals_end_vertices_raster.col(i).x(), f_normals_end_vertices_raster.col(i).y(), f_normals_end_vertices_raster.col(i).z(),
@@ -198,7 +192,7 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 		uint32_t y0 = std::max(int32_t(0), (int32_t)(std::floor(min_y)));
 		uint32_t y1 = std::min(int32_t(height_) - 1, (int32_t)(std::floor(max_y)));
 		// Draw Vertex normals
-		if (this->show_vertex_normals_) {
+		if (draw_normals && this->draw_vertex_normals_) {
 			// For each vertex, check if it's in clipped bounding box, and if so, draw its normal
 			if (IsInBoundingBox(x0, x1, y0, y1, v0_raster.x(), v0_raster.y())) {
 				vec3 v0_normal_end_vertex = v_normals_end_vertices_raster.col(i * 3);
@@ -213,13 +207,31 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 				DrawLine(v2_raster, v2_normal_end_vertex);
 			}
 		}
-		if (this->show_wireframe_) {
+		if (is_wireframe) {
 			DrawLine(v0_raster, v1_raster);
 			DrawLine(v1_raster, v2_raster);
 			DrawLine(v2_raster, v0_raster);
 			continue;
 		}
 		// If not wireframe, then rasterize triangle
+		// Compute Face Color if needed
+		vec3 v0_world = vertices_world.col(i * 3).topRows(3);
+		vec3 v1_world = vertices_world.col(i * 3 + 1).topRows(3);
+		vec3 v2_world = vertices_world.col(i * 3 + 2).topRows(3);
+		vec3 face_normal_world = f_normals_world.col(i);
+		vec3 v0_normal_world = v_normals_world.col(i * 3);
+		vec3 v1_normal_world = v_normals_world.col(i * 3 + 1);
+		vec3 v2_normal_world = v_normals_world.col(i * 3 + 2);
+		MyRGB color_256;
+		Fragment frag;
+		if (this->selected_shading_type == FLAT) {
+			frag = Fragment(model->GetMaterial(), v0_world, v1_world, v2_world, v0_normal_world, v1_normal_world, v2_normal_world, face_normal_world, 0,0,0);
+			vec3 color = frag.ComputeColorFlat(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
+			color_256 = MyRGB(color);
+		} 
+		else if (this->selected_shading_type == WHITE_SHADING) {
+			color_256 = WHITE;
+		}
 		// compute area with an edge function
 		float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
 		for (uint32_t y = y0; y <= y1; ++y)
@@ -242,28 +254,19 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 					int index_z_compare = y * width_ + x;
 					if (z <= z_buffer_[index_z_compare]) {
 						z_buffer_[index_z_compare] = z;
-						// TODO fragment shader - compute color, according to selected lighting method
-						// TODO: create fragment and pass color
-						// Get Face Normal world
-						vec3 v0_world = vertices_world.col(i * 3).topRows(3);
-						vec3 v1_world = vertices_world.col(i * 3 + 1).topRows(3);
-						vec3 v2_world = vertices_world.col(i * 3 + 2).topRows(3);
-						vec3 face_normal_world = f_normals_world.col(i);
-						vec3 v0_normal_world = v_normals_world.col(i * 3);
-						vec3 v1_normal_world = v_normals_world.col(i * 3 + 1);
-						vec3 v2_normal_world = v_normals_world.col(i * 3 + 2);
-
-						Fragment frag = Fragment(model->GetMaterial(), v0_world, v1_world, v2_world, v0_normal_world, v1_normal_world, v2_normal_world, face_normal_world, w0, w1, w2);
-
+						if (this->selected_shading_type == FLAT) {
+							DrawPixel(x, y, z, color_256, false);
+							continue;
+						}
+						else if (this->selected_shading_type == WHITE_SHADING) {
+							DrawPixel(x, y, z, color_256, false);
+							continue;
+						}
 						vec3 color;
-						switch (this->selected_shading_type)
+						frag = Fragment(model->GetMaterial(), v0_world, v1_world, v2_world, v0_normal_world, v1_normal_world, v2_normal_world, face_normal_world, w0, w1, w2);
+
+						switch (this->selected_shading_type) 
 						{
-						case WHITE_SHADING:
-							color = vec3(1, 1, 1);
-							break;
-						case FLAT:
-							color = frag.ComputeColorFlat(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
-							break;
 						case GOURAUD:
 							color = frag.ComputeColorGouraud(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
 							break;
@@ -278,9 +281,9 @@ void Renderer::DrawMeshModel(MeshModel* model) {
 				} // end if inside
 			} // end for x
 		} // end for y
-
 	} // end for each Triangle
 }
+
 void Renderer::DrawLine(const vec3& v0, const vec3& v1, MyRGB color) {
 		DrawLine(static_cast<int>(v0.x()), static_cast<int>(v0.y()), v0.z(), static_cast<int>(v1.x()), static_cast<int>(v1.y()), v1.z(), color);
 }

@@ -33,6 +33,8 @@ public:
 	
 	// Draw functions
 	void DrawScene(Scene* scene);
+	void DrawMeshModel(MeshModel* model, bool draw_wireframe, bool draw_normals = false);
+	MyRGB ComputeColor();
 	//vec3 ProjectPoint(const vec3& v_world);
 	vec3 ProjectPoint(const vec4& v_world);
 	void Draw_GL_LINE(const vec4& v0_world, const vec4& v1_world, MyRGB color = WHITE);
@@ -40,7 +42,6 @@ public:
 	void Draw_GL_LINE_STRIP(const matxf& vertices_world, MyRGB color = WHITE);
 	void Draw_GL_LINE_LOOP(const matxf& vertices_world, MyRGB color = WHITE); // Like Draw_GL_LINE_STRIP, but we also draw a line from the last vertex to the first
 	void DrawAxes();
-	void DrawMeshModel(MeshModel* model);
 	void DrawLine(const vec3& v0, const vec3& v1, MyRGB color = WHITE);
 	void DrawLine(int x0, int y0, float z0, int x1, int y1, float z1, MyRGB color = WHITE);
 	void DrawPixel(int x, int y, float z, MyRGB color = WHITE, bool do_depth_test = true);
@@ -55,12 +56,12 @@ public:
 	float canvas_top_, canvas_right_;
 
 	// Flags
-	bool show_vertex_normals_ = false;
-	bool show_face_normals_ = false;
-	bool show_cameras_ = false;
-	bool show_bounding_box_ = false;
-	bool show_wireframe_ = true;
-	bool show_lights_ = false;
+	bool draw_vertex_normals_ = false;
+	bool draw_face_normals_ = false;
+	bool draw_cameras_ = false;
+	bool draw_bounding_box_ = false;
+	bool draw_wireframe_ = true;
+	bool draw_lights_ = false;
 	bool is_backface_culling_ = false;
 	bool is_clipping_ = false;
 	bool show_axes_ = true;

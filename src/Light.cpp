@@ -1,75 +1,78 @@
 #include "Light.h"
 
-Light::Light(float intensity, Vector3f color)
+Light::Light(float intensity, vec3 color)
 {
 	this->intensity = intensity;
 	this->color = color;
 }
 
-float Light::getLightIntensityAt(Vector3f fragment)
+float Light::getLightIntensityAt(vec3 fragment)
 {
 	assert(false, "Light is an abstract class");
 
 	return 0.0f; // TODO: maybe assert error? should never be used.
 }
 
-Vector3f Light::getLightDirectionAt(Vector3f fragment)
+vec3 Light::getLightDirectionAt(vec3 fragment)
 {
 	assert(false, "Light is an abstract class");
-	return Vector3f();
+	return vec3();
 }
 
-PointLight::PointLight(float intensity, Vector3f color,
-	Vector3f location) : Light(intensity, color)
+PointLight::PointLight(float intensity, vec3 color,
+	vec3 location) : Light(intensity, color)
 {
 	this->location = location;
+	type = POINT_LIGHT;
 }
 
-float PointLight::getLightIntensityAt(Vector3f fragment)
+float PointLight::getLightIntensityAt(vec3 fragment)
 {
-	Vector3f r = (fragment - this->location);
+	vec3 r = (fragment - this->location);
 	return geometry::FastQuake3InverseSqrt(this->intensity * r.size());
 }
 
-Vector3f PointLight::getLightDirectionAt(Vector3f fragment)
+vec3 PointLight::getLightDirectionAt(vec3 fragment)
 {
 	return fragment - this->location;
 }
 
-ParallelLight::ParallelLight(float intensity, Vector3f color,
-	Vector3f direction) : Light(intensity, color)
+ParallelLight::ParallelLight(float intensity, vec3 color,
+	vec3 direction) : Light(intensity, color)
 {
 	this->direction = direction;
+	type = PARALLEL_LIGHT;
 }
 
-float ParallelLight::getLightIntensityAt(Vector3f fragment)
+float ParallelLight::getLightIntensityAt(vec3 fragment)
 {
 	// TODO: maybe replace with ray trace because there might be shadow?
 	return this->intensity;
 }
 
-Vector3f ParallelLight::getLightDirectionAt(Vector3f fragment)
+vec3 ParallelLight::getLightDirectionAt(vec3 fragment)
 {
 	return this->direction;
 }
 
-AmbientLight::AmbientLight(float intensity, Vector3f color) : Light(intensity, color)
+AmbientLight::AmbientLight(float intensity, vec3 color) : Light(intensity, color)
 {
+	type = AMBIENT_LIGHT;
 }
 
-float AmbientLight::getLightIntensityAt(Vector3f fragment)
+float AmbientLight::getLightIntensityAt(vec3 fragment)
 {
 	return this->intensity;
 }
 
-Vector3f AmbientLight::getLightDirectionAt(Vector3f fragment)
+vec3 AmbientLight::getLightDirectionAt(vec3 fragment)
 {
 	assert(false, "AmbientLight doesn't have a direction");
 
-	return Vector3f();
+	return vec3();
 }
 
-Vector3f computeReflectionVector(Vector3f light_direction, Vector3f normalized_normal)
+vec3 computeReflectionVector(vec3 light_direction, vec3 normalized_normal)
 {
 	return light_direction - 2 * (light_direction.dot(normalized_normal) * normalized_normal);
 }

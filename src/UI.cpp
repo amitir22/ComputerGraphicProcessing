@@ -35,12 +35,12 @@ void UI::ShowUI()
     
     if (ImGui::BeginMenu("Display"))
     {
-        ImGui::MenuItem("Vertex Normals", "", &(renderer_->show_vertex_normals_));
-        ImGui::MenuItem("Face Normals", "", &(renderer_->show_face_normals_));
-        ImGui::MenuItem("Cameras", "", &(renderer_->show_cameras_));
-        ImGui::MenuItem("Lights", "", &(renderer_->show_lights_));
-        ImGui::MenuItem("Wireframe", "", &(renderer_->show_wireframe_));
-        ImGui::MenuItem("Bounding Box", "", &(renderer_->show_bounding_box_));
+        ImGui::MenuItem("Vertex Normals", "", &(renderer_->draw_vertex_normals_));
+        ImGui::MenuItem("Face Normals", "", &(renderer_->draw_face_normals_));
+        ImGui::MenuItem("Cameras", "", &(renderer_->draw_cameras_));
+        ImGui::MenuItem("Lights", "", &(renderer_->draw_lights_));
+        ImGui::MenuItem("Wireframe", "", &(renderer_->draw_wireframe_));
+        ImGui::MenuItem("Bounding Box", "", &(renderer_->draw_bounding_box_));
         ImGui::MenuItem("Backface Culling", "", &(renderer_->is_backface_culling_));
         ImGui::MenuItem("Clipping", "", &(renderer_->is_clipping_));
         // draw_axes

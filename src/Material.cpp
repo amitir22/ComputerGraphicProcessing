@@ -7,10 +7,10 @@ Material::Material(unsigned int shininess, float smoothness, float k_ambient)
 	this->setSmoothness(smoothness);
 }
 
-Vector3f Material::getColorFor(Eigen::Vector3f vertex)
+vec3 Material::getColorFor(vec3 vertex)
 {
 	assert(false, "Material is an abstract class");
-	return Vector3f();
+	return vec3();
 }
 
 float Material::getKAmbient()
@@ -55,19 +55,19 @@ UniformMaterial::UniformMaterial()
 	this->color = vec3::Zero();
 }
 
-UniformMaterial::UniformMaterial(Vector3f color)
+UniformMaterial::UniformMaterial(vec3 color)
 {
 	this->color = color;
 }
 
-Eigen::Vector3f UniformMaterial::getColorFor(Vector3f vertex)
+vec3 UniformMaterial::getColorFor(vec3 vertex)
 {
 	return this->color;
 }
 
-Eigen::Vector3f someLinearColoring(float x, float y, float z)
+vec3 someLinearColoring(float x, float y, float z)
 {
-	Eigen::Vector3f color((x + y) - floor(x + y),
+	vec3 color((x + y) - floor(x + y),
 		(y + z) - floor(y + z),
 		(z + x) - floor(z + x));
 
@@ -78,7 +78,7 @@ VarMaterial::VarMaterial(colorFunction color_function)
 	this->color_function = color_function;
 }
 
-Eigen::Vector3f VarMaterial::getColorFor(Vector3f vertex)
+vec3 VarMaterial::getColorFor(vec3 vertex)
 {
 	return this->color_function(vertex.x(), vertex.y(), vertex.z());
 }

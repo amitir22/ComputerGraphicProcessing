@@ -6,11 +6,10 @@
 
 class Fragment {
 public:
-	Material material;
+	Material* material;
 	vec3 v1;
 	vec3 v2;
 	vec3 v3;
-	vec3 v_center;
 	vec3 v1_n;
 	vec3 v2_n;
 	vec3 v3_n;
@@ -21,7 +20,7 @@ public:
 
 	Fragment();
 
-	Fragment(const Material& material, 
+	Fragment(Material* material, 
 		const vec3& v1, 
 		const vec3& v2, 
 		const vec3& v3, 
@@ -35,9 +34,7 @@ public:
 		: material(material), v1(v1), v2(v2), v3(v3), v1_n(v1_n), v2_n(v2_n), 
 			v3_n(v3_n), face_normal(face_normal), barycentric_w0(barycentric_w0), 
 			barycentric_w1(barycentric_w1), barycentric_w2(barycentric_w2)
-	{
-		this->v_center = (v1 + v2 + v3) / 3;
-	}
+	{}
 
 	vec3 ComputeColorFlat(std::vector<Light*>, Light* ambient_light, Camera *camera);
 	vec3 ComputeColorGouraud(std::vector<Light*>, Light* ambient_light, Camera *camera);
@@ -45,5 +42,5 @@ public:
 };
 
 vec3 computeColorContribution(Light* light, Camera* cam, vec3 location, 
-	vec3 n,	vec3 color_ambient, Material material,
+	vec3 n,	vec3 color_ambient, Material* material,
 	float k_a, float k_d, float k_s);
