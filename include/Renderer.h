@@ -66,6 +66,7 @@ public:
 	bool is_clipping_ = false;
 	bool show_axes_ = true;
 	ShadingType selected_shading_type = PHONG;
+	bool draw_bloom_ = false;
 
 	vec3 center_of_mass_camera_debug = vec3(0, 0, 0); // delete
 	
