@@ -49,7 +49,6 @@ vec3 Fragment::ComputeColorFlat(std::vector<Light*> lights, Light* ambient_light
 	for (auto &light : lights)
 	{
 		color += computeColorContribution(light, camera, v_center, this->face_normal, color_ambient, this->material, k_a, k_d, k_s);
-		color = color.cwiseMin(1.0f);
 	}
 
 	return color;
@@ -80,17 +79,9 @@ vec3 Fragment::ComputeColorGouraud(std::vector<Light*> lights, Light* ambient_li
 
 		c3 += computeColorContribution(light, camera, this->v3, this->v3_n,
 			color_ambient, this->material, k_a, k_d, k_s);
-
-		// clipping color values
-		c1.cwiseMin(1.0f);
-		c2.cwiseMin(1.0f);
-		c3.cwiseMin(1.0f);
 	}
 
 	color = this->barycentric_w0 * c1 + this->barycentric_w1 * c2 + this->barycentric_w2 * c3;
-
-	// clipping color values
-	color.cwiseMin(1.0f);
 
 	return color;
 }
@@ -112,9 +103,6 @@ vec3 Fragment::ComputeColorPhong(std::vector<Light*> lights, Light* ambient_ligh
 	{
 		color += computeColorContribution(light, camera, location, n, color_ambient, this->material,
 										  k_a, k_d, k_s);
-
-		// clipping color values
-		color.cwiseMin(1.0f);
 	}
 
 	return color;

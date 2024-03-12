@@ -273,6 +273,11 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 							color = frag.ComputeColorPhong(scene_->GetLights(), scene_->GetAmbientLight(), scene_->GetActiveCamera());
 							break;
 						}
+
+						if (!draw_bloom_) {
+							// clipping color values
+							color = color.cwiseMin(1.0);
+						}
 						MyRGB color256 = MyRGB(color);
 
 						DrawPixel(x, y, z, color256, false);

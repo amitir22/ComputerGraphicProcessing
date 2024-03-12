@@ -9,7 +9,7 @@ Scene::Scene() {
 	// create a default camera
 	cameras_.push_back(std::make_unique<Camera>());
 	lights_.push_back(std::make_unique<PointLight>());
-	lights_.push_back(std::make_unique<ParallelLight>(DEFAULT_LIGHT_INTENSITY, DEFAULT_LIGHT_COLOR, vec3(0, -1, 0)));
+	lights_.push_back(std::make_unique<ParallelLight>(DEFAULT_LIGHT_INTENSITY, DEFAULT_LIGHT_COLOR, vec3(0, 1, 0)));
 	ambient_light_ = make_shared<AmbientLight>();
 	active_camera_idx_ = 0;
 	active_model_idx_ = -1;
