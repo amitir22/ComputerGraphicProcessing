@@ -43,3 +43,7 @@ public:
 	vec3 ComputeColorGouraud(std::vector<Light*>, Light* ambient_light, Camera *camera);
 	vec3 ComputeColorPhong(std::vector<Light*>, Light* ambient_light, Camera *camera);
 };
+
+vec3 computeColorContribution(Light* light, Camera* cam, vec3 location, 
+	vec3 n,	vec3 color_ambient, Material material,
+	float k_a, float k_d, float k_s);

@@ -8,7 +8,7 @@
 
 // default light
 static const vec3 DEFAULT_LIGHT_LOCATION = vec3(-0.5, 1, 2);
-static const vec3 DEFAULT_LIGHT_COLOR = vec3(-0.5, 1, 2);
+static const vec3 DEFAULT_LIGHT_COLOR = vec3(1, 1, 1);
 static const float DEFAULT_LIGHT_INTENSITY = 0.5;
 
 class Light {

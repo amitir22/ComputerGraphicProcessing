@@ -13,7 +13,8 @@
 MeshModel::MeshModel() noexcept
 {
 	model_transform_ = mat4::Identity();
-	material = UniformMaterial(vec3::Random());
+	//material = UniformMaterial(vec3::Random().cwiseMax(0).cwiseMin(1));
+	material = UniformMaterial(vec3(1, 1, 1));
 }
 
 MeshModel::MeshModel(string file_name) : MeshModel()

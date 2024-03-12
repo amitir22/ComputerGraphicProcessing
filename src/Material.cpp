@@ -9,6 +9,7 @@ Material::Material(unsigned int shininess, float smoothness, float k_ambient)
 
 Vector3f Material::getColorFor(Eigen::Vector3f vertex)
 {
+	assert(false, "Material is an abstract class");
 	return Vector3f();
 	// TODO: maybe change default? it should never be called thou... maybe replace with assert(false)?
 }
@@ -47,6 +48,7 @@ void Material::setSmoothness(float smoothness)
 
 UniformMaterial::UniformMaterial()
 {
+	this->color = vec3::Zero();
 }
 
 UniformMaterial::UniformMaterial(Vector3f color)
