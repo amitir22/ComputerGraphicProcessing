@@ -22,20 +22,8 @@ MeshModel::MeshModel(string file_name) : MeshModel()
 	LoadFile(file_name);
 	
 	// TODO: check this:
-	 
-	// calculate center of mass
-	vec3 center = vertices_local_.rowwise().mean();
-
-	// calculate max distance from center of mass
-	matxf square_diff_center = (vertices_local_.colwise() - center).colwise().norm();
-	float current_max_distance = 0;
-
-	for (int column = 0; column < square_diff_center.cols(); column++)
-	{
-		current_max_distance = fmax(current_max_distance, square_diff_center.col(column)[0]);
-	}
-
-	personal_camera = make_shared<Camera>(1.1 * (center - vec3(0, 0, current_max_distance)), center);
+	vec3 camera_location = 1.1 * radius_bounding_sphere_ * vec3(0, 0, -1) + center_of_mass_;
+	personal_camera = make_shared<Camera>(camera_location, center_of_mass_);
 }
 
 void MeshModel::SetModelName(string file_name) {
