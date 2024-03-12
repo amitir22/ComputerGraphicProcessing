@@ -166,7 +166,6 @@ void MeshModel::SetRotation(vec3 pitch_yaw_roll)
 	UpdateTransformation();
 }
 
-
 void MeshModel::Rotate(vec3 axis, float angle) {
 		model_transform_ = geometry::GetRotationMatrix(axis, angle) * model_transform_;
 }

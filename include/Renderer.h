@@ -60,12 +60,12 @@ public:
 	bool draw_face_normals_ = false;
 	bool draw_cameras_ = false;
 	bool draw_bounding_box_ = false;
-	bool draw_wireframe_ = true;
+	bool draw_wireframe_ = false;
 	bool draw_lights_ = false;
 	bool is_backface_culling_ = false;
 	bool is_clipping_ = false;
 	bool show_axes_ = true;
-	ShadingType selected_shading_type = WHITE_SHADING;
+	ShadingType selected_shading_type = PHONG;
 
 	vec3 center_of_mass_camera_debug = vec3(0, 0, 0); // delete
 	

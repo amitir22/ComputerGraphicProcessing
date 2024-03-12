@@ -118,6 +118,28 @@ void UI::ShowModelListWindow() {
                 }
                 ImGui::EndPopup();
             }
+            ImGui::SameLine();
+
+            if (ImGui::Button("Color")) {
+                show_color_picker_ = true; // Toggle visibility instead of directly opening the picker
+            }
+            if (show_color_picker_) 
+            {   
+                ImVec4 current_color = ImVec4(0, 0, 0, 1);
+                // Convert your vec3 color to ImVec4, ImGui uses ImVec4 for colors
+                vec3 color_vec = this->scene_->GetActiveModel()->GetUniformMaterialColor();
+                current_color.x = color_vec.x(); // R
+                current_color.y = color_vec.y(); // G
+                current_color.z = color_vec.z(); // B
+
+                if (ImGui::Begin("Color Picker", &show_color_picker_)) {
+                    if (ImGui::ColorPicker3("Material Color", (float*)&current_color)) {
+                        // When the color is picked, set the new color
+                        this->scene_->GetActiveModel()->SetUniformMaterialColor(vec3(current_color.x, current_color.y, current_color.z));
+                    }
+                    ImGui::End();
+                }
+            }
 
             ImGui::PopID();
         } // End of for loop

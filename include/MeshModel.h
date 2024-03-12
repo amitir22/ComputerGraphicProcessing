@@ -60,9 +60,12 @@ public:
 	const matxf& GetFaceNormalsLocal() const { return face_normals_local_; } // Normalized
 	const matxf& GetFacesMidpointsLocal() const {return faces_midpoints_local_;}
 		// Material
-	void SetMaterial(std::unique_ptr<Material> newMaterial) { material_ = std::move(newMaterial);};
 	Material* GetMaterial() {return material_.get();}
 	Camera* GetModelCamera() { return this->personal_camera.get(); }
+
+	vec3 GetUniformMaterialColor() { return dynamic_cast<UniformMaterial*>(material_.get())->color; }
+	void SetUniformMaterialColor(vec3 color){ material_ = std::make_unique<UniformMaterial>(color); }
+
 
 		// Translation, Rotation, Scale
 	vec3 GetTranslation() const { return model_translation_; }

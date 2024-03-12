@@ -30,9 +30,8 @@ public:
 
 class UniformMaterial : public Material
 {
-	vec3 color;
-
 public:
+	vec3 color;
 	UniformMaterial();
 	UniformMaterial(vec3 color);
 	vec3 getColorFor(vec3 vertex);
