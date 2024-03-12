@@ -41,5 +41,9 @@ public:
 	bool IsSphereCompletelyInside(const vec3& center, float radius);
 	bool IsSphereCompletelyOutside(const vec3& center, float radius);
 
-	static std::vector<vec3> ClipTriangle(const std::vector<vec3>& vertices_camera, const HalfPlane& plane);
+    static std::vector<vec3> ClipTriangleWithPlane(vec3 &v0, vec3 &v1, vec3& v2, const HalfPlane& plane);
+
+    // In Camera space
+	
+
 };

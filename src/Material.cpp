@@ -9,7 +9,7 @@ Material::Material(unsigned int shininess, float smoothness, float k_ambient)
 
 vec3 Material::getColorFor(vec3 vertex)
 {
-	assert(false, "Material is an abstract class");
+	assert((false, "Material is an abstract class"));
 	return vec3();
 }
 
@@ -40,13 +40,13 @@ void Material::setShininess(unsigned int shininess)
 
 void Material::setSmoothness(float smoothness)
 {
-	assert(0 <= smoothness && smoothness <= 1.0, "smoothness value range is [0.0, 1.0]");
+	assert((0 <= smoothness && smoothness <= 1.0, "smoothness value range is [0.0, 1.0]"));
 
 	float diff = 1 - this->k_ambient;
 	this->k_specular = smoothness * diff;
 	this->k_diffuse = diff - this->k_specular;
 
-	assert(this->k_ambient + this->k_diffuse + this->k_specular <= 1.00001);
+	assert((this->k_ambient + this->k_diffuse + this->k_specular <= 1.00001));
 }
 
 

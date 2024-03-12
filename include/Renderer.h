@@ -68,7 +68,7 @@ public:
 	bool draw_wireframe_ = false;
 	bool draw_lights_ = true;
 	bool is_backface_culling_ = false;
-	bool is_clipping_ = false;
+	bool is_clipping_ = true;
 	bool show_axes_ = true;
 	ShadingType selected_shading_type = PHONG;
 	bool draw_bloom_ = false;

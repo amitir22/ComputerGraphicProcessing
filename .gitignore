@@ -24,3 +24,5 @@ Release/
 out/
 bin/
 stam*
+hw2*.zip
+imgui.ini

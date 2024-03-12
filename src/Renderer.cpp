@@ -112,89 +112,85 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 	// Compute transformations
 	model_transform_ = model->GetModelTransform(); // mat4
 	mat4 modelview_matrix = view_transform_ * model_transform_;
+	normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
+	mat3 world_normal_transform = geometry::GetWorldNormalTransform(model_transform_);
 	// Get vertices 
 	matxf vertices_local = model->GetVerticesLocal(); // (4, 3N)
 	matxf vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
 	matxf v_normals_local = model->GetNormalsLocal(); // (3, 3N)
 	matxf f_normals_local = model->GetFaceNormalsLocal(); // (3, N)
+
+
 	// Clipping entire model
 	if (is_clipping_) {
+		std::vector<vec4> new_vertices_camera;
 		vec3 center_of_mass_camera;
 		float radius_bounding_sphere_camera;
 		geometry::GetBoundingSphere(vertices_camera, center_of_mass_camera, radius_bounding_sphere_camera);
 		if (frustum_clipper_.IsSphereCompletelyOutside(center_of_mass_camera, radius_bounding_sphere_camera)) {
 			return;
 		}
-		//std::vector<HalfPlane*> planes = frustum_clipper_.GetPlanes();
-		//// Iterate over planes, and clip with respect to each plane
-		//for (auto& plane : planes) {
-		//	// Iterate over faces and clip them
-		//	for (int i = 0; i < f_normals_local.cols(); i++) {
-		//		CLIP_STATUS status = CLIP_STATUS::INSIDE;
-		//		// Extract v0, v1,v2 from vertices_camera
-		//		vec3 v0 = vertices_camera.col(i * 3);
-		//		vec3 v1 = vertices_camera.col(i * 3 + 1);
-		//		vec3 v2 = vertices_camera.col(i * 3 + 2);
-		//		// Clip with respect to plane
-		//		Clipper::ClipTriangleWithPlane(v0, v1, v2, *plane, status);
-		//		// If triangle is completely outside, continue
-		//		if (status == CLIP_STATUS::OUTSIDE) {
-		//			continue;
-		//		}
-		//		// If triangle is completely inside, continue
-		//		if (status == CLIP_STATUS::INSIDE) {
-		//			continue;
-		//		}
-		//		// If triangle is intersecting, continue
-		//		if (status == CLIP_STATUS::INTERSECT) {
-		//			// Clip triangle with respect to each plane
-		//			Clipper::ClipTriangleWithPlane(v0, v1, v2, *plane, status);
-		//			// If triangle is completely outside, continue
-		//			if (status == CLIP_STATUS::OUTSIDE) {
-		//				continue;
-		//			}
-		//			// If triangle is completely inside, continue
-		//			if (status == CLIP_STATUS::INSIDE) {
-		//				continue;
-		//			}
-		//		}
-		//	}
-
-		//}
-	
+		std::vector<HalfPlane*> planes = frustum_clipper_.GetPlanes();
+		// Iterate over planes, and clip with respect to each plane
+		for (auto& plane : planes) 
+		{
+			// Iterate over faces and clip them
+			for (int i = 0; i < int(vertices_camera.cols() / 3); i++) 
+			{
+				// Extract v0, v1,v2 from vertices_camera
+				vec3 v0 = vertices_camera.col(i * 3).topRows(3);
+				vec3 v1 = vertices_camera.col(i * 3 + 1).topRows(3);
+				vec3 v2 = vertices_camera.col(i * 3 + 2).topRows(3);
+				// Clip with respect to plane
+				std::vector<vec3> new_added_vertices_camera = FrustumClipper::ClipTriangleWithPlane(v0, v1, v2, *plane);
+				for (const auto& vertex : new_added_vertices_camera) {
+					new_vertices_camera.push_back(vertex.homogeneous());
+				}
+			}
+			// If new_vertices_camera is empty, return
+			if (new_vertices_camera.empty()) {
+				return;
+			}
+			// Update vertices_camera
+			vertices_camera = Eigen::Map<matxf>(new_vertices_camera.data()->data(), 4, new_vertices_camera.size() / 4);
+		}
 	}
+
+	matxf vertices_world = model_transform_ * vertices_local; // (4, 3N); 
+	
 	// Compute transformations
 	mvp_ = projection_transform_ * modelview_matrix;
-	// Compute vertices 
-	matxf vertices_clip = projection_transform_ * vertices_camera; // (4, 3N)
-	matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
-	matxf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
-
 	// Get Normals
 	if (draw_normals && (this->draw_face_normals_ || this->draw_vertex_normals_)) {
-		normal_transform_ = geometry::GetNormalTransfrom(modelview_matrix);
 	}
 	matxf v_normals_end_vertices_raster; // vertex normals end points in raster space
 	matxf f_normals_end_vertices_raster; // face normals end points in raster space
 
+	// Compute vertices 
+	matxf vertices_clip = (projection_transform_ * modelview_matrix) *  vertices_local; // (4, 3N)
+	matxf vertices_ndc = vertices_clip.array().rowwise() / vertices_clip.row(3).array(); // (4, 3N)
+	matxf vertices_raster = (viewport_transform_ * vertices_ndc).topRows(3); // (3, 3N)
+
+	
+
 	if (draw_normals && this->draw_vertex_normals_) {
 		matxf v_normals_camera = normal_transform_ * v_normals_local; // (3, 3N)
-		matxf v_normals_end_vertices_camera = vertices_camera; // (4, 3N)
+		matxf v_normals_end_vertices_camera = modelview_matrix * vertices_local; // (4, 3N)
 		v_normals_end_vertices_camera.topRows(3) += v_normals_camera; // (4, 3N)
 		matxf v_normals_end_vertices_clip = projection_transform_ * v_normals_end_vertices_camera; // (4, 3N)
 		matxf v_normals_end_vertices_ndc = v_normals_end_vertices_clip.array().rowwise() / v_normals_end_vertices_clip.row(3).array(); // (4, 3N)
 		v_normals_end_vertices_raster = (viewport_transform_ * v_normals_end_vertices_ndc).topRows(3); // (3, 3N)
 	}
 	if (draw_normals && this->draw_face_normals_) {
-		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
-		matxf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
+		matxf vertices_for_normals = modelview_matrix * vertices_local;
+		matxf faces_midpoints_camera; faces_midpoints_camera.resize(4, vertices_for_normals.cols() / 3);
 		// Compute faces midpoints in camera space from vertices_camera
 		for (int i = 0; i < f_normals_local.cols(); i++) {
-			vec3 v0 = vertices_camera.col(i * 3);
-			vec3 v1 = vertices_camera.col(i * 3 + 1);
-			vec3 v2 = vertices_camera.col(i * 3 + 2);
+			vec3 v0 = vertices_for_normals.col(i * 3);
+			vec3 v1 = vertices_for_normals.col(i * 3 + 1);
+			vec3 v2 = vertices_for_normals.col(i * 3 + 2);
 			vec3 face_midpoint = (v0 + v1 + v2) / 3.0f;
-			faces_midpoints_camera.col(i) = vec4(face_midpoint.x(), face_midpoint.y(), face_midpoint.z(), 1);
+			faces_midpoints_camera.col(i) = face_midpoint.homogeneous();
 		}
 		matxf f_normals_camera = normal_transform_ * f_normals_local; // (3, N)
 		matxf f_normals_end_vertices_camera = faces_midpoints_camera; // (4, N)
@@ -204,12 +200,11 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		matxf f_normals_end_vertices_ndc = f_normals_end_vertices_clip.array().rowwise() / f_normals_end_vertices_clip.row(3).array(); // (4, N)
 		f_normals_end_vertices_raster = (viewport_transform_ * f_normals_end_vertices_ndc).topRows(3); // (3, N)
 	}
-	matxf vertices_world; 
+	
 	matxf v_normals_world;
 	matxf f_normals_world;
 	if (!is_wireframe) {
-		vertices_world = model_transform_ * vertices_local; // (4, 3N)
-		mat3 world_normal_transform = geometry::GetWorldNormalTransform(model_transform_);
+		
 		v_normals_world = world_normal_transform * v_normals_local; // (3, 3N)
 		f_normals_world = world_normal_transform * f_normals_local; // (3, 3N)
 	}

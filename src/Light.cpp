@@ -8,14 +8,14 @@ Light::Light(float intensity, vec3 color)
 
 float Light::getLightIntensityAt(vec3 fragment)
 {
-	assert(false, "Light is an abstract class");
+	assert((false, "Light is an abstract class"));
 
 	return 0.0f; // TODO: maybe assert error? should never be used.
 }
 
 vec3 Light::getLightDirectionAt(vec3 fragment)
 {
-	assert(false, "Light is an abstract class");
+	assert((false, "Light is an abstract class"));
 	return vec3();
 }
 
@@ -74,7 +74,7 @@ float AmbientLight::getLightIntensityAt(vec3 fragment)
 
 vec3 AmbientLight::getLightDirectionAt(vec3 fragment)
 {
-	assert(false, "AmbientLight doesn't have a direction");
+	assert((false, "AmbientLight doesn't have a direction"));
 
 	return vec3();
 }
