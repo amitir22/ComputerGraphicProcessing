@@ -329,6 +329,7 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 
 void Renderer::DrawLightCube(MeshModel* model) {
 	if (model == nullptr) { return; }
+	vec3 color = WHITE.getAsVec3();
 	mat4 mvp = projection_transform_ * view_transform_ * model->GetModelTransform();
 
 	matxf vertices_clip  = mvp * model->GetVerticesLocal(); // (4, 3N)
@@ -360,7 +361,6 @@ void Renderer::DrawLightCube(MeshModel* model) {
 		uint32_t y0 = std::max(int32_t(0), (int32_t)(std::floor(min_y)));
 		uint32_t y1 = std::min(int32_t(height_) - 1, (int32_t)(std::floor(max_y)));
 
-		MyRGB color_256 = WHITE;
 		// compute area with an edge function
 		float area = EdgeFunction(v0_raster, v1_raster, v2_raster);
 		int dx = x1 - x0;
@@ -384,7 +384,7 @@ void Renderer::DrawLightCube(MeshModel* model) {
 					// Depth-buffer test
 					if (z <= z_buffer_[index_z_compare]) {
 						z_buffer_[index_z_compare] = z;
-						DrawPixel(x, y, z, color_256, false);
+						DrawPixel(x, y, z, color, false);
 					} // end if depth-buffer test
 				} // end if inside
 			} // end for x
