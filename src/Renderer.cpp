@@ -189,7 +189,6 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		matxf faces_midpoints_local = model->GetFacesMidpointsLocal(); // (4, N)
 		matxf faces_midpoints_camera = modelview_matrix * faces_midpoints_local; // (4, N)
 		// Compute faces midpoints in camera space from vertices_camera
-		matxf faces_midpoints_camera; faces_midpoints_camera.resize(4, f_normals_local.cols());
 		for (int i = 0; i < f_normals_local.cols(); i++) {
 			vec3 v0 = vertices_camera.col(i * 3);
 			vec3 v1 = vertices_camera.col(i * 3 + 1);
