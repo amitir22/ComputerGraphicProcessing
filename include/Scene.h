@@ -41,5 +41,5 @@ public:
 	void AddPointLight(vec3 translation);
 	// Camera
 	std::vector<Camera*> GetCameras();
-    Camera* GetActiveCamera() { return cameras_[active_camera_idx_].get(); }
+	Camera* GetActiveCamera();
 };

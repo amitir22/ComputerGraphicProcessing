@@ -10,7 +10,9 @@
 #include "MyRGB.h"
 #include "Clipper.h"
 
-#define GRAYSCALE_VEC3 vec3(0.2126, 0.7152, 0.0722)
+const vec3 GRAYSCALE_VEC3 = vec3(0.2126, 0.7152, 0.0722);
+const float BLOOM_BLUR_GAUSSIAN_WEIGHTS[] = {0.227027, 0.1945946, 0.1216216, 
+											 0.054054, 0.016216};
 
 class Renderer
 {
@@ -79,6 +81,7 @@ private:
 	Scene* scene_;
 	// set scene
 	void SetScene(Scene* scene);
+	void ApplyGaussianFilter(unsigned int x, unsigned int y);
 };
 
 // Flat uniform for each polygon

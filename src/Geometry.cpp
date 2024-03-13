@@ -4,6 +4,12 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
 #endif
+
+float geometry::GetManhattanDistance(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
+{
+	return std::max(x1, x2) - std::min(x1, x2) + std::max(y1, y2) - std::min(y1, y2);
+}
+
 float geometry::Radians(float degrees) { return degrees * M_PI / 180; }
 
 vec3 geometry::RotateVector(const vec3& v, const vec3& axis, float angle)

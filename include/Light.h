@@ -5,12 +5,13 @@
 #include "Material.h"
 #include "MeshModel.h"
 
-#define MAX_LIGHT_INTENSITY (1.0)
+#define MAX_LIGHT_INTENSITY (3.0)
 
 // default light
-static const vec3 DEFAULT_LIGHT_LOCATION = vec3(-0.5, 1, 2);
-static const vec3 DEFAULT_LIGHT_COLOR = vec3(1, 1, 1);
-static const float DEFAULT_LIGHT_INTENSITY = 0.5;
+static const vec3 DEFAULT_LIGHT_LOCATION = vec3(-2, 1, -2);
+static const vec3 DEFAULT_LIGHT_COLOR = vec3(1, 0.5, 0.5);
+static const float DEFAULT_LIGHT_INTENSITY = 1.5;
+static const float DEFAULT_BLOOM_INTENSITY_FACTOR = 1.0;
 
 
 class Light {
@@ -43,7 +44,6 @@ public:
 	MeshModel* GetLightCubeModel() { return &light_cube_model_; }
 	void SetTranslation(vec3 translation);
 	vec3 GetTranslation() { return translation; }
-
 };
 
 class ParallelLight : public Light {

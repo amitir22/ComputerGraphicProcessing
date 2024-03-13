@@ -106,6 +106,15 @@ std::vector<Camera*> Scene::GetCameras()
 	return cameras;
 }
 
+Camera* Scene::GetActiveCamera()
+{
+	if (active_model_idx_ > -1)
+	{
+		return models_[active_model_idx_]->GetModelCamera();
+	}
+	return cameras_[active_camera_idx_].get();
+}
+
 std::vector<Light*> Scene::GetLights()
 {
 	std::vector<Light*> lights;
