@@ -1,6 +1,7 @@
 // Renderer.h
 #pragma once
 #include <memory>
+#include <cmath>
 #include <vector>
 
 #include "glad/glad.h"
@@ -11,8 +12,11 @@
 #include "Clipper.h"
 
 const vec3 GRAYSCALE_VEC3 = vec3(0.2126, 0.7152, 0.0722);
-const float BLOOM_BLUR_GAUSSIAN_WEIGHTS[] = {0.227027, 0.1945946, 0.1216216, 
-											 0.054054, 0.016216};
+const float BLOOM_BLUR_GAUSSIAN_WEIGHTS[] = { 0.227027, 0.1945946, 0.1216216,
+											 0.054054, 0.016216 };
+const float BLOOM_BLUR_FACTOR = 3.0;
+//const float BLOOM_BLUR_GAUSSIAN_WEIGHTS[] = { 0.6, 0.55, 0.5,
+//											 0.4, 0.3 };
 
 class Renderer
 {

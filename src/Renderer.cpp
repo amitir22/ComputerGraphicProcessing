@@ -39,8 +39,19 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 	height_ = new_height;
 	framebuffer_.reset(new GLubyte[width_ * height_ * 3]);
 	bloom_blur_byte_buffer_.reset(new GLubyte[width_ * height_ * 3]);
-	bloom_pre_blur_buffer_.reset(new vec3[width_ * height_ * 3]);
-	bloom_post_blur_buffer_.reset(new vec3[width_ * height_ * 3]);
+	bloom_post_blur_buffer_.reset(new vec3[width_ * height_]);
+	bloom_pre_blur_buffer_.reset(new vec3[width_ * height_]);
+
+	// fill bloom buffers with vec3 zero
+	for (int row = 0; row < height_; row++)
+	{
+		for (int col = 0; col < width_; col++)
+		{
+			bloom_post_blur_buffer_[row * width_ + col] = vec3::Zero();
+			bloom_pre_blur_buffer_[row * width_ + col] = vec3::Zero();
+		}
+	}
+	 
 	// fill z_buffer with z_far
 	z_buffer_.reset(new float[width_ * height_]);
 	std::fill(z_buffer_.get(), z_buffer_.get() + width_ * height_, z_far_);
@@ -54,8 +65,23 @@ void Renderer::HandleWindowReshape(int new_width, int new_height) {
 
 void Renderer::ClearBuffers()
 {
-	memset(framebuffer_.get(), 0, width_ * height_ * 3); // Initialize with black color
-	memset(z_buffer_.get(), z_far_, width_ * height_ * sizeof(float)); // Initialize with z_far
+	bloom_pre_blur_buffer_.reset(new vec3[width_ * height_]);
+	bloom_post_blur_buffer_.reset(new vec3[width_ * height_]);
+	for (int row = 0; row < height_; row++)
+	{
+		for (int col = 0; col < width_; col++)
+		{
+			bloom_pre_blur_buffer_[col + row * width_] = vec3::Zero();
+			bloom_post_blur_buffer_[col + row * width_] = vec3::Zero();
+		}
+	}
+	framebuffer_.reset(new GLubyte[width_ * height_ * 3]);
+	bloom_blur_byte_buffer_.reset(new GLubyte[width_ * height_ * 3]);
+	// fill z_buffer with z_far
+	z_buffer_.reset(new float[width_ * height_]);
+	std::fill(z_buffer_.get(), z_buffer_.get() + width_ * height_, z_far_);
+	//memset(framebuffer_.get(), 0, width_ * height_ * 3); // Initialize with black color
+	//memset(z_buffer_.get(), z_far_, width_ * height_ * sizeof(float)); // Initialize with z_far
 }
 
 void Renderer::SetScene(Scene *scene)
@@ -81,25 +107,22 @@ void Renderer::ApplyGaussianFilter(unsigned int x, unsigned int y)
 	float current_horizontal_weight;
 	float current_vertical_weight;
 
-	int vertical_iter = (int)x - 4;
-	int vertical_iter_max = (int)x + 4;
-	int horizontal_iter = (int)y - 4;
-	int horizontal_iter_max = (int)y + 4;
+	int y_iter = std::max((int)y - 4, 0);
+	int y_iter_max = std::min((unsigned int)y + 4, height_);
+	int x_iter = std::max((int)x - 4, 0);
+	int x_iter_max = std::min((unsigned int)x + 4, height_);
 
-	for (horizontal_iter; horizontal_iter < horizontal_iter_max; horizontal_iter++)
+	if (bloom_pre_blur_buffer_[y * width_ + x].norm() != 0)
 	{
-		if (horizontal_iter < 0 || horizontal_iter >= width_)
-			continue;
-
-		for (vertical_iter; vertical_iter < vertical_iter_max; vertical_iter++)
+		for (y_iter; y_iter <= y_iter_max; y_iter++)
 		{
-			if (vertical_iter < 0 || vertical_iter >= height_ || bloom_pre_blur_buffer_[y * width_ + x] == vec3::Zero())
-				continue;
+			for (x_iter; x_iter <= x_iter_max; x_iter++)
+			{
+				current_horizontal_weight = BLOOM_BLUR_FACTOR * BLOOM_BLUR_GAUSSIAN_WEIGHTS[std::max((int)x, x_iter) - std::min((int)x, x_iter)];
+				current_vertical_weight = BLOOM_BLUR_FACTOR * BLOOM_BLUR_GAUSSIAN_WEIGHTS[std::max((int)y, y_iter) - std::min((int)y, y_iter)];
 
-			current_horizontal_weight = BLOOM_BLUR_GAUSSIAN_WEIGHTS[std::max((int)x, horizontal_iter) - std::min((int)x, horizontal_iter)];
-			current_vertical_weight = BLOOM_BLUR_GAUSSIAN_WEIGHTS[std::max((int)y, vertical_iter) - std::min((int)y, vertical_iter)];
-			
-			bloom_post_blur_buffer_[vertical_iter * width_ + horizontal_iter] += bloom_pre_blur_buffer_[y * width_ + x] * current_horizontal_weight * current_vertical_weight;
+				bloom_post_blur_buffer_[y_iter * width_ + x_iter] += bloom_pre_blur_buffer_[y * width_ + x] * current_horizontal_weight * current_vertical_weight;
+			}
 		}
 	}
 }
@@ -163,9 +186,9 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		//	for (int i = 0; i < f_normals_local.cols(); i++) {
 		//		CLIP_STATUS status = CLIP_STATUS::INSIDE;
 		//		// Extract v0, v1,v2 from vertices_camera
-		//		vec3 v0 = vertices_camera.col(i * 3);
-		//		vec3 v1 = vertices_camera.col(i * 3 + 1);
-		//		vec3 v2 = vertices_camera.col(i * 3 + 2);
+		//		vec3 v0 = vertices_camera.x(i * 3);
+		//		vec3 v1 = vertices_camera.x(i * 3 + 1);
+		//		vec3 v2 = vertices_camera.x(i * 3 + 2);
 		//		// Clip with respect to plane
 		//		Clipper::ClipTriangleWithPlane(v0, v1, v2, *plane, status);
 		//		// If triangle is completely outside, continue
@@ -385,33 +408,47 @@ void Renderer::DrawMeshModel(MeshModel* model, bool is_wireframe, bool draw_norm
 		{
 			for (unsigned int col = 0; col < width_; col++)
 			{
-				ApplyGaussianFilter(col, row);
+				if (bloom_pre_blur_buffer_[row * width_ + col].norm() != 0)
+					ApplyGaussianFilter(col, row);
+			}
+		}
+
+		// clipping rgb values
+		for (unsigned int row = 0; row < height_; row++)
+		{
+			for (unsigned int col = 0; col < width_; col++)
+			{
+				bloom_post_blur_buffer_[row * width_ + col] = bloom_post_blur_buffer_[row * width_ + col].cwiseMax(0).cwiseMin(1);
 			}
 		}
 
 		MyRGB buffer_pixel_output_color;
 
 		// combine bloom_post_blur_buffer_ onto framebuffer_
-		for (unsigned int row = 0; row < height_; row++)
+		for (unsigned int y = 0; y < height_; y++)
 		{
-			for (unsigned int col = 0; col < width_; col++)
+			for (unsigned int x = 0; x < width_; x++)
 			{
-				vec3 bloom_pixel_color = bloom_post_blur_buffer_[row * width_ + col];
+				vec3 bloom_pixel_color = bloom_post_blur_buffer_[y * width_ + x];
 				MyRGB buffer_pixel_input_color = MyRGB();
+				MyRGB blur_pixel_color = MyRGB(bloom_pixel_color);
 
-				buffer_pixel_input_color.r = framebuffer_[INDEX(width_, col, row, 0)];
-				buffer_pixel_input_color.g = framebuffer_[INDEX(width_, col, row, 1)];
-				buffer_pixel_input_color.b = framebuffer_[INDEX(width_, col, row, 2)];
+				//buffer_pixel_input_color.r = framebuffer_[INDEX(width_, x, y, 0)];
+				//buffer_pixel_input_color.g = framebuffer_[INDEX(width_, x, y, 1)];
+				//buffer_pixel_input_color.b = framebuffer_[INDEX(width_, x, y, 2)];
+				//
+				//
+				//buffer_pixel_output_color.r = (unsigned char)std::min((int)buffer_pixel_input_color.r + (int)buffer_pixel_output_color.r, 255);
+				//buffer_pixel_output_color.g = (unsigned char)std::min((int)buffer_pixel_input_color.g + (int)buffer_pixel_output_color.g, 255);
+				//buffer_pixel_output_color.b = (unsigned char)std::min((int)buffer_pixel_input_color.b + (int)buffer_pixel_output_color.b, 255);
+				//
+				//framebuffer_[INDEX(width_, x, y, 0)] = buffer_pixel_output_color.r;
+				//framebuffer_[INDEX(width_, x, y, 1)] = buffer_pixel_output_color.g;
+				//framebuffer_[INDEX(width_, x, y, 2)] = buffer_pixel_output_color.b;
 
-				buffer_pixel_output_color = MyRGB(bloom_pixel_color);
-
-				buffer_pixel_output_color.r = std::max(buffer_pixel_input_color.r, buffer_pixel_output_color.r);
-				buffer_pixel_output_color.g = std::max(buffer_pixel_input_color.g, buffer_pixel_output_color.g);
-				buffer_pixel_output_color.b = std::max(buffer_pixel_input_color.b, buffer_pixel_output_color.b);
-
-				framebuffer_[INDEX(width_, col, row, 0)] = buffer_pixel_output_color.r;
-				framebuffer_[INDEX(width_, col, row, 1)] = buffer_pixel_output_color.g;
-				framebuffer_[INDEX(width_, col, row, 2)] = buffer_pixel_output_color.b;
+				framebuffer_[(x + y * width_) * 3 + 0] = (unsigned char)std::min((int)framebuffer_[INDEX(width_, x, y, 0)] + (int)blur_pixel_color.r, 255);
+				framebuffer_[(x + y * width_) * 3 + 1] = (unsigned char)std::min((int)framebuffer_[INDEX(width_, x, y, 1)] + (int)blur_pixel_color.g, 255);
+				framebuffer_[(x + y * width_) * 3 + 2] = (unsigned char)std::min((int)framebuffer_[INDEX(width_, x, y, 2)] + (int)blur_pixel_color.b, 255);
 			}
 		}
 	}
@@ -548,15 +585,19 @@ void Renderer::DrawPixel(int x, int y, float z, vec3 color, bool do_depth_test) 
 		framebuffer_[index_r+1] = color_256.g;
 		framebuffer_[index_r+2] = color_256.b;
 
-		pixel_brightness = DEFAULT_BLOOM_INTENSITY_FACTOR * color.dot(GRAYSCALE_VEC3);
-
-		if (pixel_brightness > 1.0)
-		{ 
-			bloom_pre_blur_buffer_[y * width_ + x] = color;
-		}
-		else
+		if (draw_bloom_)
 		{
-			bloom_pre_blur_buffer_[y * width_ + x] = vec3::Zero();
+			pixel_brightness = DEFAULT_BLOOM_INTENSITY_FACTOR * color.dot(GRAYSCALE_VEC3);
+
+			if (pixel_brightness > 1.0)
+			{
+				bloom_pre_blur_buffer_[y * width_ + x] = DEFAULT_BLOOM_INTENSITY_FACTOR * color;
+				//std::cout << "pixel brightness: " << color.x() << ", " << color.y() << ", " << color.z() << std::endl;
+			}
+			else
+			{
+				bloom_pre_blur_buffer_[y * width_ + x] = vec3::Zero();
+			}
 		}
 		
 		return;
